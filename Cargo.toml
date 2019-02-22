@@ -1,0 +1,8 @@
+[package]
+name = "gomoku"
+version = "0.1.0"
+authors = ["pacifistes <bbrunell@student.42.fr>"]
+edition = "2018"
+
+[dependencies]
+piston_window = "0.89.0"
