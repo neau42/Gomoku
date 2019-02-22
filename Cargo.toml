@@ -6,3 +6,13 @@ edition = "2018"
 
 [dependencies]
 piston_window = "0.89.0"
+find_folder = "0.3.0"
+piston2d-opengl_graphics = "0.59.0"
+
+[lib]
+name = "gomoku"
+path = "lib/lib.rs"
+
+[[bin]]
+name = "gomoku"
+path = "src/main.rs"
