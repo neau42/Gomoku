@@ -1,10 +1,24 @@
+extern crate piston;
+extern crate graphics;
+
 use piston_window::*;
 use gomoku::gui::window::*;
 use gomoku::gui::color::*;
+use piston::event_loop::{Events, EventLoop, EventSettings};
+
 use opengl_graphics::{GlGraphics, GlyphCache};
 
-const WIDTH: u32 = 800;
-const HEIGHT: u32 = 800;
+
+pub use crate::gameboard::Gameboard;
+pub use crate::gameboard_controller::GameboardController;
+pub use crate::gameboard_view::{GameboardView, GameboardViewSettings};
+
+mod gameboard;
+mod gameboard_controller;
+mod gameboard_view;
+
+const WIDTH: u32 = 1600;
+const HEIGHT: u32 = 1024;
 
 fn main() {
 	let opengl = OpenGL::V3_2;
@@ -18,10 +32,19 @@ fn main() {
 	let mut gl = GlGraphics::new(opengl);
 	let mut events = Events::new(EventSettings::new().lazy(true));
 
+	let gameboard = Gameboard::new();
+	let mut gameboard_controller = GameboardController::new(gameboard);
+	let gameboard_view_settings = GameboardViewSettings::new();
+	let gameboard_view = GameboardView::new(gameboard_view_settings);
+
 	//Update window only when receiving input . Event are disable
-	window.set_lazy(true);
+	// window.set_lazy(true);
 	//Boucle de jeu
+
 	while let Some(e) = events.next(&mut window) {
+		gameboard_controller.event(gameboard_view.settings.position,
+                               gameboard_view.settings.size,
+                               &e);
         if let Some(args) = e.render_args() {
 			let draw_closure = |context: Context, graphic: &mut GlGraphics| {
 				let transform = context.transform.trans(10.0, 100.0);
