@@ -8,6 +8,7 @@ pub fn window_new(width: u32, height: u32, opengl: OpenGL) -> PistonWindow {
 		.samples(4)
 		.exit_on_esc(true)
 		.vsync(true)
+		.resizable(false)
 		.build()
 		.unwrap()
 }
