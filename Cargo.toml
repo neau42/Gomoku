@@ -8,7 +8,11 @@ edition = "2018"
 piston_window = "0.89.0"
 find_folder = "0.3.0"
 piston2d-opengl_graphics = "0.59.0"
+<<<<<<< Updated upstream
 piston2d-graphics = "0.30.0"
+=======
+conrod = { version = "0.61.1", features = ["glium", "winit"] }
+>>>>>>> Stashed changes
 
 [lib]
 name = "gomoku"
