@@ -1,63 +1,58 @@
 mod event_loop;
-// #[macro_use] extern crate conrod_core;
-#[macro_use]
-extern crate conrod;
-use crate::event_loop::*;
-use piston_window::*;
-use conrod::*;
+mod controllers;
+mod views;
 
-// use conrod_core::{widget, Colorable, Positionable, Widget};
-// use conrod;
-use opengl_graphics::{GlyphCache, Filter};
-use std::path::Path;
+use conrod::*;
 use conrod::backend::glium::glium::glutin;
 use conrod::glium::Surface;
-const WIDTH: u32 = 800;
-const HEIGHT: u32 = 800;
+use std::path::Path;
+use conrod::backend::glium::glium::glutin::*;
+use conrod::backend::glium::glium::Display;
+use conrod::backend::winit::convert_event;
+// use crate::views::homepage_view::*;
+
+const WIDTH: u32 = 1600;
+const HEIGHT: u32 = 1024;
+
+
+widget_ids! {
+    struct Ids {
+        text
+    }
+}
+
+//  Renderer = A type used for converting `conrod_core::render::Primitives` into `Command`s that can be used
+//  for drawing to the glium `Surface`.
+
+// The image map describing each of our widget->image mappings (in our case, none).
 
 fn main() {
-    let mut events_loop = conrod::backend::glium::glium::glutin::EventsLoop::new();
-    
-    let window_builder = conrod::backend::glium::glium::glutin::WindowBuilder::new()
+    let mut events_loop = EventsLoop::new();
+    let window_builder = WindowBuilder::new()
         .with_decorations(false)
         .with_dimensions((WIDTH, HEIGHT).into());
-    
-    let context_builder = conrod::backend::glium::glium::glutin::ContextBuilder::new()
+    let context_builder = ContextBuilder::new()
         .with_vsync(true)
         .with_multisampling(4);
-    
-    let display = conrod::backend::glium::glium::Display::new(window_builder, context_builder, &events_loop).unwrap();
-    
-    let mut ui = conrod::UiBuilder::new([WIDTH as f64, HEIGHT as f64]).build();
+    let display = Display::new(window_builder, context_builder, &events_loop).unwrap();
+    let mut ui = UiBuilder::new([WIDTH as f64, HEIGHT as f64]).build();
+    let mut renderer = conrod::backend::glium::Renderer::new(&display).unwrap();
+    let image_map = conrod::image::Map::<glium::texture::Texture2d>::new();
 
-    // let texture_settings = TextureSettings::new().filter(Filter::Nearest);
-    // let ref mut glyphs = GlyphCache::new("assets/FiraSans-Regular.ttf", (), texture_settings).expect("Could not load font");
     ui.fonts.insert_from_file(Path::new("assets/FiraSans-Regular.ttf")).unwrap();
 
-    // A type used for converting `conrod_core::render::Primitives` into `Command`s that can be used
-    // for drawing to the glium `Surface`.
-    let mut renderer = conrod::backend::glium::Renderer::new(&display).unwrap();
+    let mut events = event_loop::EventLoop::new();
 
-
-    // The image map describing each of our widget->image mappings (in our case, none).
-     let mut image_map = conrod::image::Map::<glium::texture::Texture2d>::new();
-
-
-    // Generate the widget identifiers.
-        widget_ids! { struct Ids {
-        text
-    } }
     let ids = Ids::new(ui.widget_id_generator());
+    // let homepage_controller = HomepageController::new();
+    // let homepage_view = HomepageView::new(&ui);
 
-
-    let mut event_loop = event_loop::EventLoop::new();
     'render: loop {
-         for event in event_loop.next(&mut events_loop) {
-            if let Some(event) = conrod::backend::winit::convert_event(event.clone(), &display) {
+         for event in events.next(&mut events_loop) {
+            if let Some(event) = convert_event(event.clone(), &display) {
                 ui.handle_event(event);
-                event_loop.needs_update();
+                events.needs_update();
             }
-
             match event {
                 glutin::Event::WindowEvent { event, .. } => match event {
                     glutin::WindowEvent::CloseRequested | glutin::WindowEvent::KeyboardInput {
@@ -71,6 +66,7 @@ fn main() {
                 }
                 _ => ()
             }
+            // homepage_controller.event(&event);
         }
 
         // Set the widgets.

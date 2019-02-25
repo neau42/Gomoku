@@ -1,6 +1,5 @@
 use std::time::Instant;
 use conrod::backend::glium::glium::glutin;
-use conrod::glium::Surface;
 
 pub struct EventLoop {
     last_update: Instant,
