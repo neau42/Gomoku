@@ -9,9 +9,9 @@ use piston::event_loop::{Events, EventLoop, EventSettings};
 use opengl_graphics::{GlGraphics, GlyphCache};
 
 
-pub use crate::gameboard::Gameboard;
-pub use crate::gameboard_controller::GameboardController;
-pub use crate::gameboard_view::{GameboardView, GameboardViewSettings};
+use crate::gameboard::Gameboard;
+use crate::gameboard_controller::GameboardController;
+use crate::gameboard_view::{GameboardView, GameboardViewSettings};
 
 mod gameboard;
 mod gameboard_controller;
@@ -38,26 +38,28 @@ fn main() {
 	let gameboard_view = GameboardView::new(gameboard_view_settings);
 
 	//Update window only when receiving input . Event are disable
-	// window.set_lazy(true);
+	window.set_lazy(true);
 	//Boucle de jeu
 
 	while let Some(e) = events.next(&mut window) {
-		gameboard_controller.event(gameboard_view.settings.position,
-                               gameboard_view.settings.size,
-                               &e);
+		gameboard_controller.event(gameboard_view.settings.size, &e);
         if let Some(args) = e.render_args() {
 			let draw_closure = |context: Context, graphic: &mut GlGraphics| {
 				let transform = context.transform.trans(10.0, 100.0);
 				clear(fill_color(195, 155, 95, 1.0), graphic);
 				graphic.clear_stencil(0);
-				text::Text::new_color([0.0, 1.0, 0.0, 1.0], 32).draw(
-					"Hello world!",
-					glyphs,
-					&context.draw_state,
-					transform, graphic
-				).unwrap();
+				// text::Text::new_color([0.0, 1.0, 0.0, 1.0], 32).draw(
+				// 	"Hello world!",
+				// 	glyphs,
+				// 	&context.draw_state,
+				// 	transform, graphic
+				// ).unwrap();
+				gameboard_view.draw(&gameboard_controller, glyphs, &context, graphic);
+
 			};
             gl.draw(args.viewport(), draw_closure);
+
+
 		}
 	}
 }
