@@ -11,13 +11,23 @@ use conrod::backend::glium::glium::Display;
 use conrod::backend::winit::convert_event;
 use views::homepage::*;
 use controllers::homepage::*;
-
+use gomoku::gui::color::fill_color;
+use conrod::color;
 const WIDTH: u32 = 1600;
 const HEIGHT: u32 = 1024;
 
 widget_ids! {
     pub struct WidgetIndex {
         background,
+        title,
+        window_canvas,
+        window_canvas_y_scrollbar,
+        window_canvas_x_scrollbar,
+        homepage_canvas,
+        button_player_vs_player,
+        button_player_vs_ia,
+        toggle_button_weight_boxes,
+        dropdown_button_deph,
         text,
     }
 }
@@ -68,7 +78,21 @@ fn main() {
         }
 
         let ui = &mut ui.set_widgets();
+
         widget::Image::new(backgroud).wh_of(ui.window).middle_of(ui.window).set(widget_index.background, ui);
+        widget::Canvas::new()
+            .border(1.0)
+            .pad(50.0)
+            .color(color::TRANSPARENT)
+            .scroll_kids()
+            .set(widget_index.window_canvas, ui);
+        widget::Scrollbar::x_axis(widget_index.window_canvas).auto_hide(true).set(widget_index.window_canvas_y_scrollbar, ui);
+        widget::Scrollbar::y_axis(widget_index.window_canvas).auto_hide(true).set(widget_index.window_canvas_x_scrollbar, ui);
+        widget::Text::new("Gomoku")
+            .mid_top_of(widget_index.window_canvas)
+            .font_size(50)
+            .color(color::BLACK)
+            .set(widget_index.title, ui);
         homepage_view.display(ui, &widget_index);
         
         // Draw the `Ui` if it has changed.
