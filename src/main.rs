@@ -1,23 +1,25 @@
 mod event_loop;
-mod controllers;
+mod models;
 mod views;
+mod controllers;
 
+use models::homepage::*;
+use views::homepage::*;
+use controllers::homepage::*;
+use conrod::backend::glium::glium::glutin::*;
+use conrod::backend::glium::glium::Display;
+use conrod::backend::winit::convert_event;
+use conrod::color;
 use ::image::open;
 use conrod::*;
 use conrod::glium::Surface;
 use std::path::Path;
-use conrod::backend::glium::glium::glutin::*;
-use conrod::backend::glium::glium::Display;
-use conrod::backend::winit::convert_event;
-use views::homepage::*;
-use controllers::homepage::*;
-use gomoku::gui::color::fill_color;
-use conrod::color;
+
 const WIDTH: u32 = 1600;
 const HEIGHT: u32 = 1024;
 
 widget_ids! {
-    pub struct WidgetIndex {
+    pub struct WidgetIds {
         background,
         title,
         window_canvas,
@@ -40,10 +42,23 @@ fn load_background(display: &glium::Display) -> glium::texture::Texture2d {
     texture
 }
 
-//  Renderer = A type used for converting `conrod_core::render::Primitives` into `Command`s that can be used
-//  for drawing to the glium `Surface`.
+fn window_display(background: conrod::image::Id, ui: &mut UiCell, widget_ids: &WidgetIds) {
+    widget::Image::new(background).wh_of(ui.window).middle_of(ui.window).set(widget_ids.background, ui);
+    widget::Canvas::new()
+        .border(1.0)
+        .pad(50.0)
+        .color(color::TRANSPARENT)
+        .scroll_kids()
+        .set(widget_ids.window_canvas, ui);
+    widget::Scrollbar::x_axis(widget_ids.window_canvas).auto_hide(true).set(widget_ids.window_canvas_y_scrollbar, ui);
+    widget::Scrollbar::y_axis(widget_ids.window_canvas).auto_hide(true).set(widget_ids.window_canvas_x_scrollbar, ui);
+    widget::Text::new("Gomoku")
+        .mid_top_of(widget_ids.window_canvas)
+        .font_size(50)
+        .color(color::BLACK)
+        .set(widget_ids.title, ui);
+}
 
-// The image map describing each of our widget->image mappings (in our case, none).
 fn main() {
     let mut events_loop = EventsLoop::new();
     let window_builder = WindowBuilder::new()
@@ -59,41 +74,28 @@ fn main() {
 
     ui.fonts.insert_from_file(Path::new("assets/fonts/FiraSans-Regular.ttf")).unwrap();
     
-    let backgroud = image_map.insert(load_background(&display));
+    let background = image_map.insert(load_background(&display));
+    let widget_ids = WidgetIds::new(ui.widget_id_generator());
+
+    let model = HomepageModel::new();
+    let view = HomepageView::new();
+    let controller = HomepageController::new(view, model, &widget_ids);
 
     let mut events = event_loop::EventLoop::new();
-    let homepage_controller = HomepageController::new();
-    let homepage_view = HomepageView::new(&mut ui);
-    let widget_index = WidgetIndex::new(ui.widget_id_generator());
-
     'render: loop {
          for event in events.next(&mut events_loop) {
             if let Some(event) = convert_event(event.clone(), &display) {
                 ui.handle_event(event);
                 events.needs_update();
             }
-            if homepage_controller.event(&event) {
+            if controller.event(&event) {
                 break 'render;
             }
         }
 
         let ui = &mut ui.set_widgets();
-
-        widget::Image::new(backgroud).wh_of(ui.window).middle_of(ui.window).set(widget_index.background, ui);
-        widget::Canvas::new()
-            .border(1.0)
-            .pad(50.0)
-            .color(color::TRANSPARENT)
-            .scroll_kids()
-            .set(widget_index.window_canvas, ui);
-        widget::Scrollbar::x_axis(widget_index.window_canvas).auto_hide(true).set(widget_index.window_canvas_y_scrollbar, ui);
-        widget::Scrollbar::y_axis(widget_index.window_canvas).auto_hide(true).set(widget_index.window_canvas_x_scrollbar, ui);
-        widget::Text::new("Gomoku")
-            .mid_top_of(widget_index.window_canvas)
-            .font_size(50)
-            .color(color::BLACK)
-            .set(widget_index.title, ui);
-        homepage_view.display(ui, &widget_index);
+        window_display(background, ui, &widget_ids);
+        controller.show(ui, &widget_ids);
         
         // Draw the `Ui` if it has changed.
         if let Some(primitives) = ui.draw_if_changed() {
