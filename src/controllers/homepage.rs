@@ -43,7 +43,7 @@ impl HomepageController {
 
     fn set_events(&mut self, widget_ids: &WidgetIds) {
         self.events.insert(widget_ids.button_player_vs_player, || {
-            println!("click on button 'player vs player'");
+            println!("click on button 'player vs player {}'", x);
         });
 
         self.events.insert(widget_ids.button_player_vs_ia, || {
