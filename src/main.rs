@@ -15,6 +15,13 @@ use controllers::homepage::*;
 const WIDTH: u32 = 1600;
 const HEIGHT: u32 = 1024;
 
+widget_ids! {
+    pub struct WidgetIndex {
+        background,
+        text,
+    }
+}
+
 fn load_background(display: &glium::Display) -> glium::texture::Texture2d {
     let rgba_image = open(&Path::new("assets/images/wood.jpg")).unwrap().to_rgba();
     let image_dimensions = rgba_image.dimensions();
@@ -47,6 +54,7 @@ fn main() {
     let mut events = event_loop::EventLoop::new();
     let homepage_controller = HomepageController::new();
     let homepage_view = HomepageView::new(&mut ui);
+    let widget_index = WidgetIndex::new(ui.widget_id_generator());
 
     'render: loop {
          for event in events.next(&mut events_loop) {
@@ -60,9 +68,8 @@ fn main() {
         }
 
         let ui = &mut ui.set_widgets();
-
-        homepage_view.display(ui, &mut image_map, &display);
-        widget::Image::new(backgroud).wh_of(ui.window);
+        widget::Image::new(backgroud).wh_of(ui.window).middle_of(ui.window).set(widget_index.background, ui);
+        homepage_view.display(ui, &widget_index);
         
         // Draw the `Ui` if it has changed.
         if let Some(primitives) = ui.draw_if_changed() {
