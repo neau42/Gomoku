@@ -8,14 +8,16 @@ use piston::event_loop::{Events, EventLoop, EventSettings};
 
 use opengl_graphics::{GlGraphics, GlyphCache};
 
-
 use crate::gameboard::Gameboard;
-use crate::gameboard_controller::GameboardController;
-use crate::gameboard_view::{GameboardView, GameboardViewSettings};
 
 mod gameboard;
-mod gameboard_controller;
-mod gameboard_view;
+
+mod views;
+use views::gameboard::*;
+
+
+mod controllers;
+use controllers::gameboard::*;
 
 const WIDTH: u32 = 1600;
 const HEIGHT: u32 = 1024;
@@ -33,7 +35,7 @@ fn main() {
 	let mut events = Events::new(EventSettings::new().lazy(true));
 
 	let gameboard = Gameboard::new();
-	let mut gameboard_controller = GameboardController::new(gameboard);
+	let mut gameboard = GameboardController::new(gameboard);
 	let gameboard_view_settings = GameboardViewSettings::new();
 	let gameboard_view = GameboardView::new(gameboard_view_settings);
 
@@ -42,12 +44,12 @@ fn main() {
 	//Boucle de jeu
 
 	while let Some(e) = events.next(&mut window) {
-		gameboard_controller.event(gameboard_view.settings.size, &e);
+		gameboard.event(gameboard_view.settings.size, &e);
         if let Some(args) = e.render_args() {
 			let draw_closure = |context: Context, graphic: &mut GlGraphics| {
 				clear(fill_color(195, 155, 95, 1.0), graphic);
 				graphic.clear_stencil(0);
-				gameboard_view.draw(&gameboard_controller, glyphs, &context, graphic);
+				gameboard_view.draw(&gameboard, glyphs, &context, graphic);
 			};
             gl.draw(args.viewport(), draw_closure);
 

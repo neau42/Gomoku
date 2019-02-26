@@ -4,7 +4,7 @@ use graphics::types::Color;
 use graphics::{Context, Graphics, Line, Rectangle, Ellipse};
 use graphics::character::CharacterCache;
 
-use crate::gameboard_controller::GameboardController;
+use crate::controllers::gameboard::GameboardController;
 use crate::gameboard::Stone;
 
 pub struct GameboardViewSettings {
