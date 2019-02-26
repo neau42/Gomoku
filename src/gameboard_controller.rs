@@ -13,7 +13,7 @@ pub struct GameboardController {
 	pub selected_stone: Option<[usize; 2]>,
 	pub preview_stone: Option<[usize; 2]>,
 
-	test: bool,
+	test_switch_player: bool,
 }
 
 impl GameboardController {
@@ -26,7 +26,7 @@ impl GameboardController {
 		  selected_stone: None,
 		  preview_stone: None,
 
-		  test: true,
+		  test_switch_player: true,
       }
   }
 
@@ -45,12 +45,14 @@ impl GameboardController {
 		match self.selected_stone {
 			Some(x_y) => {
 				println!("controller: X: {}, Y: {}", x_y[0], x_y[1]);
-				if self.test == true {
-					self.gameboard.cells[x_y[0]][x_y[1]] = Stone::BLACK; }
-				else {
-					self.gameboard.cells[x_y[0]][x_y[1]] = Stone::WHITE; }
-				self.test = !self.test;
-		},
+				if self.gameboard.cells[x_y[0]][x_y[1]] == Stone::NOPE {
+					if self.test_switch_player == true {
+						self.gameboard.cells[x_y[0]][x_y[1]] = Stone::BLACK; }
+					else {
+						self.gameboard.cells[x_y[0]][x_y[1]] = Stone::WHITE; }
+					self.test_switch_player = !self.test_switch_player;
+				}
+			},
 			None => (),
 		}
 		self.release_position = self.cursor_pos;
@@ -62,7 +64,7 @@ impl GameboardController {
   }
 }
 
-pub fn get_stone(x: f64, y: f64, size: f64) -> Option<[usize; 2]> {
+pub fn get_stone(x: f64, y: f64, size: f64) -> Option<[usize; 2]> {// a faire dans la vue?
 	// Check that coordinates are inside board boundaries.
 	 if x >= 36.0 - 25.0 && x < size + 36.0 + 25.0 && y >= 36.0 - 25.0 && y < size + 36.0 + 25.0 {
 		let stone_x = ((x - 36.0 + 25.0) / size * 18.0) as usize;

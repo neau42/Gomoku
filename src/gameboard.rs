@@ -3,7 +3,7 @@
 /// Size of game board.
 const SIZE: usize = 19;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum Stone {
     BLACK,
     WHITE,

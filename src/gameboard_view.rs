@@ -57,6 +57,13 @@ impl GameboardView {
 	}
 }
 
+pub fn draw_map<G: Graphics>(settings: &GameboardViewSettings, c: &Context, g: &mut G)
+{
+	draw_lines(settings, c, g);
+	draw_hoshi(settings, c, g);
+}
+
+// Draw stone on map
 pub fn draw_stones<G: Graphics>(settings: &GameboardViewSettings, controller: &GameboardController, c: &Context, g: &mut G) {
 	for i in 0..19 * 19 {
 		match controller.gameboard.cells[i/19][i%19] {
@@ -67,48 +74,45 @@ pub fn draw_stones<G: Graphics>(settings: &GameboardViewSettings, controller: &G
 	}
 }
 
-
 pub fn draw_lines<G: Graphics>(settings: &GameboardViewSettings, c: &Context, g: &mut G) {
-   let stone_edge = Line::new([0.0, 0.0, 0.2, 1.0],1.0);
-//    let stone_edge_border = Line::new([1.0, 1.0, 1.0, 0.8],1.0);
-        for i in 0..19 {
-            let x = settings.position[0] + i as f64 / 18.0 * settings.size;
-            let y = settings.position[1] + i as f64 / 18.0 * settings.size;
-            let x2 = settings.position[0] + settings.size;
-            let y2 = settings.position[1] + settings.size;
+   let stone_edge = Line::new([0.0, 0.0, 0.0, 1.0],1.0);
+   let stone_edge_border = Line::new([0.9, 0.9, 0.8, 0.6],1.0);
 
-            let vline = [x, settings.position[1], x, y2];
-            // let vline_border = [x-1.0, settings.position[1], x-1.0, y2];
-            // // stone_edge_border.draw(vline_border, &c.draw_state, c.transform, g);
-            stone_edge.draw(vline, &c.draw_state, c.transform, g);
+	//draw line border horizontal
+	for i in 0..19 {
+		let y = settings.position[1] + i as f64 / 18.0 * settings.size;
+		let x2 = settings.position[0] + settings.size;
 
-            let hline = [settings.position[0], y, x2, y];
-            // let hline_border = [settings.position[0], y - 1.0, x2, y - 1.0];
-            stone_edge.draw(hline, &c.draw_state, c.transform, g);
-            // stone_edge_border.draw(hline_border, &c.draw_state, c.transform, g);
-		}
+		let hline_border = [settings.position[0], y + 1.0, x2, y + 1.0];
+		stone_edge_border.draw(hline_border, &c.draw_state, c.transform, g);
+	}
+	//draw line horizontal and vertical
+	for i in 0..19 {
+		let x = settings.position[0] + i as f64 / 18.0 * settings.size;
+		let y = settings.position[1] + i as f64 / 18.0 * settings.size;
+		let x2 = settings.position[0] + settings.size;
+		let y2 = settings.position[1] + settings.size;
 
+		let hline = [settings.position[0], y, x2, y];
+		stone_edge.draw(hline, &c.draw_state, c.transform, g);
+		let vline = [x, settings.position[1], x, y2];
+		stone_edge.draw(vline, &c.draw_state, c.transform, g);
+	}
 }
 
 pub fn draw_hoshi<G: Graphics>(settings: &GameboardViewSettings, c: &Context, g: &mut G)
 {
-for i in 0..3 {
-	for j in [3, 9, 16].iter() {
+for i in [3, 9, 15].iter() {
+	for j in [3, 9, 15].iter() {
 		Rectangle::new([0.0, 0.0, 0.0, 1.0])
 		.draw([
 			settings.position[0] + *j as f64 * (settings.size / 18.0) - settings.hoshi_size / 2.0,
-			settings.position[1] + (3.0 + (6.0 * i as f64)) * (settings.size / 18.0) - settings.hoshi_size / 2.0,
+			settings.position[1] + *i as f64 * (settings.size / 18.0) - settings.hoshi_size / 2.0,
 			settings.hoshi_size,
 			settings.hoshi_size],
 			&c.draw_state, c.transform, g);
 		}
 	}
-}
-
-pub fn draw_map<G: Graphics>(settings: &GameboardViewSettings, c: &Context, g: &mut G)
-{
-	draw_lines(settings, c, g);
-	draw_hoshi(settings, c, g);
 }
 
 pub fn draw_one_stone<G: Graphics>(
