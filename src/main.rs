@@ -2,30 +2,31 @@ mod event_loop;
 mod controllers;
 mod views;
 
+use ::image::open;
 use conrod::*;
-use conrod::backend::glium::glium::glutin;
 use conrod::glium::Surface;
 use std::path::Path;
 use conrod::backend::glium::glium::glutin::*;
 use conrod::backend::glium::glium::Display;
 use conrod::backend::winit::convert_event;
-// use crate::views::homepage_view::*;
+use views::homepage::*;
+use controllers::homepage::*;
 
 const WIDTH: u32 = 1600;
 const HEIGHT: u32 = 1024;
 
-
-widget_ids! {
-    struct Ids {
-        text
-    }
+fn load_background(display: &glium::Display) -> glium::texture::Texture2d {
+    let rgba_image = open(&Path::new("assets/images/wood.jpg")).unwrap().to_rgba();
+    let image_dimensions = rgba_image.dimensions();
+    let raw_image = glium::texture::RawImage2d::from_raw_rgba_reversed(&rgba_image.into_raw(), image_dimensions);
+    let texture = glium::texture::Texture2d::new(display, raw_image).unwrap();
+    texture
 }
 
 //  Renderer = A type used for converting `conrod_core::render::Primitives` into `Command`s that can be used
 //  for drawing to the glium `Surface`.
 
 // The image map describing each of our widget->image mappings (in our case, none).
-
 fn main() {
     let mut events_loop = EventsLoop::new();
     let window_builder = WindowBuilder::new()
@@ -37,15 +38,15 @@ fn main() {
     let display = Display::new(window_builder, context_builder, &events_loop).unwrap();
     let mut ui = UiBuilder::new([WIDTH as f64, HEIGHT as f64]).build();
     let mut renderer = conrod::backend::glium::Renderer::new(&display).unwrap();
-    let image_map = conrod::image::Map::<glium::texture::Texture2d>::new();
+    let mut image_map = conrod::image::Map::<glium::texture::Texture2d>::new();
 
-    ui.fonts.insert_from_file(Path::new("assets/FiraSans-Regular.ttf")).unwrap();
+    ui.fonts.insert_from_file(Path::new("assets/fonts/FiraSans-Regular.ttf")).unwrap();
+    
+    let backgroud = image_map.insert(load_background(&display));
 
     let mut events = event_loop::EventLoop::new();
-
-    let ids = Ids::new(ui.widget_id_generator());
-    // let homepage_controller = HomepageController::new();
-    // let homepage_view = HomepageView::new(&ui);
+    let homepage_controller = HomepageController::new();
+    let homepage_view = HomepageView::new(&mut ui);
 
     'render: loop {
          for event in events.next(&mut events_loop) {
@@ -53,32 +54,16 @@ fn main() {
                 ui.handle_event(event);
                 events.needs_update();
             }
-            match event {
-                glutin::Event::WindowEvent { event, .. } => match event {
-                    glutin::WindowEvent::CloseRequested | glutin::WindowEvent::KeyboardInput {
-                        input: glutin::KeyboardInput {
-                            virtual_keycode: Some(glutin::VirtualKeyCode::Escape),
-                            ..
-                        },
-                        ..
-                    } => break 'render,
-                    _ => ()
-                }
-                _ => ()
+            if homepage_controller.event(&event) {
+                break 'render;
             }
-            // homepage_controller.event(&event);
         }
 
-        // Set the widgets.
         let ui = &mut ui.set_widgets();
 
-        // "Hello World!" in the middle of the screen.
-        widget::Text::new("Hello World!")
-            .middle_of(ui.window)
-            .color(conrod::color::WHITE)
-            .font_size(32)
-            .set(ids.text, ui);
-
+        homepage_view.display(ui, &mut image_map, &display);
+        widget::Image::new(backgroud).wh_of(ui.window);
+        
         // Draw the `Ui` if it has changed.
         if let Some(primitives) = ui.draw_if_changed() {
             renderer.fill(&display, primitives, &image_map);
