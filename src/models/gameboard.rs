@@ -11,16 +11,16 @@ pub enum Stone {
 }
 /// Stores game board information.
 pub struct Gameboard {
-    /// Stores the content of the cells.
-    /// `0` is an empty cell.
+	pub size: usize,
     pub cells: [[Stone; SIZE]; SIZE],
 }
 
+/// Creates a new game board.
 impl Gameboard {
-    /// Creates a new game board.
-    pub fn new() -> Gameboard {
-        Gameboard {
-            cells: [[Stone::NOPE; SIZE]; SIZE],
-        }
-    }
+	pub fn new() -> Gameboard {
+		Gameboard {
+			size: SIZE,
+			cells: [[Stone::NOPE; SIZE]; SIZE],
+		}
+	}
 }

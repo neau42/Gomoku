@@ -2,11 +2,13 @@
 
 use piston::input::{GenericEvent, Button, MouseButton};
 
-use crate::Gameboard;
-use crate::gameboard::Stone;
+use crate::views::gameboard::GameboardView;
+use crate::models::gameboard::Gameboard;
+use crate::models::gameboard::Stone;
 
 pub struct GameboardController {
     pub gameboard: Gameboard,
+	pub view: GameboardView,
     cursor_pos: [f64; 2],
     click_position: [f64; 2],
     release_position: [f64; 2],
@@ -17,31 +19,31 @@ pub struct GameboardController {
 }
 
 impl GameboardController {
-  pub fn new(gameboard: Gameboard) -> GameboardController {
-      GameboardController {
-          gameboard: gameboard,
-          cursor_pos: [0.0; 2],
-		  click_position: [0.0; 2],
-		  release_position: [0.0; 2],
-		  selected_stone: None,
-		  preview_stone: None,
+	pub fn new(gameboard: Gameboard, view: GameboardView) -> GameboardController {
+		GameboardController {
+			gameboard,
+			view,
+			cursor_pos: [0.0; 2],
+			click_position: [0.0; 2],
+			release_position: [0.0; 2],
+			selected_stone: None,
+			preview_stone: None,
 
-		  test_switch_player: true,
+			test_switch_player: true,
       }
   }
 
-	pub fn event<E: GenericEvent>(&mut self, size: f64, e: &E) {
+	pub fn event<E: GenericEvent>(&mut self, e: &E) {
     if let Some(pos) = e.mouse_cursor_args() {
 	    self.cursor_pos = pos;
-        self.preview_stone = get_stone(self.cursor_pos[0], self.cursor_pos[1],size);
-	// 	// println!("mouse move pos: {:?}", self.cursor_pos);
+        self.preview_stone = self.get_stone(self.cursor_pos[0], self.cursor_pos[1]);
 	}
 	if let Some(Button::Mouse(MouseButton::Left)) = e.press_args() {
 		println!("mouse click pos: {:?}", self.cursor_pos);
 		self.click_position = self.cursor_pos;
   	}
   	if let Some(Button::Mouse(MouseButton::Left)) = e.release_args() {
-        self.selected_stone = get_stone(self.cursor_pos[0], self.cursor_pos[1],size);
+        self.selected_stone = self.get_stone(self.cursor_pos[0], self.cursor_pos[1]);
 		match self.selected_stone {
 			Some(x_y) => {
 				println!("controller: X: {}, Y: {}", x_y[0], x_y[1]);
@@ -62,15 +64,22 @@ impl GameboardController {
 		println!("keyboard! pressed: {:?}", key);
 	}
   }
-}
+	pub fn get_stone(&mut self, x: f64, y: f64) -> Option<[usize; 2]> {// a faire dans la vue?
+		let size_px = self.view.settings.size;
+		let map_position = self.view.settings.position;
+		let map_size = self.gameboard.size;
+		let semi_cell_size = size_px / map_size as f64 / 2.0;
 
-pub fn get_stone(x: f64, y: f64, size: f64) -> Option<[usize; 2]> {// a faire dans la vue?
-	// Check that coordinates are inside board boundaries.
-	 if x >= 36.0 - 25.0 && x < size + 36.0 + 25.0 && y >= 36.0 - 25.0 && y < size + 36.0 + 25.0 {
-		let stone_x = ((x - 36.0 + 25.0) / size * 18.0) as usize;
-		let stone_y = ((y - 36.0 + 25.0) / size * 18.0) as usize;
-		// println!("stone_x: {}, stone_y: {}", stone_x, stone_y);
-		return Some([stone_x, stone_y])
-	 }
-	 None
+		// Check that coordinates are inside board boundaries.
+		if x >= map_position[0] - semi_cell_size
+			&& x < size_px + map_position[0] + semi_cell_size
+			&& y >= map_position[1] - semi_cell_size
+			&& y < size_px + map_position[1] + semi_cell_size {
+			let stone_x = ((x - map_position[0] + semi_cell_size) / size_px * (map_size - 1) as f64) as usize;
+			let stone_y = ((y - map_position[1] + semi_cell_size) / size_px * (map_size - 1) as f64) as usize;
+			// println!("stone_x: {}, stone_y: {}", stone_x, stone_y);
+			return Some([stone_x, stone_y])
+		}
+		None
+	}
 }

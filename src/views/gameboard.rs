@@ -5,7 +5,7 @@ use graphics::{Context, Graphics, Line, Rectangle, Ellipse};
 use graphics::character::CharacterCache;
 
 use crate::controllers::gameboard::GameboardController;
-use crate::gameboard::Stone;
+use crate::models::gameboard::Stone;
 
 pub struct GameboardViewSettings {
     pub position: [f64; 2],

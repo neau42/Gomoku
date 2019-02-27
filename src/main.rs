@@ -8,9 +8,7 @@ use piston::event_loop::{Events, EventLoop, EventSettings};
 
 use opengl_graphics::{GlGraphics, GlyphCache};
 
-use crate::gameboard::Gameboard;
-
-mod gameboard;
+// use crate::gameboard::Gameboard;
 
 mod views;
 use views::gameboard::*;
@@ -18,6 +16,9 @@ use views::gameboard::*;
 
 mod controllers;
 use controllers::gameboard::*;
+
+mod models;
+use models::gameboard::*;
 
 const WIDTH: u32 = 1600;
 const HEIGHT: u32 = 1024;
@@ -35,21 +36,21 @@ fn main() {
 	let mut events = Events::new(EventSettings::new().lazy(true));
 
 	let gameboard = Gameboard::new();
-	let mut gameboard = GameboardController::new(gameboard);
 	let gameboard_view_settings = GameboardViewSettings::new();
 	let gameboard_view = GameboardView::new(gameboard_view_settings);
+	let mut gameboard = GameboardController::new(gameboard, gameboard_view);
 
 	//Update window only when receiving input . Event are disable
 	window.set_lazy(true);
 	//Boucle de jeu
 
 	while let Some(e) = events.next(&mut window) {
-		gameboard.event(gameboard_view.settings.size, &e);
+		gameboard.event(&e);
         if let Some(args) = e.render_args() {
 			let draw_closure = |context: Context, graphic: &mut GlGraphics| {
 				clear(fill_color(195, 155, 95, 1.0), graphic);
 				graphic.clear_stencil(0);
-				gameboard_view.draw(&gameboard, glyphs, &context, graphic);
+				gameboard.view.draw(&gameboard, glyphs, &context, graphic);
 			};
             gl.draw(args.viewport(), draw_closure);
 
