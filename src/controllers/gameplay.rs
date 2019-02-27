@@ -1,5 +1,7 @@
 use crate::controllers::homepage::HomepageController;
 use crate::controllers::window::WindowController;
+use crate::traits::view_controller::GameViewController;
+use crate::traits::view_controller::PageType;
 use crate::utils::event_loop::EventLoop as Events;
 use crate::WidgetIds;
 
@@ -16,7 +18,7 @@ use std::path::Path;
 
 pub struct GameplayController {
     window: WindowController,
-    page: HomepageController,
+    page: Box<GameViewController>,
     ui: Ui,
     widget_ids: WidgetIds,
     events_loop: EventsLoop,
@@ -75,10 +77,20 @@ impl GameplayController {
                     events.needs_update();
                 }
                 if self.is_callback(&event) {
-                    break 'render;
+                   self.page = match self.page.get_type() {
+                       PageType::Gameboard => HomepageController::new(&self.widget_ids),
+                       _ => break 'render,
+                   }
                 }
             }
-
+            if self.page.need_change_window() {
+                self.page = match self.page.get_type() {
+                    //Change byGameBoar::new
+                    PageType::Homepage => HomepageController::new(&self.widget_ids),
+                    _ => HomepageController::new(&self.widget_ids),
+                }
+            }
+            
             let ui = &mut self.ui.set_widgets();
             self.window.show(ui, &self.widget_ids);
             self.page.show(ui, &self.widget_ids);

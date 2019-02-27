@@ -2,6 +2,7 @@ mod controllers;
 mod views;
 mod models;
 mod utils;
+mod traits;
 
 use controllers::gameplay::*;
 use conrod::*;
@@ -17,10 +18,11 @@ widget_ids! {
         window_canvas_y_scrollbar,
         window_canvas_x_scrollbar,
         homepage_canvas,
-        button_player_vs_player,
-        button_player_vs_ia,
+        dropdown_button_game_mode,
         toggle_button_weight_boxes,
-        dropdown_button_deph,
+        dropdown_button_first_ia_deph,
+        dropdown_button_second_ia_deph,
+        button_start,
         text,
     }
 }
