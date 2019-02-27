@@ -1,41 +1,88 @@
 use crate::controllers::homepage::HomepageController;
 use crate::controllers::window::WindowController;
+use crate::utils::event_loop::EventLoop as Events;
+use crate::WidgetIds;
 
-use std::io;
-use std::io::{Error, ErrorKind};
+use conrod::backend::winit::convert_event;
+use conrod::backend::glium::glium::glutin::*;
+use conrod::backend::glium::glium::Display;
+use conrod::backend::glium::glium::*;
+use conrod::backend::glium::Renderer;
+use glium::backend::glutin::DisplayCreationError;
+use conrod::image::Map;
+use conrod::*;
+use conrod::glium::Surface;
+use std::path::Path;
 
-pub struct gameplayController {
+pub struct GameplayController {
     window: WindowController,
     page: HomepageController,
+    ui: Ui,
+    widget_ids: WidgetIds,
+    events_loop: EventsLoop,
+    width: u32,
+    height: u32,
 }
 
-impl gameplayController {
-    pub fn new() -> gameplayController {
+impl GameplayController {
+    pub fn new(width: u32, height: u32, ui: Ui, widget_ids: WidgetIds) -> GameplayController {
         let window = WindowController::new();
-        let page = HomepageController::new();
-        gameplayController {
+        let page = HomepageController::new(&widget_ids);
+        GameplayController {
             window,
             page,
+            ui,
+            widget_ids,
+            events_loop: EventsLoop::new(),
+            width,
+            height,
         }
     }
 
-    pub fn run_loop(&self) {
-        let mut events = event_loop::EventLoop::new();
+    pub fn open_window(&self) -> Result<Display, DisplayCreationError> {
+        let window_builder = WindowBuilder::new()
+            .with_decorations(false)
+            .with_dimensions((self.width, self.height).into());
+        let context_builder = ContextBuilder::new()
+            .with_vsync(true)
+            .with_multisampling(4);
+        Display::new(window_builder, context_builder, &self.events_loop)
+    }
+
+    pub fn is_callback(&self, event: &Event) -> bool{
+        match event {
+            glutin::Event::WindowEvent { event, .. } => match event {
+                glutin::WindowEvent::CloseRequested | glutin::WindowEvent::KeyboardInput {
+                    input: glutin::KeyboardInput {
+                        virtual_keycode: Some(glutin::VirtualKeyCode::Escape),
+                        ..
+                    },
+                    ..
+                } => return true,
+                _ => ()
+            }
+            _ => ()
+        }
+        false
+    }
+
+    pub fn render_loop(&mut self, display : Display, mut renderer: Renderer, image_map: Map<Texture2d>) {
+        let mut events = Events::new();
         'render: loop {
-            for event in events.next(&mut events_loop) {
+            for event in events.next(&mut self.events_loop) {
                 if let Some(event) = convert_event(event.clone(), &display) {
-                    ui.handle_event(event);
+                    self.ui.handle_event(event);
                     events.needs_update();
                 }
-                if controller.event(&event) {
+                if self.is_callback(&event) {
                     break 'render;
                 }
             }
 
-            let ui = &mut ui.set_widgets();
-            window_display(background, ui, &widget_ids);
-            controller.show(ui, &widget_ids);
-            
+            let ui = &mut self.ui.set_widgets();
+            self.window.show(ui, &self.widget_ids);
+            self.page.show(ui, &self.widget_ids);
+
             // Draw the `Ui` if it has changed.
             if let Some(primitives) = ui.draw_if_changed() {
                 renderer.fill(&display, primitives, &image_map);
@@ -47,106 +94,13 @@ impl gameplayController {
         }
     }
 
-    pub fn init(&self) -> Result<_, io::Error> {
-        //  cHeck file exists
+    pub fn run(&mut self) {
+        let display = self.open_window().unwrap();
+        let renderer = Renderer::new(&display).unwrap();
+        let mut image_map = Map::<Texture2d>::new();
+        
+        self.window.load_background(&mut image_map, &display);
+        self.ui.fonts.insert_from_file(Path::new("assets/fonts/FiraSans-Regular.ttf")).unwrap();
+        self.render_loop(display, renderer, image_map);
     }
 }
-
-// const WIDTH: u32 = 1600;
-// const HEIGHT: u32 = 1024;
-
-
-
-// mod event_loop;
-// mod models;
-// mod views;
-
-
-// use models::homepage::*;
-// use views::homepage::*;
-// use controllers::homepage::*;
-// use conrod::backend::glium::glium::glutin::*;
-// use conrod::backend::glium::glium::Display;
-// use conrod::backend::winit::convert_event;
-// use conrod::color;
-// use ::image::open;
-// use conrod::*;
-// use conrod::glium::Surface;
-// use std::path::Path;
-
-// widget_ids! {
-//     pub struct WidgetIds {
-//         background,
-//         title,
-//         window_canvas,
-//         window_canvas_y_scrollbar,
-//         window_canvas_x_scrollbar,
-//         homepage_canvas,
-//         button_player_vs_player,
-//         button_player_vs_ia,
-//         toggle_button_weight_boxes,
-//         dropdown_button_deph,
-//         text,
-//     }
-// }
-
-// fn load_background(display: &glium::Display) -> glium::texture::Texture2d {
-//     let rgba_image = open(&Path::new("assets/images/wood.jpg")).unwrap().to_rgba();
-//     let image_dimensions = rgba_image.dimensions();
-//     let raw_image = glium::texture::RawImage2d::from_raw_rgba_reversed(&rgba_image.into_raw(), image_dimensions);
-//     let texture = glium::texture::Texture2d::new(display, raw_image).unwrap();
-//     texture
-// }
-
-// fn window_display(background: conrod::image::Id, ui: &mut UiCell, widget_ids: &WidgetIds) {
-//     widget::Image::new(background).wh_of(ui.window).middle_of(ui.window).set(widget_ids.background, ui);
-//     widget::Canvas::new()
-//         .border(1.0)
-//         .pad(50.0)
-//         .color(color::TRANSPARENT)
-//         .scroll_kids()
-//         .set(widget_ids.window_canvas, ui);
-//     widget::Scrollbar::x_axis(widget_ids.window_canvas).auto_hide(true).set(widget_ids.window_canvas_y_scrollbar, ui);
-//     widget::Scrollbar::y_axis(widget_ids.window_canvas).auto_hide(true).set(widget_ids.window_canvas_x_scrollbar, ui);
-//     widget::Text::new("Gomoku")
-//         .mid_top_of(widget_ids.window_canvas)
-//         .font_size(50)
-//         .color(color::BLACK)
-//         .set(widget_ids.title, ui);
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // let mut events_loop = EventsLoop::new();
-    // let window_builder = WindowBuilder::new()
-    //     .with_decorations(false)
-    //     .with_dimensions((WIDTH, HEIGHT).into());
-    // let context_builder = ContextBuilder::new()
-    //     .with_vsync(true)
-    //     .with_multisampling(4);
-    // let display = Display::new(window_builder, context_builder, &events_loop).unwrap();
-    // let mut ui = UiBuilder::new([WIDTH as f64, HEIGHT as f64]).build();
-    // let mut renderer = conrod::backend::glium::Renderer::new(&display).unwrap();
-    // let mut image_map = conrod::image::Map::<glium::texture::Texture2d>::new();
-
-    // ui.fonts.insert_from_file(Path::new("assets/fonts/FiraSans-Regular.ttf")).unwrap();
-    
-    // let background = image_map.insert(load_background(&display));
-    // let widget_ids = WidgetIds::new(ui.widget_id_generator());
-
-    // let model = HomepageModel::new();
-    // let view = HomepageView::new();
-    // let controller = HomepageController::new(view, model, &widget_ids);
-
-    //renderLoop

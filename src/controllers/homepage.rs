@@ -1,8 +1,8 @@
-use crate::views::homepage::HomepageView;
-use crate::models::homepage::HomepageModel;
+
+
 use crate::WidgetIds;
-use conrod::backend::glium::glium::glutin::Event;
-use conrod::backend::glium::glium::glutin;
+use crate::models::homepage::HomepageModel;
+use crate::views::homepage::HomepageView;
 use conrod::UiCell;
 use std::collections::HashMap;
 use conrod::widget::id::Id;
@@ -14,7 +14,9 @@ pub struct HomepageController {
 }
 
 impl HomepageController {
-    pub fn new(view: HomepageView, model: HomepageModel, widget_ids: &WidgetIds) -> HomepageController {
+    pub fn new(widget_ids: &WidgetIds) -> HomepageController {
+        let model = HomepageModel::new();
+        let view = HomepageView::new();
         let mut controller = HomepageController {
             view,
             model,
@@ -24,26 +26,9 @@ impl HomepageController {
         controller
     }
 
-    pub fn event(&self, event: &Event) -> bool {
-        match event {
-            glutin::Event::WindowEvent { event, .. } => match event {
-                glutin::WindowEvent::CloseRequested | glutin::WindowEvent::KeyboardInput {
-                    input: glutin::KeyboardInput {
-                        virtual_keycode: Some(glutin::VirtualKeyCode::Escape),
-                        ..
-                    },
-                    ..
-                } => return true,
-                _ => ()
-            }
-            _ => ()
-        }
-        false
-    }
-
     fn set_events(&mut self, widget_ids: &WidgetIds) {
         self.events.insert(widget_ids.button_player_vs_player, || {
-            println!("click on button 'player vs player {}'", x);
+            println!("click on button 'player vs player'");
         });
 
         self.events.insert(widget_ids.button_player_vs_ia, || {
