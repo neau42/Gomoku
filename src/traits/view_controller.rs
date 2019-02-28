@@ -1,4 +1,6 @@
 use crate::WidgetIds;
+use crate::models::game_info::*;
+use crate::traits::view_model::*;
 use conrod::*;
 
 pub enum PageType {
@@ -8,7 +10,6 @@ pub enum PageType {
 
 pub trait GameViewController {
     fn new(widget_ids: &WidgetIds) -> Box<Self> where Self: Sized;
-    fn show(&mut self, ui: &mut UiCell, widget_ids: &WidgetIds);
+    fn show(&self, model: &mut Box<dyn GameViewModel>, ui: &mut UiCell, widget_ids: &WidgetIds);
     fn get_type(&self) -> PageType;
-    fn need_change_window(&self) -> bool;
 }

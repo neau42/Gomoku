@@ -2,7 +2,9 @@ use crate::controllers::homepage::HomepageController;
 use crate::controllers::window::WindowController;
 use crate::traits::view_controller::GameViewController;
 use crate::traits::view_controller::PageType;
+use crate::traits::view_model::*;
 use crate::utils::event_loop::EventLoop as Events;
+use crate::models::game_info::*;
 use crate::WidgetIds;
 
 use conrod::backend::winit::convert_event;
@@ -15,10 +17,12 @@ use conrod::image::Map;
 use conrod::*;
 use conrod::glium::Surface;
 use std::path::Path;
+use std::any::Any;
 
 pub struct GameplayController {
-    window: WindowController,
-    page: Box<GameViewController>,
+    window_controller: WindowController,
+    page_controller: Box<GameViewController>,
+    page_model: Box<dyn GameViewModel>,
     ui: Ui,
     widget_ids: WidgetIds,
     events_loop: EventsLoop,
@@ -28,11 +32,13 @@ pub struct GameplayController {
 
 impl GameplayController {
     pub fn new(width: u32, height: u32, ui: Ui, widget_ids: WidgetIds) -> GameplayController {
-        let window = WindowController::new();
-        let page = HomepageController::new(&widget_ids);
+        let window_controller = WindowController::new();
+        let page_controller = HomepageController::new(&widget_ids);
+        let page_model:  Box<dyn GameViewModel> = Box::new(GameInfo::new());
         GameplayController {
-            window,
-            page,
+            window_controller,
+            page_controller,
+            page_model,
             ui,
             widget_ids,
             events_loop: EventsLoop::new(),
@@ -70,6 +76,7 @@ impl GameplayController {
 
     pub fn render_loop(&mut self, display : Display, mut renderer: Renderer, image_map: Map<Texture2d>) {
         let mut events = Events::new();
+        
         'render: loop {
             for event in events.next(&mut self.events_loop) {
                 if let Some(event) = convert_event(event.clone(), &display) {
@@ -77,14 +84,14 @@ impl GameplayController {
                     events.needs_update();
                 }
                 if self.is_callback(&event) {
-                   self.page = match self.page.get_type() {
+                   self.page_controller = match self.page_controller.get_type() {
                        PageType::Gameboard => HomepageController::new(&self.widget_ids),
                        _ => break 'render,
                    }
                 }
             }
-            if self.page.need_change_window() {
-                self.page = match self.page.get_type() {
+            if self.page_model.need_change_window() {
+                self.page_controller = match self.page_controller.get_type() {
                     //Change byGameBoar::new
                     PageType::Homepage => HomepageController::new(&self.widget_ids),
                     _ => HomepageController::new(&self.widget_ids),
@@ -92,8 +99,8 @@ impl GameplayController {
             }
             
             let ui = &mut self.ui.set_widgets();
-            self.window.show(ui, &self.widget_ids);
-            self.page.show(ui, &self.widget_ids);
+            self.window_controller.show(ui, &self.widget_ids);
+            self.page_controller.show(&mut self.page_model, ui, &self.widget_ids);
 
             // Draw the `Ui` if it has changed.
             if let Some(primitives) = ui.draw_if_changed() {
@@ -111,7 +118,7 @@ impl GameplayController {
         let renderer = Renderer::new(&display).unwrap();
         let mut image_map = Map::<Texture2d>::new();
         
-        self.window.load_background(&mut image_map, &display);
+        self.window_controller.load_background(&mut image_map, &display);
         self.ui.fonts.insert_from_file(Path::new("assets/fonts/FiraSans-Regular.ttf")).unwrap();
         self.render_loop(display, renderer, image_map);
     }

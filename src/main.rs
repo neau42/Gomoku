@@ -4,6 +4,8 @@ mod models;
 mod utils;
 mod traits;
 
+extern crate strum;
+#[macro_use] extern crate strum_macros;
 use controllers::gameplay::*;
 use conrod::*;
 
@@ -20,8 +22,8 @@ widget_ids! {
         homepage_canvas,
         dropdown_button_game_mode,
         toggle_button_weight_boxes,
-        dropdown_button_first_ia_deph,
-        dropdown_button_second_ia_deph,
+        number_dialer_first_ia_depth,
+        number_dialer_second_ia_depth,
         button_start,
         text,
     }
