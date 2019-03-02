@@ -5,8 +5,13 @@ authors = ["pacifistes <bbrunell@student.42.fr>"]
 edition = "2018"
 
 [dependencies]
-piston = "0.42.0"
-piston2d-graphics = "0.30.0"
+# <<<<<<< HEAD
+# piston = "0.42.0"
+# piston2d-graphics = "0.30.0"
+# =======
+strum = "0.13.0"
+strum_macros = "0.13.0"
+image = "0.21"
 piston_window = "0.89.0"
 find_folder = "0.3.0"
 piston2d-opengl_graphics = "0.59.0"
