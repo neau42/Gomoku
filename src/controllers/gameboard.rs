@@ -41,42 +41,42 @@ impl GameboardController {
             None => panic!("&GameViewModel isn't a Gameboard!"),
         };
 
-		model.selected_stone = self.get_cell(self.cursor_pos[0], self.cursor_pos[1], model);
-		match model.selected_stone {
-			Some(x_y) => {
-				if model.cells[x_y[0]][x_y[1]] == Stone::NOPE {
-					if self.test_switch_player == true { //TEMP
-						model.cells[x_y[0]][x_y[1]] = Stone::BLACK; }
-					else {
-						model.cells[x_y[0]][x_y[1]] = Stone::WHITE; }
-					self.test_switch_player = !self.test_switch_player;
-					println!("stone put on X: {}, Y: {}", x_y[0], x_y[1]);
-					return true;
-				}
-			},
-			None => (),
-		}
+		// model.selected_stone = self.get_cell(self.cursor_pos[0], self.cursor_pos[1], model);
+		// match model.selected_stone {
+		// 	Some(x_y) => {
+		// 		if model.cells[x_y[0]][x_y[1]] == Stone::NOPE {
+		// 			if self.test_switch_player == true { //TEMP
+		// 				model.cells[x_y[0]][x_y[1]] = Stone::BLACK; }
+		// 			else {
+		// 				model.cells[x_y[0]][x_y[1]] = Stone::WHITE; }
+		// 			self.test_switch_player = !self.test_switch_player;
+		// 			println!("stone put on X: {}, Y: {}", x_y[0], x_y[1]);
+		// 			return true;
+		// 		}
+		// 	},
+		// 	None => (),
+		// }
 		false
 	}
 
-	pub fn get_cell(&mut self, x: f64, y: f64, model: &mut Gameboard) -> Option<[usize; 2]> {
-		let size_px = self.view.size;
-		let map_position = self.view.position;
-		let map_size = model.size;
-		let semi_cell_size = size_px / map_size as f64 / 2.0;
+	// pub fn get_cell(&mut self, x: f64, y: f64, model: &mut Gameboard) -> Option<[usize; 2]> {
+	// 	let size_px = self.view.size;
+	// 	let map_position = self.view.position;
+	// 	let map_size = model.size;
+	// 	let semi_cell_size = size_px / map_size as f64 / 2.0;
 
-		// Check that coordinates are inside board boundaries.
-		if x >= map_position[0] - semi_cell_size
-			&& x < size_px + map_position[0] + semi_cell_size
-			&& y >= map_position[1] - semi_cell_size
-			&& y < size_px + map_position[1] + semi_cell_size {
-			let stone_x = ((x - map_position[0] + semi_cell_size) / size_px * (map_size - 1) as f64) as usize;
-			let stone_y = ((y - map_position[1] + semi_cell_size) / size_px * (map_size - 1) as f64) as usize;
-			println!("stone x: {} y: {}", stone_x, stone_y);
-			return Some([stone_x, stone_y])
-		}
-		None
-	}
+	// 	// Check that coordinates are inside board boundaries.
+	// 	if x >= map_position[0] - semi_cell_size
+	// 		&& x < size_px + map_position[0] + semi_cell_size
+	// 		&& y >= map_position[1] - semi_cell_size
+	// 		&& y < size_px + map_position[1] + semi_cell_size {
+	// 		let stone_x = ((x - map_position[0] + semi_cell_size) / size_px * (map_size - 1) as f64) as usize;
+	// 		let stone_y = ((y - map_position[1] + semi_cell_size) / size_px * (map_size - 1) as f64) as usize;
+	// 		println!("stone x: {} y: {}", stone_x, stone_y);
+	// 		return Some([stone_x, stone_y])
+	// 	}
+	// 	None
+	// }
 
 	pub fn set_events(&mut self, widget_ids: &WidgetIds) {
 		// println!("GameboardController: set_events");

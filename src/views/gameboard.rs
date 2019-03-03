@@ -43,8 +43,7 @@ impl GameboardView {
 	model.cells[3][3] = Stone::BLACK;
 
 		if let Some((y, x)) = widget_gameboard::Board::new(model)
-		// if widget_gameboard::Board::new(model)
-			.middle_of(widget_ids.background)
+			.middle_of(widget_ids.window_canvas)
 			.down_from(widget_ids.title, 15.0)
 			.w_h(self.size, self.size)
 			.set(widget_ids.grid, ui)
@@ -52,7 +51,8 @@ impl GameboardView {
 				// println!("click !!!!!");
 				println!("click [{}][{}]!!!!!", y, x);
 			}
-	}
+
+		}
 }
 
 		// let mut elements = widget::Matrix::new(model.size, model.size)
