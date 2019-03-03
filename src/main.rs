@@ -12,6 +12,7 @@ mod utils;
 mod traits;
 
 extern crate strum;
+#[macro_use] extern crate conrod_derive;
 #[macro_use] extern crate strum_macros;
 use controllers::gameplay::*;
 

@@ -36,7 +36,6 @@ impl Gameboard {
 
 impl GameViewModel for Gameboard {
     fn get_model(&mut self) -> &mut dyn Any {
-		println!("get_model GameBoard");
         self
     }
 

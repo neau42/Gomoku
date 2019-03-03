@@ -5,6 +5,7 @@
 use crate::controllers::gameboard::GameboardController;
 use crate::models::gameboard::Stone;
 use crate::models::gameboard::Gameboard;
+use crate::views::widget_gameboard;
 
 use crate::models::game_info::*;
 use crate::WidgetIds;
@@ -16,9 +17,9 @@ use conrod::*;
 pub struct GameboardView {
     pub position: [f64; 2],
     pub size: f64,
-    pub background_color: Rgba,
-	pub selected_stone_background_color: Rgba,
-	pub preview_stone_background_color: Rgba,
+    // pub background_color: Rgba,
+	// pub selected_stone_background_color: Rgba,
+	// pub preview_stone_background_color: Rgba,
 	pub hoshi_size: f64,
 }
 
@@ -26,47 +27,66 @@ impl GameboardView {
 	pub fn new() -> GameboardView {
 		GameboardView {
 			position: [36.0; 2],
-			size: 950.0,
-			background_color: Rgba(0.8, 0.8, 1.0, 1.0),
-			selected_stone_background_color: Rgba(0.9, 0.9, 0.9, 1.0),
-			preview_stone_background_color: Rgba(0.8, 0.8, 1.0, 0.5),
+			size: 800.0,
+			// background_color: Rgba(0.8, 0.8, 1.0, 1.0),
+			// selected_stone_background_color: Rgba(0.9, 0.9, 0.9, 1.0),
+			// preview_stone_background_color: Rgba(0.8, 0.8, 1.0, 0.5),
 			hoshi_size: 15.0,
 		}
 	}
 
     pub fn display_grid(&self, model: &mut Gameboard, ui: &mut UiCell, widget_ids: &WidgetIds) {
-		let mut elements = widget::Matrix::new(model.size, model.size)
-    	    .w_h(self.size - 1.0, self.size - 1.0)
-			.x(self.position[0])
-			.y(self.position[1])
-			// .color(color::BLACK)
-       		.set(widget_ids.grid, ui);
-			// .down_from(widget_ids.title, 15.0)
-    	    // .mid_top_of(widget_ids.footer)
+	model.cells[0][0] = Stone::WHITE;
+	model.cells[2][2] = Stone::BLACK;
+	model.cells[2][3] = Stone::BLACK;
+	model.cells[3][2] = Stone::WHITE;
+	model.cells[3][3] = Stone::BLACK;
+
+		if let Some((y, x)) = widget_gameboard::Board::new(model)
+		// if widget_gameboard::Board::new(model)
+			.middle_of(widget_ids.background)
+			.down_from(widget_ids.title, 15.0)
+			.w_h(self.size, self.size)
+			.set(widget_ids.grid, ui)
+			.was_clicked() {
+				// println!("click !!!!!");
+				println!("click [{}][{}]!!!!!", y, x);
+			}
+	}
+}
+
+		// let mut elements = widget::Matrix::new(model.size, model.size)
+    	//     .w_h(self.size - 1.0, self.size - 1.0)
+		// 	.x(self.position[0])
+		// 	.y(self.position[1])
+		// 	// .color(color::BLACK)
+       	// 	.set(widget_ids.grid, ui);
+		// 	// .down_from(widget_ids.title, 15.0)
+    	//     // .mid_top_of(widget_ids.footer)
+		// // while let Some(elem) = elements.next(ui) {
+		// // 	let (r, c) = (elem.row, elem.col);
+		// // 	let button = widget::Button::new().color(color::TRANSPARENT);
+		// // 	for _click in elem.set(button, ui) {
+		// // 		println!("Click on {:?}", (r, c));
+		// // 	}
+		
+
+    	// let mut elements = widget::Matrix::new(model.size, model.size)
+    	//     .w_h(self.size, self.size)
+		// 	.x_y_relative(22.5, 22.5)
+		// 	// .color(color::TRANSPARENT);
+		// 	// .down_from(widget_ids.title, 15.0)
+    	//     // .mid_top_of(widget_ids.footer)
+       	// 	.set(widget_ids.grid_select, ui);
 		// while let Some(elem) = elements.next(ui) {
 		// 	let (r, c) = (elem.row, elem.col);
 		// 	let button = widget::Button::new().color(color::TRANSPARENT);
 		// 	for _click in elem.set(button, ui) {
 		// 		println!("Click on {:?}", (r, c));
 		// 	}
-		
+		// }
 
-    	let mut elements = widget::Matrix::new(model.size, model.size)
-    	    .w_h(self.size, self.size)
-			.x_y_relative(22.5, 22.5)
-			// .color(color::TRANSPARENT);
-			// .down_from(widget_ids.title, 15.0)
-    	    // .mid_top_of(widget_ids.footer)
-       		.set(widget_ids.grid_select, ui);
-		while let Some(elem) = elements.next(ui) {
-			let (r, c) = (elem.row, elem.col);
-			let button = widget::Button::new().color(color::TRANSPARENT);
-			for _click in elem.set(button, ui) {
-				println!("Click on {:?}", (r, c));
-			}
-		}
 
-	}
 // }
 //    let stone_edge_style = conrod::widget::primitive::line::Style::new();
 //    stone_edge_style.color(conrod::color::BLACK);
@@ -162,22 +182,21 @@ impl GameboardView {
 // 	}
 // }
 
-	pub fn draw_map(&self, model: &mut Gameboard, ui: &mut UiCell, widget_ids: &WidgetIds)
-	{
-		println!("draw_map!");
-		draw_lines(self, model.size);
-		// draw_hoshi(view, controller, c, g);
-	}
-}
+	// pub fn draw_map(&self, model: &mut Gameboard, ui: &mut UiCell, widget_ids: &WidgetIds)
+	// {
+	// 	println!("draw_map!");
+	// 	draw_lines(self, model.size);
+	// 	// draw_hoshi(view, controller, c, g);
+	// }
 
 
 
-pub fn draw_lines(view: &GameboardView, size: usize) {
-   let stone_edge_style = conrod::widget::primitive::line::Style::new();
-   stone_edge_style.color(conrod::color::BLACK);
+// pub fn draw_lines(view: &GameboardView, size: usize) {
+//    let stone_edge_style = conrod::widget::primitive::line::Style::new();
+//    stone_edge_style.color(conrod::color::BLACK);
 
-   let stone_edge_border_style = conrod::widget::primitive::line::Style::new();
-   stone_edge_border_style.color(conrod::color::WHITE);
+//    let stone_edge_border_style = conrod::widget::primitive::line::Style::new();
+//    stone_edge_border_style.color(conrod::color::WHITE);
 
 //    stone_edge_border_style.color([0.9, 0.9, 0.8, 0.6]);
 
@@ -185,31 +204,31 @@ pub fn draw_lines(view: &GameboardView, size: usize) {
 //    let stone_edge_border = conrod::widget::primitive::line::Line::new([0.9, 0.9, 0.8, 0.6],0.5);
 
 	//draw lines border horizontal
-	for i in 0..size {
-		let y = view.position[1] + i as f64 / (size - 1) as f64 * view.size;
-		let x2 = view.position[0] + view.size;
+// 	for i in 0..size {
+// 		let y = view.position[1] + i as f64 / (size - 1) as f64 * view.size;
+// 		let x2 = view.position[0] + view.size;
 
-	   let stone_edge_border = conrod::widget::primitive::line::Line::styled([view.position[0], y + 1.0], [x2, y + 1.0], stone_edge_border_style);
+// 	   let stone_edge_border = conrod::widget::primitive::line::Line::styled([view.position[0], y + 1.0], [x2, y + 1.0], stone_edge_border_style);
 
 
-		// stone_edge_border.draw(hline_border, &c.draw_state, c.transform, g);
-	}
-	//draw lines horizontal and vertical
-	for i in 0..size {
-		let x = view.position[0] + i as f64 / (size - 1) as f64 * view.size;
-		let y = view.position[1] + i as f64 / (size - 1) as f64 * view.size;
-		let x2 = view.position[0] + view.size;
-		let y2 = view.position[1] + view.size;
+// 		// stone_edge_border.draw(hline_border, &c.draw_state, c.transform, g);
+// 	}
+// 	//draw lines horizontal and vertical
+// 	for i in 0..size {
+// 		let x = view.position[0] + i as f64 / (size - 1) as f64 * view.size;
+// 		let y = view.position[1] + i as f64 / (size - 1) as f64 * view.size;
+// 		let x2 = view.position[0] + view.size;
+// 		let y2 = view.position[1] + view.size;
 
-		let hline = [view.position[0], y, x2, y];
-	   let stone_edge = conrod::widget::primitive::line::Line::styled([view.position[0], y], [x2, y], stone_edge_style);
+// 		let hline = [view.position[0], y, x2, y];
+// 	   let stone_edge = conrod::widget::primitive::line::Line::styled([view.position[0], y], [x2, y], stone_edge_style);
 
-		// stone_edge.draw(hline, &c.draw_state, c.transform, g);
-		let vline = [x, view.position[1], x, y2];
-	   let stone_edge = conrod::widget::primitive::line::Line::styled([x, view.position[1]], [x, y2], stone_edge_style);
+// 		// stone_edge.draw(hline, &c.draw_state, c.transform, g);
+// 		let vline = [x, view.position[1], x, y2];
+// 	   let stone_edge = conrod::widget::primitive::line::Line::styled([x, view.position[1]], [x, y2], stone_edge_style);
 
-	}
-}
+// 	}
+// }
 
 
 
@@ -226,6 +245,7 @@ pub fn draw_stones<G: Graphics>(view: &GameboardView, controller: &GameboardCont
 		}
 	}
 }
+
 
 pub fn draw_one_stone<G: Graphics>(
 	view: &GameboardView,

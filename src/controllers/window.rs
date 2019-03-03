@@ -33,7 +33,6 @@ impl WindowController {
     }
 
     pub fn show(&self, ui: &mut UiCell, widget_ids: &WidgetIds) {
-		println!("windows controller: show");
         if self.model.background.is_some() {
             self.view.display_background(ui, widget_ids, self.model.background.unwrap());
         }

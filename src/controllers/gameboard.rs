@@ -130,12 +130,6 @@ impl GameViewController for GameboardController {
 	}
 
     fn show(&self, model:  &mut Box<dyn GameViewModel>, ui: &mut UiCell, widget_ids: &WidgetIds) {
-		//         let model: &mut GameInfo = match model.get_model().downcast_mut::<GameInfo>() {
-        //     Some(model) => model,
-        //     None => panic!("&GameViewModel isn't a GameInfo!"),
-        // };
-		println!("gameboard controller: show");
-
 		let model: &mut Gameboard = match model.get_model().downcast_mut::<Gameboard>() {
             Some(model) => model,
             None => panic!("&GameViewModel isn't a Gameboard!"),

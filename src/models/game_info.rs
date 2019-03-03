@@ -59,7 +59,6 @@ impl GameInfo {
 
 impl GameViewModel for GameInfo {
     fn get_model(&mut self) -> &mut dyn Any {
-		println!("get_model GameInfo");
         self
     }
 
