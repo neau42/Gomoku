@@ -63,6 +63,7 @@ impl GameplayController {
             glutin::Event::WindowEvent { event, .. } => match event {
                 glutin::WindowEvent::CloseRequested | glutin::WindowEvent::KeyboardInput {
                     input: glutin::KeyboardInput {
+                        state: ElementState::Released,
                         virtual_keycode: Some(glutin::VirtualKeyCode::Escape),
                         ..
                     },
