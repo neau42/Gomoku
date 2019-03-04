@@ -5,10 +5,6 @@ authors = ["pacifistes <bbrunell@student.42.fr>"]
 edition = "2018"
 
 [dependencies]
-# <<<<<<< HEAD
-# piston = "0.42.0"
-# piston2d-graphics = "0.30.0"
-# =======
 strum = "0.13.0"
 strum_macros = "0.13.0"
 image = "0.21"
@@ -17,11 +13,6 @@ find_folder = "0.3.0"
 piston2d-opengl_graphics = "0.59.0"
 conrod = { version = "0.61.1", features = ["glium", "winit"] }
 conrod_derive = "0.63.0"
-
-
-[lib]
-name = "gomoku"
-path = "lib/lib.rs"
 
 [[bin]]
 name = "gomoku"

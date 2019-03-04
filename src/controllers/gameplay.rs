@@ -1,4 +1,4 @@
-use crate::controllers::homepage::HomepageController;
+use crate::controllers::resolver_builder::ResolverBuilderController;
 use crate::models::gameboard::Gameboard;
 use crate::controllers::gameboard::GameboardController;
 use crate::controllers::window::WindowController;
@@ -6,7 +6,7 @@ use crate::traits::view_controller::GameViewController;
 use crate::traits::view_controller::PageType;
 use crate::traits::view_model::*;
 use crate::utils::event_loop::EventLoop as Events;
-use crate::models::game_info::*;
+use crate::models::resolver_builder::*;
 use crate::WidgetIds;
 
 use conrod::backend::winit::convert_event;
@@ -34,7 +34,7 @@ pub struct GameplayController {
 impl GameplayController {
     pub fn new(width: u32, height: u32, ui: Ui, widget_ids: WidgetIds) -> GameplayController {
         let window_controller = WindowController::new();
-        let page_controller = HomepageController::new(&widget_ids);
+        let page_controller = ResolverBuilderController::new(&widget_ids);
         let page_model:  Box<dyn GameViewModel> = Box::new(GameInfo::new());
         GameplayController {
             window_controller,
@@ -88,7 +88,7 @@ impl GameplayController {
                    self.page_controller = match self.page_controller.get_type() {
                        PageType::Gameboard => {
 						   self.page_model = Box::new(GameInfo::new());
-						   HomepageController::new(&self.widget_ids)
+						   ResolverBuilderController::new(&self.widget_ids)
 					   },
                        _ => break 'render,
                    }
@@ -100,17 +100,17 @@ impl GameplayController {
             }
             if self.page_model.need_change_window() {
                 self.page_controller = match self.page_controller.get_type() {
-                    PageType::Homepage => {
+                    PageType::ResolverBuilder => {
 						self.page_model = Box::new(Gameboard::new());
 						GameboardController::new(&self.widget_ids)
 					},
-                    _ => HomepageController::new(&self.widget_ids),
+                    _ => ResolverBuilderController::new(&self.widget_ids),
                 }
             }
             
 		// match self.page_controller.get_type() {
 		// 	PageType::Gameboard => println!("TYPE: Gameboard"),
-		// 	PageType::Homepage => println!("TYPE: Homepage"),
+		// 	PageType::ResolverBuilder => println!("TYPE: ResolverBuilder"),
 		// 	_ => println!("TYPE: other"),
 		// }
             let ui = &mut self.ui.set_widgets();

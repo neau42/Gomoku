@@ -1,20 +1,22 @@
 //! Gomoku!
 //! 
+extern crate strum;
+
+#[macro_use] extern crate conrod_derive;
+#[macro_use] extern crate strum_macros;
+
+mod models;
+mod views;
+mod controllers;
+mod utils;
+mod widgets;
+mod traits;
+
+use controllers::gameplay::*;
 use conrod::*;
 
 const WIDTH: u32 = 1600;
 const HEIGHT: u32 = 1024;
-
-mod controllers;
-mod views;
-mod models;
-mod utils;
-mod traits;
-
-extern crate strum;
-#[macro_use] extern crate conrod_derive;
-#[macro_use] extern crate strum_macros;
-use controllers::gameplay::*;
 
 widget_ids! {
     pub struct WidgetIds {
@@ -23,7 +25,7 @@ widget_ids! {
         window_canvas,
         window_canvas_y_scrollbar,
         window_canvas_x_scrollbar,
-        homepage_canvas,
+        resolver_builder_canvas,
         dropdown_button_game_mode,
         toggle_button_weight_boxes,
         number_dialer_first_ia_depth,
@@ -43,3 +45,135 @@ fn main() {
 
     gameplay.run()
 }
+
+
+
+
+
+
+
+// http://www.ffothello.org/informatique/algorithmes/
+
+// Fig. 4 : fail-soft alpha-beta
+
+// int alphabêta(int depth, int alpha, int bêta)
+// {
+//    if (game over or depth <= 0)
+//       return winning score or eval();
+//    move bestMove ;
+//    int current = -INFINITY;
+//    for (each possible move m) {
+//       make move m;
+//       int score = -alphabêta(depth - 1, -bêta, -alpha)
+//       unmake move m;
+//       if (score >= current) {
+//          current = score;
+//          bestmove = m;
+//          if (score >= alpha){
+//             alpha = score;
+//             bestmove = m ;
+//             if (score >= bêta)
+//                break;
+//          }
+//       }
+//    }
+//    return current;
+// }
+
+
+// si alpha < current < bêta, alors current est la valeur minimax
+// si current <= alpha, alors la vraie valeur minimax m vérifie :
+// m <= current <= alpha
+// si bêta <= current alors la vraie valeur minimax m vérifie :
+// bêta <= current <= m
+
+
+// int alphabêta(int depth, int alpha, int bêta)
+// {
+//    if (game over or depth <= 0)
+//       return winning score or eval();
+//    move bestMove = first move;
+//    make move bestMove;
+//    int current = -alphabêta(depth - 1, -bêta, -alpha);
+//    unmake move bestMove;
+//    if (current >= alpha)
+//       alpha = current;
+//    if (current < bêta) {
+//       for (each remaining move m) {
+//          make move m;
+//          int score = -alphabêta(depth - 1, -(alpha+1), -alpha)
+//          if (score > alpha && score < bêta)
+//             score = -alphabêta(depth - 1, -bêta, -alpha)
+//          unmake move m;
+//          if (score >= current) {
+//             current = score;
+//             bestmove = m;
+//             if (score >= alpha){
+//                alpha = score;
+//                if (score >= bêta)
+//                   break;
+//             }
+//          }
+//    }
+//    return current;
+// }
+
+// si alpha < current < bêta, alors current est la valeur minimax
+// si current <= alpha, alors la vraie valeur minimax m vérifie :
+// m <= current <= alpha
+// si bêta <= current alors la vraie valeur minimax m vérifie :
+// bêta <= current <= m
+
+
+// int MTDF(depth, init_g) 
+// {
+//    int g = init_g , bêta;
+//    int upperbound = +INFINITY;
+//    int lowerbound = -INFINITY;
+//    do {
+//       if (g == lowerbound)
+//          bêta = g + 1 ;
+//       else
+//          bêta = g;
+//       g = AlphaBêtaWithMemory(depth, bêta - 1, bêta);
+//       if (g < bêta)
+//          upperbound = g
+//       else
+//          lowerbound = g;
+//       }
+//    while (lowerbound != upperbound);
+//    return g ;
+// }
+
+
+// ****************
+// NegaSCiot
+// int alphabêta(int depth, int alpha, int bêta)
+// {
+//    if (game over or depth <= 0)
+//       return winning score or eval();
+//    move bestMove = first move;
+//    make move bestMove;
+//    int current = -alphabêta(depth - 1, -bêta, -alpha);
+//    unmake move bestMove;
+//    if (current >= alpha)
+//       alpha = current;
+//    if (current < bêta) {
+//       for (each remaining move m) {
+//          make move m;
+//          int score = -alphabêta(depth - 1, -(alpha+1), -alpha)
+//          if (score > alpha && score < bêta)
+//             score = -alphabêta(depth - 1, -bêta, -alpha)
+//          unmake move m;
+//          if (score >= current) {
+//             current = score;
+//             bestmove = m;
+//             if (score >= alpha){
+//                alpha = score;
+//                if (score >= bêta)
+//                   break;
+//             }
+//          }
+//    }
+//    return current;
+// }

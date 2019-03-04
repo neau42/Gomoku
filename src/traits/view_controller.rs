@@ -4,7 +4,7 @@ use conrod::*;
 
 #[derive(PartialEq)]
 pub enum PageType {
-    Homepage,
+    ResolverBuilder,
     Gameboard,
 }
 

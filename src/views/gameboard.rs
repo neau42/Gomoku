@@ -1,7 +1,7 @@
 //! Gameboard view.
 
 use crate::models::gameboard::Gameboard;
-use crate::views::widget_gameboard;
+use crate::widgets::gameboard as CustomWidget;
 use crate::WidgetIds;
 use conrod::*;
 
@@ -25,7 +25,7 @@ impl GameboardView {
 
 	pub fn display_grid(& self, model: & Gameboard, ui: &mut UiCell, widget_ids: &WidgetIds, color: Color) -> Option<(usize, usize)> {
 	
-	if let Some((y, x)) = widget_gameboard::Board::new(model, color)
+	if let Some((y, x)) = CustomWidget::Board::new(model, color)
 		.middle_of(widget_ids.window_canvas)
 		.down_from(widget_ids.title, 15.0)
 		.w_h(self.size, self.size)
