@@ -1,6 +1,6 @@
 use crate::controllers::resolver_builder::ResolverBuilderController;
-use crate::models::gameboard::Gameboard;
-use crate::controllers::gameboard::GameboardController;
+use crate::models::resolver::Resolver;
+use crate::controllers::resolver::ResolverController;
 use crate::controllers::window::WindowController;
 use crate::traits::view_controller::GameViewController;
 use crate::traits::view_controller::PageType;
@@ -86,7 +86,7 @@ impl GameplayController {
                 }
                 if self.is_callback(&event) {
                    self.page_controller = match self.page_controller.get_type() {
-                       PageType::Gameboard => {
+                       PageType::Resolver => {
 						   self.page_model = Box::new(GameInfo::new());
 						   ResolverBuilderController::new(&self.widget_ids)
 					   },
@@ -94,22 +94,22 @@ impl GameplayController {
                    }
                 }
 				// match self.page_controller.get_type() {
-				// 	PageType::Gameboard => self.page_controller.check_event(&event, &mut self.page_model, &mut self.ui.set_widgets(), &self.widget_ids),
+				// 	PageType::Resolver => self.page_controller.check_event(&event, &mut self.page_model, &mut self.ui.set_widgets(), &self.widget_ids),
 				// 	_ => (),
 				// }
             }
             if self.page_model.need_change_window() {
                 self.page_controller = match self.page_controller.get_type() {
                     PageType::ResolverBuilder => {
-						self.page_model = Box::new(Gameboard::new());
-						GameboardController::new(&self.widget_ids)
+						self.page_model = Box::new(Resolver::new());
+						ResolverController::new(&self.widget_ids)
 					},
                     _ => ResolverBuilderController::new(&self.widget_ids),
                 }
             }
             
 		// match self.page_controller.get_type() {
-		// 	PageType::Gameboard => println!("TYPE: Gameboard"),
+		// 	PageType::Resolver => println!("TYPE: Resolver"),
 		// 	PageType::ResolverBuilder => println!("TYPE: ResolverBuilder"),
 		// 	_ => println!("TYPE: other"),
 		// }

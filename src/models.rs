@@ -1,3 +1,3 @@
 pub mod resolver_builder;
-pub mod gameboard;
+pub mod resolver;
 pub mod window;

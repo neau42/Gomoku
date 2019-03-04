@@ -1,4 +1,4 @@
-//! Gameboard controller.
+//! Resolver controller.
 
 use conrod::UiCell;
 
@@ -8,29 +8,29 @@ use crate::traits::view_model::GameViewModel;
 
 use conrod::*;
 
-use crate::views::gameboard::GameboardView;
-use crate::models::gameboard::Gameboard;
-use crate::models::gameboard::Stone;
+use crate::views::resolver::ResolverView;
+use crate::models::resolver::Resolver;
+use crate::models::resolver::Stone;
 
 
-pub struct GameboardController {
-	pub view: GameboardView,
+pub struct ResolverController {
+	pub view: ResolverView,
 }
 
-impl GameViewController for GameboardController {
-	fn new(_widget_ids: &WidgetIds) -> Box<GameboardController> {
-		let view = GameboardView::new();
-		println!("new GameboardController!");
-		let controller = GameboardController {
+impl GameViewController for ResolverController {
+	fn new(_widget_ids: &WidgetIds) -> Box<ResolverController> {
+		let view = ResolverView::new();
+		println!("new ResolverController!");
+		let controller = ResolverController {
 			view,
 			};
 		Box::new(controller)
 	}
 
 	fn show(&self, model: &mut Box<dyn GameViewModel>, ui: &mut UiCell, widget_ids: &WidgetIds) {
-		let model: &mut Gameboard = match model.get_model().downcast_mut::<Gameboard>() {
+		let model: &mut Resolver = match model.get_model().downcast_mut::<Resolver>() {
 			Some(model) => model,
-			None => panic!("&GameViewModel isn't a Gameboard!"),
+			None => panic!("&GameViewModel isn't a Resolver!"),
 		};
 		
 		let color: Color;
@@ -55,6 +55,6 @@ impl GameViewController for GameboardController {
 	}
 
     fn get_type(&self) -> PageType {
-        PageType::Gameboard
+        PageType::Resolver
     }
 }

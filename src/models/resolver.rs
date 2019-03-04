@@ -13,7 +13,7 @@ pub enum Stone {
 	NOPE,
 }
 /// Stores game board information.
-pub struct Gameboard {
+pub struct Resolver {
 	pub size: usize,
     pub cells: [[Stone; SIZE]; SIZE],
 	pub test_switch: bool,
@@ -21,9 +21,9 @@ pub struct Gameboard {
 }
 
 /// Creates a new game board.
-impl Gameboard {
-	pub fn new() -> Gameboard {
-		Gameboard {
+impl Resolver {
+	pub fn new() -> Resolver {
+		Resolver {
 			size: SIZE,
 			cells: [[Stone::NOPE; SIZE]; SIZE],
 			test_switch: true,
@@ -41,7 +41,7 @@ impl Gameboard {
 	}
 }
 
-impl GameViewModel for Gameboard {
+impl GameViewModel for Resolver {
     fn get_model(&mut self) -> &mut dyn Any {
         self
     }

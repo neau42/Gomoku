@@ -1,4 +1,4 @@
-use crate::models::gameboard::*;
+use crate::models::resolver::*;
 use conrod::{self, widget, color, Colorable, Positionable, Widget};
 use conrod::UiCell;
 use conrod::widget::id::Id;
@@ -10,12 +10,12 @@ use conrod::position::rect::Rect;
 pub struct Board<'a> {
     #[conrod(common_builder)]
     common: widget::CommonBuilder,
-    board_state: &'a Gameboard,
+    board_state: &'a Resolver,
 	color: Color,
 }
 
 impl<'a> Board<'a> {
-    pub fn new(board_state: &'a Gameboard, color: Color) -> Self {
+    pub fn new(board_state: &'a Resolver, color: Color) -> Self {
         Board {
             common: widget::CommonBuilder::default(),
 			board_state: board_state,
@@ -59,7 +59,7 @@ impl Iterator for InfoClick {
     }
 }
 
-fn get_mouse_event(rect: Rect, board_state: &Gameboard, button_id: conrod::widget::Id, ui: &UiCell) -> (Interaction, u16, usize, usize) {
+fn get_mouse_event(rect: Rect, board_state: &Resolver, button_id: conrod::widget::Id, ui: &UiCell) -> (Interaction, u16, usize, usize) {
 	let input = ui.widget_input(button_id);
 
 	let (interaction, x_mouse, y_mouse) = input.mouse().map_or((Interaction::Idle, 0.0, 0.0), |mouse| {
@@ -141,7 +141,7 @@ impl<'a> Widget for Board<'a> {
 }
 
 /// get board idx from mouse position
-pub fn get_cell(x: f64, y: f64, rect: Rect, model: & Gameboard) -> Option<(usize, usize)> {
+pub fn get_cell(x: f64, y: f64, rect: Rect, model: & Resolver) -> Option<(usize, usize)> {
 	let size_px = rect.x.end - rect.x.start;
 	let map_size = model.size;
 	let semi_cell_size = size_px / map_size as f64 / 2.0;
@@ -220,7 +220,7 @@ fn draw_hoshi(size: usize, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
 }
 
 /// draw all stones presents on board
-fn draw_stones(board_state: & Gameboard, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
+fn draw_stones(board_state: & Resolver, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
 
 	for i in 0..board_state.size * board_state.size {
 		match board_state.cells[i/board_state.size][i%board_state.size] {
