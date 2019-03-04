@@ -36,11 +36,17 @@ impl GameboardView {
 	}
 
     pub fn display_grid(&self, model: &mut Gameboard, ui: &mut UiCell, widget_ids: &WidgetIds) {
-	model.cells[0][0] = Stone::WHITE;
+		// for e in 0..model.size {
+		// 	for f in 0..model.size {
+		// 		model.cells[e][f] = Stone::WHITE;
+		// 	}
+		// }
+		
+	// model.cells[0][0] = Stone::WHITE;
 	model.cells[2][2] = Stone::BLACK;
-	model.cells[2][3] = Stone::BLACK;
-	model.cells[3][2] = Stone::WHITE;
-	model.cells[3][3] = Stone::BLACK;
+	// model.cells[2][3] = Stone::BLACK;
+	// model.cells[3][2] = Stone::WHITE;
+	// model.cells[3][3] = Stone::BLACK;
 
 		if let Some((y, x)) = widget_gameboard::Board::new(model)
 			.middle_of(widget_ids.window_canvas)
@@ -50,41 +56,11 @@ impl GameboardView {
 			.was_clicked() {
 				// println!("click !!!!!");
 				println!("click [{}][{}]!!!!!", y, x);
+				model.cells[x][y] = Stone::WHITE;
 			}
 
 		}
 }
-
-		// let mut elements = widget::Matrix::new(model.size, model.size)
-    	//     .w_h(self.size - 1.0, self.size - 1.0)
-		// 	.x(self.position[0])
-		// 	.y(self.position[1])
-		// 	// .color(color::BLACK)
-       	// 	.set(widget_ids.grid, ui);
-		// 	// .down_from(widget_ids.title, 15.0)
-    	//     // .mid_top_of(widget_ids.footer)
-		// // while let Some(elem) = elements.next(ui) {
-		// // 	let (r, c) = (elem.row, elem.col);
-		// // 	let button = widget::Button::new().color(color::TRANSPARENT);
-		// // 	for _click in elem.set(button, ui) {
-		// // 		println!("Click on {:?}", (r, c));
-		// // 	}
-		
-
-    	// let mut elements = widget::Matrix::new(model.size, model.size)
-    	//     .w_h(self.size, self.size)
-		// 	.x_y_relative(22.5, 22.5)
-		// 	// .color(color::TRANSPARENT);
-		// 	// .down_from(widget_ids.title, 15.0)
-    	//     // .mid_top_of(widget_ids.footer)
-       	// 	.set(widget_ids.grid_select, ui);
-		// while let Some(elem) = elements.next(ui) {
-		// 	let (r, c) = (elem.row, elem.col);
-		// 	let button = widget::Button::new().color(color::TRANSPARENT);
-		// 	for _click in elem.set(button, ui) {
-		// 		println!("Click on {:?}", (r, c));
-		// 	}
-		// }
 
 
 // }

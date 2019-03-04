@@ -45,8 +45,6 @@ pub struct InfoClick {
 }
 
 impl InfoClick {
-    /// `true` if the `Button` was clicked one or more times.
-	///  pub fn was_clicked(self) -> bool { self.is_click > 0 }
     pub fn was_clicked(self) -> Option<(usize, usize)> {
         if (self.is_click == 0) {
             None
@@ -69,48 +67,22 @@ impl Iterator for InfoClick {
     }
 }
 
-// fn get_mouse_pos(button_id: widget::Id, ui: &UiCell) -> (f64, f64) {
-// 	 if let Some(mouse) = ui.widget_input(button_id).mouse() {
-//         if mouse.buttons.left().is_down() {
-//             let mouse_abs_xy = mouse.abs_xy();
-//             // let clamped_x = inner_rect.x.clamp_value(mouse_abs_xy[0]);
-//             // let clamped_y = inner_rect.y.clamp_value(mouse_abs_xy[1]);
-//             // let (l, r, b, t) = inner_rect.l_r_b_t();
-//             // new_x = map_range(clamped_x, l, r, min_x, max_x);
-//             // new_y = map_range(clamped_y, b, t, min_y, max_y);
-// 	return (mouse_abs_xy[0], mouse_abs_xy[1])
-//         }
-//     }
-// 	(0.0, 0.0)
-
-// }
-
-// fn interaction_and_times_triggered(button_id: widget::Id, ui: &UiCell) -> (Interaction, u16) {
-//     let input = ui.widget_input(button_id);
-//     let interaction = input.mouse().map_or(Interaction::Idle, |mouse| {
-//         let is_pressed =
-//             mouse.buttons.left().is_down()
-//             || ui.global_input().current.touch.values()
-//                  .any(|t| t.start.widget == Some(button_id));
-
-//         if is_pressed { Interaction::Press } else { Interaction::Hover }
-//     });
-//     let times_triggered = (input.clicks().left().count() + input.taps().count()) as u16;
-//     (interaction, times_triggered)
-// }
-
-fn interaction_and_times_triggered(button_id: conrod::widget::Id, ui: &UiCell) -> (Interaction, u16, f64, f64) {
+fn get_mouse_event(rect: Rect, board_state: &Gameboard, button_id: conrod::widget::Id, ui: &UiCell) -> (Interaction, u16, usize, usize) {
 	let input = ui.widget_input(button_id);
-	// let interaction = input.mouse().map_or(Interaction::Idle, |mouse| {
-	let (interaction, x, y) = input.mouse().map_or((Interaction::Idle, 0.0, 0.0), |mouse| {
-		let is_pressed = mouse.buttons.left().is_down();
-			// || ui.global_input().current.touch.values()
-			//      .any(|t| t.start.widget == Some(button_id));
+	let (interaction, x_mouse, y_mouse) = input.mouse().map_or((Interaction::Idle, 0.0, 0.0), |mouse| {
+		let is_pressed = mouse.buttons.left().is_down()
+			|| ui.global_input().current.touch.values()
+			     .any(|t| t.start.widget == Some(button_id));
 		let mouse_abs_xy = mouse.abs_xy();
 		if is_pressed { (Interaction::Press, mouse_abs_xy[0], mouse_abs_xy[1]) } else { (Interaction::Hover, mouse_abs_xy[0], mouse_abs_xy[1]) }
 	});
-	let times_triggered = (input.clicks().left().count() + input.taps().count()) as u16;
-    (interaction, times_triggered, x, y)
+	let is_click = (input.clicks().left().count() + input.taps().count()) as u16;
+
+	let (interaction, x, y, is_click) = match get_cell(x_mouse, y_mouse, rect, board_state) {
+	Some((x, y)) => (interaction, x, y, is_click),
+	_ => (Interaction::Idle, 0,0,0),
+	};
+    (interaction, is_click, x, y)
 }
 
 ///INDEXS
@@ -120,16 +92,14 @@ pub struct State {
 
 struct CellIndex {
     lines: conrod::widget::id::List,
-	borders_background: conrod::widget::id::Id
 }
 
 impl CellIndex {
-    pub fn new(mut generator: conrod::widget::id::Generator) -> Self {
+    pub fn new(mut generator: conrod::widget::id::Generator, size: usize) -> Self {
         let mut cell_index = CellIndex {
             lines: conrod::widget::id::List::new(),
-			borders_background: generator.next()
         };
-        cell_index.lines.resize(19 * 23, &mut generator);//19*19: pierres + 19 * 3: lines + 9 hoshi + ...
+        cell_index.lines.resize(size * (size + 3) + 20, &mut generator);
         cell_index
     }
 }
@@ -142,7 +112,7 @@ impl<'a> Widget for Board<'a> {
 
     fn init_state(&self, id_gen: widget::id::Generator) -> Self::State {
         State {
-            cell_index: CellIndex::new(id_gen)
+            cell_index: CellIndex::new(id_gen, self.board_state.size)
         }
     }
 
@@ -150,60 +120,56 @@ impl<'a> Widget for Board<'a> {
         ()
     }
 
-    // Draw les pierres deja poser
-    // fn draw_boxes(mut self, &widget::UpdateArgs<Self> ) {
-    //     let widget::UpdateArgs { id, state, rect, ui, .. } = args;
-    // }
-
-    fn update(mut self, args: widget::UpdateArgs<Self>) -> Self::Event {
+    fn update(self, args: widget::UpdateArgs<Self>) -> Self::Event {
 		let widget::UpdateArgs { id, state, rect, ui, .. } = args;
-        draw_lines(self.board_state.size, id, &state, rect, ui);
-		draw_hoshi(self.board_state.size, id, &state, rect, ui);
-		draw_stones(self.board_state, id, &state, rect, ui);
+		let size = self.board_state.size;
+     
+	    draw_lines(size, id, &state, rect, ui);
+		draw_hoshi(size, id, &state, rect, ui);
 
-        let (interaction, times_triggered, x, y) = interaction_and_times_triggered(id, ui);
-		if (interaction != Interaction::Idle) {
-			println!("interaction: {:?}", interaction);
-			// let x_y = get_cell(x, y, rect, self.board_state);
-			println!("x: {}, y: {}", x, y);
-			// println!("x: {}, y: {}, X: {}, Y: {}", x, y, x_y.unwrap()[0], x_y.unwrap()[1]);
+        let (interaction, is_click, x, y) = get_mouse_event(rect, self.board_state, id, ui);
+
+		if interaction == Interaction::Hover {
+			if self.board_state.cells[x][y] == Stone::NOPE {
+				draw_one_stone([x, y],
+				(color::WHITE).with_alpha(0.5),
+				size,
+				id, rect, ui, state.cell_index.lines[size * 4 + (x+1) * (y+1)]);
+			}
 		}
-
-        // self.draw_boxes(&args);
-        // if (true/*n'est pas deja afficher(deja la previous dans la case) +  est une empty box, */) {
-        //     self.draw_preview_boxe();
-        // }
-
-		InfoClick {
-            is_click: times_triggered,
-            x: x as usize,
-            y: y as usize,
-        }
+		else if interaction == Interaction::Press {
+			if self.board_state.cells[x][y] == Stone::NOPE {
+				draw_one_stone([x, y],
+				color::WHITE,
+				size,
+				id, rect, ui, state.cell_index.lines[size * 4 + (x+1) * (y+1)]);
+			}
+		}
+		draw_stones(self.board_state, id, &state, rect, ui);
+		InfoClick {is_click, x, y}
     }
 }
 
-	// pub fn get_cell(x: f64, y: f64, rect: Rect, model: & Gameboard) -> Option<[usize; 2]> {
-	// 	let size_px = rect.x.end - rect.x.start;
-	// 	// let map_position = self.view.position;
-	// 	let map_size = model.size;
-	// 	let semi_cell_size = size_px / map_size as f64 / 2.0;
+/// get board idx from mouse position
+pub fn get_cell(x: f64, y: f64, rect: Rect, model: & Gameboard) -> Option<(usize, usize)> {
+	let size_px = rect.x.end - rect.x.start;
+	let map_size = model.size;
+	let semi_cell_size = size_px / map_size as f64 / 2.0;
 
-	// 	println!("get_cell x: {}, y: {}", x, y);
+	// Check that coordinates are inside board boundaries.
+	if x >= rect.x.start - semi_cell_size
+		&& x < rect.x.end + semi_cell_size
+		&& y >= rect.y.start - semi_cell_size
+		&& y < rect.x.end + semi_cell_size {
+		let stone_x = ((x - rect.x.start + semi_cell_size) / size_px * (map_size - 1) as f64) as usize;
+		let stone_y = ((rect.y.end - y + semi_cell_size) / size_px * (map_size - 1) as f64) as usize;
+		Some((stone_x, stone_y))
+	}
+	else {
+		None
+	}
+}
 
-	// 	// Check that coordinates are inside board boundaries.
-	// 	if x >=  - semi_cell_size
-	// 		&& x < size_px + semi_cell_size
-	// 		&& y >= - semi_cell_size
-	// 		&& y < size_px + semi_cell_size {
-	// 		let stone_x = ((x + semi_cell_size) / size_px * (map_size - 1) as f64) as usize;
-	// 		let stone_y = ((y + semi_cell_size) / size_px * (map_size - 1) as f64) as usize;
-	// 		println!("stone x: {} y: {}", stone_x, stone_y);
-	// 		Some([stone_x, stone_y])
-	// 	}
-	// 	else {
-	// 		None
-	// 	}
-	// }
 
 /// draw gomoku gameboard lines
 fn draw_lines(size: usize, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
@@ -216,6 +182,7 @@ fn draw_lines(size: usize, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
 			.x_y_relative_to(id, 0.0, 0.0)
 			.color(color::WHITE)
 			.thickness(0.3)
+			.graphics_for(id)
 			.set(state.cell_index.lines[i+(size*2)], ui);
 	}
 	let x2 = rect.x.end;
@@ -230,12 +197,14 @@ fn draw_lines(size: usize, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
 			.x_y_relative_to(id, 0.0, 0.0)
 			.color(color::BLACK)
 			.thickness(1.0)
+			.graphics_for(id)
 			.set(state.cell_index.lines[i], ui);
 
 		conrod::widget::primitive::line::Line::new([x, rect.y.start], [x, y2])
 			.x_y_relative_to(id, 0.0, 0.0)
 			.color(color::BLACK)
 			.thickness(1.0)
+			.graphics_for(id)
 			.set(state.cell_index.lines[i+size], ui);
 		}
 	}
@@ -253,6 +222,7 @@ fn draw_hoshi(size: usize, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
 					rect.y.start + (*j as f64 * stone_size)
 					)
 				.color(color::BLACK)
+				.graphics_for(id)
 				.set(state.cell_index.lines[cmpt+(size * 3)], ui);
 				cmpt +=1;
 		}
@@ -268,12 +238,12 @@ fn draw_stones(board_state: & Gameboard, id: Id, state: &State, rect: Rect, ui: 
 				[i / board_state.size, i % board_state.size],
 				color::WHITE,
 				board_state.size,
-				id, rect, ui, state.cell_index.lines[19*4 + i]),
+				id, rect, ui, state.cell_index.lines[board_state.size*4 + i]),
 			Stone::BLACK => draw_one_stone(
 				[i / board_state.size, i % board_state.size],
 				color::BLACK,
 				board_state.size,
-				id, rect, ui, state.cell_index.lines[19*4 + i]),
+				id, rect, ui, state.cell_index.lines[board_state.size*4 + i]),
 			_ => (),
 		}
 	}
@@ -294,5 +264,6 @@ fn draw_one_stone(ind: [usize; 2], color: Color, size: usize, id: Id, rect: Rect
 					pos[0],
 					pos[1])
 				.color(color)
+				.graphics_for(id)
 				.set(line_id, ui);
 }

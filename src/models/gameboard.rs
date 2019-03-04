@@ -16,8 +16,6 @@ pub enum Stone {
 pub struct Gameboard {
 	pub size: usize,
     pub cells: [[Stone; SIZE]; SIZE],
-	pub selected_stone: Option<[usize; 2]>,
-	pub preview_stone: Option<[usize; 2]>,
 	change_window: bool,
 }
 
@@ -27,8 +25,6 @@ impl Gameboard {
 		Gameboard {
 			size: SIZE,
 			cells: [[Stone::NOPE; SIZE]; SIZE],
-			selected_stone: None,
-			preview_stone: None,
 			change_window: false,
 		}
 	}
