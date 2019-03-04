@@ -84,14 +84,21 @@ pub struct State {
 
 struct CellIndex {
     lines: conrod::widget::id::List,
+    stone: conrod::widget::id::List,
+    hoshi: conrod::widget::id::List,
+    // lines: conrod::widget::id::List,
 }
 
 impl CellIndex {
     pub fn new(mut generator: conrod::widget::id::Generator, size: usize) -> Self {
         let mut cell_index = CellIndex {
             lines: conrod::widget::id::List::new(),
+            stone: conrod::widget::id::List::new(),
+            hoshi: conrod::widget::id::List::new(),
         };
-        cell_index.lines.resize(size * (size + 3) + 20, &mut generator);
+        cell_index.lines.resize(size * 3, &mut generator);
+        cell_index.stone.resize(size * size, &mut generator);
+        cell_index.hoshi.resize(9, &mut generator);
         cell_index
     }
 }
@@ -125,14 +132,14 @@ impl<'a> Widget for Board<'a> {
 			if self.board_state.cells[x][y] == Stone::NOPE {
 				draw_one_stone([x, y],
 				(self.color).with_alpha(0.5), size,
-				id, rect, ui, state.cell_index.lines[size * 4 + (x+1) * (y+1)]);
+				id, rect, ui, state.cell_index.stone[x + y * size]);
 			}
 		}
 		else if interaction == Interaction::Press {
 			if self.board_state.cells[x][y] == Stone::NOPE {
 				draw_one_stone([x, y],
 				self.color, size,
-				id, rect, ui, state.cell_index.lines[size * 4 + (x+1) * (y+1)]);
+				id, rect, ui, state.cell_index.stone[x + y * size]);
 			}
 		}
 		draw_stones(self.board_state, id, &state, rect, ui);
@@ -213,7 +220,7 @@ fn draw_hoshi(size: usize, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
 					)
 				.color(color::BLACK)
 				.graphics_for(id)
-				.set(state.cell_index.lines[cmpt+(size * 3)], ui);
+				.set(state.cell_index.hoshi[cmpt], ui);
 				cmpt +=1;
 		}
 	}
@@ -223,24 +230,24 @@ fn draw_hoshi(size: usize, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
 fn draw_stones(board_state: & Gameboard, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
 
 	for i in 0..board_state.size * board_state.size {
-		match board_state.cells[i/board_state.size][i%board_state.size] {
+		match board_state.cells[i%board_state.size][i/board_state.size] {
 			Stone::WHITE =>	draw_one_stone(
-				[i / board_state.size, i % board_state.size],
+				[i % board_state.size, i / board_state.size],
 				color::WHITE,
 				board_state.size,
-				id, rect, ui, state.cell_index.lines[board_state.size*4 + i]),
+				id, rect, ui, state.cell_index.stone[i]),
 			Stone::BLACK => draw_one_stone(
-				[i / board_state.size, i % board_state.size],
+				[i % board_state.size, i / board_state.size],
 				color::BLACK,
 				board_state.size,
-				id, rect, ui, state.cell_index.lines[board_state.size*4 + i]),
+				id, rect, ui, state.cell_index.stone[i]),
 			_ => (),
 		}
 	}
 }
 
 /// draw one stone on board in [ind[0]][ind[1]] 
-fn draw_one_stone(ind: [usize; 2], color: Color, size: usize, id: Id, rect: Rect, ui: &mut UiCell, line_id: Id) {
+fn draw_one_stone(ind: [usize; 2], color: Color, size: usize, id: Id, rect: Rect, ui: &mut UiCell, cell_id: Id) {
 	let stone_size = (rect.x.end - rect.x.start) / (size - 1) as f64;
 
 	let pos = [
@@ -255,5 +262,5 @@ fn draw_one_stone(ind: [usize; 2], color: Color, size: usize, id: Id, rect: Rect
 					pos[1])
 				.color(color)
 				.graphics_for(id)
-				.set(line_id, ui);
+				.set(cell_id, ui);
 }

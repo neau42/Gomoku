@@ -20,7 +20,6 @@ pub struct ResolverController {
 impl GameViewController for ResolverController {
 	fn new(_widget_ids: &WidgetIds) -> Box<ResolverController> {
 		let view = ResolverView::new();
-		println!("new ResolverController!");
 		let controller = ResolverController {
 			view,
 			};
