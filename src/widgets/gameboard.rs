@@ -86,7 +86,6 @@ struct CellIndex {
     lines: conrod::widget::id::List,
     stone: conrod::widget::id::List,
     hoshi: conrod::widget::id::List,
-    // lines: conrod::widget::id::List,
 }
 
 impl CellIndex {
