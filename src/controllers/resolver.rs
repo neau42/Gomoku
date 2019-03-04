@@ -10,7 +10,7 @@ use conrod::*;
 
 use crate::views::resolver::ResolverView;
 use crate::models::resolver::Resolver;
-use crate::models::resolver::Stone;
+use crate::models::gameboard::Stone;
 
 
 pub struct ResolverController {
@@ -36,7 +36,7 @@ impl GameViewController for ResolverController {
 		let color: Color;
 		let stone: Stone;
 
-		if model.test_switch == true {
+		if model.state.test_switch == true {
 			color = color::WHITE;
 			stone = Stone::WHITE;
 		} else {
@@ -46,8 +46,8 @@ impl GameViewController for ResolverController {
 
 		match self.view.display_grid(model, ui, widget_ids, color) {
 			Some((x, y)) => {
-				if model.set_stone_on_cell(x, y, stone){
-					model.test_switch = !model.test_switch;
+				if model.state.set_stone_on_cell(x, y, stone){
+					model.state.test_switch = !model.state.test_switch;
 					}
 				}
 			_ => (),

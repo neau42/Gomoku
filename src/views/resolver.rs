@@ -24,7 +24,7 @@ impl ResolverView {
 	}
 
 	pub fn display_grid(& self, model: & Resolver, ui: &mut UiCell, widget_ids: &WidgetIds, color: Color) -> Option<(usize, usize)> {
-		if let Some((y, x)) = CustomWidget::Board::new(model, color)
+		if let Some((y, x)) = CustomWidget::Board::new(&model.state, color)
 			.middle_of(widget_ids.window_canvas)
 			.down_from(widget_ids.title, 15.0)
 			.w_h(self.size, self.size)
