@@ -1,11 +1,8 @@
 use crate::models::gameboard::*;
-use conrod::{self, widget, color, Colorable, Sizeable, Borderable, Positionable, Widget};
-use conrod::Scalar;
-use conrod::Point;
+use conrod::{self, widget, color, Colorable, Positionable, Widget};
 use conrod::UiCell;
 use conrod::widget::id::Id;
 use conrod::color::Color;
-// use conrod::widget::State;
 use conrod::position::rect::Rect;
 
 /// BOARD
@@ -14,21 +11,16 @@ pub struct Board<'a> {
     #[conrod(common_builder)]
     common: widget::CommonBuilder,
     board_state: &'a Gameboard,
-    // old_x: usize
-    // old_y: usize
+	color: Color,
 }
 
 impl<'a> Board<'a> {
-    pub fn new(board_state: &'a Gameboard) -> Self {
+    pub fn new(board_state: &'a Gameboard, color: Color) -> Self {
         Board {
             common: widget::CommonBuilder::default(),
 			board_state: board_state,
+			color,
         }
-    }
-
-    pub fn boxe_is_empty(y: usize, x: usize) -> bool {
-        // if board_state.
-        true
     }
 }
 
@@ -46,7 +38,7 @@ pub struct InfoClick {
 
 impl InfoClick {
     pub fn was_clicked(self) -> Option<(usize, usize)> {
-        if (self.is_click == 0) {
+        if self.is_click == 0 {
             None
         }
         else {
@@ -69,13 +61,13 @@ impl Iterator for InfoClick {
 
 fn get_mouse_event(rect: Rect, board_state: &Gameboard, button_id: conrod::widget::Id, ui: &UiCell) -> (Interaction, u16, usize, usize) {
 	let input = ui.widget_input(button_id);
+
 	let (interaction, x_mouse, y_mouse) = input.mouse().map_or((Interaction::Idle, 0.0, 0.0), |mouse| {
-		let is_pressed = mouse.buttons.left().is_down()
-			|| ui.global_input().current.touch.values()
-			     .any(|t| t.start.widget == Some(button_id));
+		let is_pressed = mouse.buttons.left().is_down();
 		let mouse_abs_xy = mouse.abs_xy();
 		if is_pressed { (Interaction::Press, mouse_abs_xy[0], mouse_abs_xy[1]) } else { (Interaction::Hover, mouse_abs_xy[0], mouse_abs_xy[1]) }
-	});
+		});
+
 	let is_click = (input.clicks().left().count() + input.taps().count()) as u16;
 
 	let (interaction, x, y, is_click) = match get_cell(x_mouse, y_mouse, rect, board_state) {
@@ -132,16 +124,14 @@ impl<'a> Widget for Board<'a> {
 		if interaction == Interaction::Hover {
 			if self.board_state.cells[x][y] == Stone::NOPE {
 				draw_one_stone([x, y],
-				(color::WHITE).with_alpha(0.5),
-				size,
+				(self.color).with_alpha(0.5), size,
 				id, rect, ui, state.cell_index.lines[size * 4 + (x+1) * (y+1)]);
 			}
 		}
 		else if interaction == Interaction::Press {
 			if self.board_state.cells[x][y] == Stone::NOPE {
 				draw_one_stone([x, y],
-				color::WHITE,
-				size,
+				self.color, size,
 				id, rect, ui, state.cell_index.lines[size * 4 + (x+1) * (y+1)]);
 			}
 		}
@@ -175,7 +165,7 @@ pub fn get_cell(x: f64, y: f64, rect: Rect, model: & Gameboard) -> Option<(usize
 fn draw_lines(size: usize, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
 	let x2 = rect.x.start + rect.w();
 	
-	//draw white lines border horizontal
+	//draw white lines_border horizontal
 	for i in 0..size {
 		let y = rect.y.start + i as f64 / (size - 1) as f64 * rect.h();
 		conrod::widget::primitive::line::Line::new([rect.x.start, y - 1.0], [x2, y - 1.0])

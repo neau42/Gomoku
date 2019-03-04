@@ -16,7 +16,8 @@ pub enum Stone {
 pub struct Gameboard {
 	pub size: usize,
     pub cells: [[Stone; SIZE]; SIZE],
-	change_window: bool,
+	pub test_switch: bool,
+
 }
 
 /// Creates a new game board.
@@ -25,8 +26,18 @@ impl Gameboard {
 		Gameboard {
 			size: SIZE,
 			cells: [[Stone::NOPE; SIZE]; SIZE],
-			change_window: false,
+			test_switch: true,
 		}
+	}
+
+	pub fn set_stone_on_cell(&mut self, x: usize, y: usize, stone: Stone) -> bool {
+		if self.cells[x][y] == Stone::NOPE {
+			self.cells[x][y] = stone;
+			true
+		} else {
+			false
+		}
+		
 	}
 }
 
@@ -36,7 +47,6 @@ impl GameViewModel for Gameboard {
     }
 
     fn need_change_window(&self) -> bool {
-        // self.change_window;
 		false
 	}
 }

@@ -76,9 +76,9 @@ impl GameViewController for HomepageController {
         }
     }
 
-	fn check_event(&mut self, _event: &Event, _model: &mut Box<dyn GameViewModel>, _ui: &mut UiCell, _widget_ids: &WidgetIds) {
-		()
-	}
+	// fn check_event(&mut self, _event: &Event, _model: &mut Box<dyn GameViewModel>, _ui: &mut UiCell, _widget_ids: &WidgetIds) {
+	// 	()
+	// }
     
     fn get_type(&self) -> PageType {
         PageType::Homepage
