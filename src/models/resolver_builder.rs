@@ -22,7 +22,7 @@ pub struct GameInfo {
 
 impl GameInfo {
      pub fn new() -> GameInfo {
-        let min_depth = 0.0 as f32;
+        let min_depth = 1.0 as f32;
         let max_depth = 10.0 as f32;
         GameInfo {
             mode_index: Some(0),
