@@ -5,7 +5,7 @@ use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 
 /// Size of game board.
-const SIZE: usize = 19;
+pub const SIZE: usize = 19;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
 pub enum Stone {
@@ -19,6 +19,8 @@ pub enum Stone {
 pub struct Gameboard {
 	pub size: usize,
     pub cells: [[Stone; SIZE]; SIZE],
+	pub white_stone: [[bool; SIZE]; SIZE],
+	pub black_stone: [[bool; SIZE]; SIZE],
     pub upperbound: isize,
     pub lowerbound: isize,
 }
@@ -29,6 +31,10 @@ impl Gameboard {
 		Gameboard {
 			size: SIZE,
 			cells: [[Stone::NOPE; SIZE]; SIZE],
+		
+			white_stone: [[false; SIZE]; SIZE],
+			black_stone: [[false; SIZE]; SIZE],
+
             upperbound: std::isize::MAX,
             lowerbound: std::isize::MIN,
 		}

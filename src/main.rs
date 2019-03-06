@@ -8,6 +8,8 @@ mod utils;
 mod widgets;
 mod traits;
 
+mod minmax_alphabeta;
+
 use controllers::gameplay::*;
 use conrod::*;
 

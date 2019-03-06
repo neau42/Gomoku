@@ -8,6 +8,7 @@ use crate::views::Game::GameView;
 use crate::models::game::Game;
 use crate::models::gameboard::Stone;
 
+// <<<<<<< Updated upstream
 use conrod::*;
 use conrod::UiCell;
 use conrod::widget::id::Id;
@@ -16,6 +17,14 @@ use std::collections::HashMap;
 pub enum GameEvent {
 	Grid()
 }
+// =======
+use crate::minmax_alphabeta;
+
+
+// // pub enum GameEvent {
+// 	// Grid(fn(&mut ))
+// // }
+// >>>>>>> Stashed changes
 
 pub struct GameController {
 	pub view: GameView,
@@ -59,11 +68,23 @@ impl GameViewController for GameController {
 			//puis set
 		}
 
+// <<<<<<< Updated upstream
 		if let Some((y, x)) = player.get_move() {
 			if model.state.set_stone_on_cell(y, x, stone) {
 				model.is_black_turn = !model.is_black_turn;
+					minmax_alphabeta::algo(&mut model.state);
+
 			}
 			player.set_move(None);
+// =======
+// 		match self.view.display_grid(model, ui, widget_ids, color) {
+// 			Some((x, y)) => {
+// 				if model.state.set_stone_on_cell(x, y, stone){
+// 					model.state.test_switch = !model.state.test_switch;
+// 					}
+// 				}
+// 			_ => (),
+// >>>>>>> Stashed changes
 		}
 	}
 

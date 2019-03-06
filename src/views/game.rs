@@ -31,4 +31,5 @@ impl GameView {
 				event(player, Some((y, x)));
 			}
 	}
+
 }
