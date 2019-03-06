@@ -1,4 +1,4 @@
-pub mod resolver_builder;
-pub mod resolver;
+pub mod game_builder;
+pub mod Game;
 pub mod gameboard;
 pub mod window;

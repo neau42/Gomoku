@@ -9,7 +9,7 @@ pub enum GameMode {
     IaVsIa
 }
 
-pub struct GameInfo {
+pub struct GameBuilder {
     pub mode_index: Option<usize>,
     pub game_modes: [String; 3],
     pub first_ia_depth: f32,
@@ -20,11 +20,11 @@ pub struct GameInfo {
     change_window: bool,
 }
 
-impl GameInfo {
-     pub fn new() -> GameInfo {
+impl GameBuilder {
+     pub fn new() -> GameBuilder {
         let min_depth = 1.0 as f32;
         let max_depth = 10.0 as f32;
-        GameInfo {
+        GameBuilder {
             mode_index: Some(0),
             game_modes: [GameMode::PlayerVsPlayer.to_string(), GameMode::PlayerVsIa.to_string(), GameMode::IaVsIa.to_string()],
             first_ia_depth: min_depth,
@@ -57,7 +57,7 @@ impl GameInfo {
     }
 }
 
-impl GameViewModel for GameInfo {
+impl GameViewModel for GameBuilder {
     fn get_model(&mut self) -> &mut dyn Any {
         self
     }

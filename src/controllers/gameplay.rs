@@ -1,12 +1,12 @@
-use crate::controllers::resolver_builder::ResolverBuilderController;
-use crate::models::resolver::Resolver;
-use crate::controllers::resolver::ResolverController;
+use crate::controllers::game_builder::GameBuilderController;
+use crate::models::Game::Game;
+use crate::controllers::Game::GameController;
 use crate::controllers::window::WindowController;
 use crate::traits::view_controller::GameViewController;
 use crate::traits::view_controller::PageType;
 use crate::traits::view_model::*;
 use crate::utils::event_loop::EventLoop as Events;
-use crate::models::resolver_builder::*;
+use crate::models::game_builder::*;
 use crate::WidgetIds;
 
 use conrod::backend::winit::convert_event;
@@ -34,8 +34,8 @@ pub struct GameplayController {
 impl GameplayController {
     pub fn new(width: u32, height: u32, ui: Ui, widget_ids: WidgetIds) -> GameplayController {
         let window_controller = WindowController::new();
-        let page_controller = ResolverBuilderController::new(&widget_ids);
-        let page_model:  Box<dyn GameViewModel> = Box::new(GameInfo::new());
+        let page_controller = GameBuilderController::new(&widget_ids);
+        let page_model:  Box<dyn GameViewModel> = Box::new(GameBuilder::new());
         GameplayController {
             window_controller,
             page_controller,
@@ -87,33 +87,23 @@ impl GameplayController {
                 }
                 if self.is_callback(&event) {
                    self.page_controller = match self.page_controller.get_type() {
-                       PageType::Resolver => {
-						   self.page_model = Box::new(GameInfo::new());
-						   ResolverBuilderController::new(&self.widget_ids)
+                       PageType::Game => {
+						   self.page_model = Box::new(GameBuilder::new());
+						   GameBuilderController::new(&self.widget_ids)
 					   },
                        _ => break 'render,
                    }
                 }
-				// match self.page_controller.get_type() {
-				// 	PageType::Resolver => self.page_controller.check_event(&event, &mut self.page_model, &mut self.ui.set_widgets(), &self.widget_ids),
-				// 	_ => (),
-				// }
             }
             if self.page_model.need_change_window() {
                 self.page_controller = match self.page_controller.get_type() {
-                    PageType::ResolverBuilder => {
-						self.page_model = Box::new(Resolver::new());
-						ResolverController::new(&self.widget_ids)
+                    PageType::GameBuilder => {
+						self.page_model = Box::new(Game::new());
+						GameController::new(&self.widget_ids)
 					},
-                    _ => ResolverBuilderController::new(&self.widget_ids),
+                    _ => GameBuilderController::new(&self.widget_ids),
                 }
             }
-            
-		// match self.page_controller.get_type() {
-		// 	PageType::Resolver => println!("TYPE: Resolver"),
-		// 	PageType::ResolverBuilder => println!("TYPE: ResolverBuilder"),
-		// 	_ => println!("TYPE: other"),
-		// }
             let ui = &mut self.ui.set_widgets();
             self.window_controller.show(ui, &self.widget_ids);
             self.page_controller.show(&mut self.page_model, ui, &self.widget_ids);

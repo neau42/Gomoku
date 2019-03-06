@@ -4,8 +4,8 @@ use conrod::*;
 
 #[derive(PartialEq)]
 pub enum PageType {
-    ResolverBuilder,
-    Resolver,
+    GameBuilder,
+    Game,
 }
 
 pub trait GameViewController {

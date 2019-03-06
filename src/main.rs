@@ -25,7 +25,7 @@ widget_ids! {
         window_canvas,
         window_canvas_y_scrollbar,
         window_canvas_x_scrollbar,
-        resolver_builder_canvas,
+        game_builder_canvas,
         dropdown_button_game_mode,
         toggle_button_weight_boxes,
         number_dialer_first_ia_depth,
