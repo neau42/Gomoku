@@ -28,7 +28,7 @@ impl GameViewController for GameController {
 	fn new(widget_ids: &WidgetIds) -> Box<GameController> {
 		let view = GameView::new();
 		let event = |player: &mut Box<Player>, selected_move: Option<(usize, usize)>| {
-			player.set_move(selected_move);
+			player.set_move();
 		};
 		let controller = GameController {
 			view,
@@ -55,8 +55,9 @@ impl GameViewController for GameController {
 			self.view.display_grid(ui, widget_ids, self.event, &model.state, player, color);
 		}
 		if let Some((y, x)) = player.get_move() {
-			if model.state.set_stone_on_cell(y, x, stone) {
+			if let Some(new_state) = model.state.set_stone_on_cell(y, x, stone) {
 				model.is_black_turn = !model.is_black_turn;
+				model.state = new_state;
 			}
 			player.set_move(None);
 		}

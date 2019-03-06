@@ -27,5 +27,6 @@ impl Player for IA {
 
     fn get_move(&self) -> Option<(usize, usize)> {
         //Call_algo 
+        None
     }
 }
