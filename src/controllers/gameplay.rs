@@ -1,6 +1,6 @@
 use crate::controllers::game_builder::GameBuilderController;
-use crate::models::Game::Game;
-use crate::controllers::Game::GameController;
+use crate::models::game::Game;
+use crate::controllers::game::GameController;
 use crate::controllers::window::WindowController;
 use crate::traits::view_controller::GameViewController;
 use crate::traits::view_controller::PageType;
@@ -98,7 +98,11 @@ impl GameplayController {
             if self.page_model.need_change_window() {
                 self.page_controller = match self.page_controller.get_type() {
                     PageType::GameBuilder => {
-						self.page_model = Box::new(Game::new());
+                        let game_builder: &mut GameBuilder = match self.page_model.get_model().downcast_mut::<GameBuilder>() {
+                            Some(game_builder) => game_builder,
+                            None => panic!("&GameViewModel isn't a GameBuilder!"),
+                        };
+						self.page_model = Box::new(game_builder.build());
 						GameController::new(&self.widget_ids)
 					},
                     _ => GameBuilderController::new(&self.widget_ids),

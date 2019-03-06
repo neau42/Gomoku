@@ -1,22 +1,19 @@
 //! Game board logic.
 use crate::traits::view_model::*;
+use crate::traits::player::*;
 use crate::models::gameboard::*;
 use std::any::Any;
 
 
 pub struct Game {
 	pub state: Gameboard,
-	// pub players: [Box<Player>; 2],
-	// pub is_black_turn: bool,
+	pub black_player: Box<Player>,
+	pub white_player: Box<Player>,
+	pub is_black_turn: bool,
 }
 
 /// Creates a new game board.
 impl Game {
-	pub fn new() -> Game {
-		Game {
-			state: Gameboard::new(),
-		}
-	}
 }
 
 impl GameViewModel for Game {

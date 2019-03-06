@@ -1,17 +1,14 @@
 use crate::traits::view_model::*;
-use std::string::ToString;
+use crate::traits::player::*;
+use crate::models::game::Game;
+use crate::models::ia::*;
+use crate::models::human::*;
+use crate::models::gameboard::*;
 use std::any::Any;
 
-#[derive(PartialEq, Clone, Copy, IntoStaticStr, EnumIter, ToString)]
-pub enum GameMode {
-    PlayerVsPlayer,
-    PlayerVsIa,
-    IaVsIa
-}
-
 pub struct GameBuilder {
-    pub mode_index: Option<usize>,
-    pub game_modes: [String; 3],
+    pub mode_index: usize,
+    pub game_modes: [&'static str; 3],
     pub first_ia_depth: f32,
     pub second_ia_depth: f32,
     pub min_depth: f32,
@@ -25,8 +22,8 @@ impl GameBuilder {
         let min_depth = 1.0 as f32;
         let max_depth = 10.0 as f32;
         GameBuilder {
-            mode_index: Some(0),
-            game_modes: [GameMode::PlayerVsPlayer.to_string(), GameMode::PlayerVsIa.to_string(), GameMode::IaVsIa.to_string()],
+            mode_index: 0,
+            game_modes: ["Player vs Player", "Player vs Ia", "Ia vs Ia"],
             first_ia_depth: min_depth,
             second_ia_depth: min_depth,
             min_depth,
@@ -36,7 +33,7 @@ impl GameBuilder {
         }
     }
 
-    pub fn set_mode(&mut self, mode_index: Option<usize>) {
+    pub fn set_mode(&mut self, mode_index: usize) {
         self.mode_index = mode_index;
     }
 
@@ -54,6 +51,23 @@ impl GameBuilder {
 
     pub fn change_window(&mut self) {
         self.change_window = true;
+    }
+
+    pub fn build(&self) -> Game {
+        let black_player: Box<Player> =  match self.mode_index {
+            0 | 1 => Box::new(Human::new()),
+            _ => Box::new(IA::new(self.first_ia_depth as u8)),
+        };
+        let white_player: Box<Player> =  match self.mode_index {
+            0 => Box::new(Human::new()),
+            _ => Box::new(IA::new(self.second_ia_depth as u8)),
+        };
+        Game {
+            state: Gameboard::new(),
+            black_player,
+            white_player,
+            is_black_turn: true,
+        }
     }
 }
 

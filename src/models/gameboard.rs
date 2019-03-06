@@ -21,7 +21,6 @@ pub struct Gameboard {
     pub cells: [[Stone; SIZE]; SIZE],
     pub upperbound: isize,
     pub lowerbound: isize,
-	pub test_switch: bool,
 }
 
 /// Creates a new game board.
@@ -32,11 +31,10 @@ impl Gameboard {
 			cells: [[Stone::NOPE; SIZE]; SIZE],
             upperbound: std::isize::MAX,
             lowerbound: std::isize::MIN,
-			test_switch: true,
 		}
 	}
 
-	pub fn set_stone_on_cell(&mut self, x: usize, y: usize, stone: Stone) -> bool {
+	pub fn set_stone_on_cell(&mut self, y: usize, x: usize, stone: Stone) -> bool {
 		if self.cells[x][y] == Stone::NOPE {
 			self.cells[x][y] = stone;
 			true
@@ -55,7 +53,7 @@ impl Gameboard {
     }
 
     pub fn eval(&self) -> isize {
-        10
+        0
     }
 
     pub fn expand(&self) -> Vec<Gameboard> {
@@ -103,7 +101,7 @@ impl Gameboard {
         return current;
     }
 
-pub fn mdtf(&mut self, all_state: HashSet<Gameboard>, mut g: isize, depth: usize) -> isize { //On utilise donc en général comme valeur de f la valeur retourné par l’algorithme lors d’une itération précédente
+    pub fn mdtf(&mut self, all_state: HashSet<Gameboard>, mut g: isize, depth: usize) -> isize { //On utilise donc en général comme valeur de f la valeur retourné par l’algorithme lors d’une itération précédente
         let mut upperbound = std::isize::MAX;
         let mut lowerbound = std::isize::MIN;
 

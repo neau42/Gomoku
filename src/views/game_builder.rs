@@ -42,9 +42,7 @@ impl GameBuilderView {
     }
 
     pub fn display_dropdown_button_game_mode(&self, ui: &mut UiCell, widget_ids: &WidgetIds, event: &GameBuilderEvent, model: &mut GameBuilder) {
-        let game_modes: [&str; 3] = [GameMode::PlayerVsPlayer.into(), GameMode::PlayerVsIa.into(), GameMode::IaVsIa.into()];
-
-        for mode_index in widget::DropDownList::new(&game_modes, model.mode_index)
+        for mode_index in widget::DropDownList::new(&model.game_modes, Some(model.mode_index))
             .w_of(widget_ids.game_builder_canvas)
             .h(75.0)
             .middle_of(widget_ids.game_builder_canvas)
@@ -56,7 +54,7 @@ impl GameBuilderView {
             .set(widget_ids.dropdown_button_game_mode, ui)
         {
             if let GameBuilderEvent::DropdownButtonGameMode(event) = event {
-                event(model, Some(mode_index));
+                event(model, mode_index);
             }
         }
     }

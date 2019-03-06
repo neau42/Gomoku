@@ -11,7 +11,7 @@ use conrod::widget::id::Id;
 
 
 pub enum GameBuilderEvent {
-    DropdownButtonGameMode(fn(&mut GameBuilder, Option<usize>)),
+    DropdownButtonGameMode(fn(&mut GameBuilder, usize)),
     ToggleButtonWeightBoxes(fn(&mut GameBuilder, bool)),
     NumberDialerFirstIaDepth(fn(&mut GameBuilder, f32)),
     NumberDialerSecondIaDepth(fn(&mut GameBuilder, f32)),
@@ -25,7 +25,7 @@ pub struct GameBuilderController {
 
 impl GameBuilderController {
     fn set_events(&mut self, widget_ids: &WidgetIds) {
-        self.events.insert(widget_ids.dropdown_button_game_mode, GameBuilderEvent::DropdownButtonGameMode(|model: &mut GameBuilder, mode_index: Option<usize>| {
+        self.events.insert(widget_ids.dropdown_button_game_mode, GameBuilderEvent::DropdownButtonGameMode(|model: &mut GameBuilder, mode_index: usize| {
             model.set_mode(mode_index) ;
         }));
 
@@ -67,10 +67,10 @@ impl GameViewController for GameBuilderController {
         self.view.display_button_start(ui, widget_ids, self.events.get(&widget_ids.button_start).unwrap(), model);
         self.view.display_dropdown_button_game_mode(ui, widget_ids, self.events.get(&widget_ids.dropdown_button_game_mode).unwrap(), model); 
         self.view.display_toggle_button(ui, widget_ids, self.events.get(&widget_ids.toggle_button_weight_boxes).unwrap(), model);
-        if model.mode_index != Some(0) {
+        if model.mode_index != 0 {
             self.view.display_number_dialer_first_ia_depth(ui, widget_ids, self.events.get(&widget_ids.number_dialer_first_ia_depth).unwrap(), model);
         }
-        if model.mode_index == Some(2) {
+        if model.mode_index == 2 {
             self.view.display_number_dialer_second_ia_depth(ui, widget_ids, self.events.get(&widget_ids.number_dialer_second_ia_depth).unwrap(), model);
         }
     }

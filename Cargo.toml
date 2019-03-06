@@ -5,8 +5,6 @@ authors = ["pacifistes <bbrunell@student.42.fr>"]
 edition = "2018"
 
 [dependencies]
-strum = "0.13.0"
-strum_macros = "0.13.0"
 image = "0.21"
 piston_window = "0.89.0"
 find_folder = "0.3.0"
