@@ -54,11 +54,6 @@ impl GameViewController for GameController {
 		if player.get_type() == PlayerType::Human {
 			self.view.display_grid(ui, widget_ids, self.event, &model.state, player, color);
 		}
-		else {
-			//Call ia function
-			//puis set
-		}
-
 		if let Some((y, x)) = player.get_move() {
 			if model.state.set_stone_on_cell(y, x, stone) {
 				model.is_black_turn = !model.is_black_turn;
