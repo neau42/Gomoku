@@ -48,13 +48,14 @@ impl GameViewController for GameController {
 		let stone = model.current_stone.clone();
 		if let Some(new_state) = match model.get_current_player().get_type() {
 			PlayerType::Human => {
-				self.view.display_grid(ui, widget_ids, self.event, model, stone);
+				self.view.display_grid(ui, widget_ids, self.event, model, stone, true);
 				model.get_current_player().get_move()
 				// None//TMP
 			},
 			_ => {
+				self.view.display_grid(ui, widget_ids, self.event, model, stone, false);
 				println!("je passe");
-				let (_, selected_move) = model.mdtf(0, 4);
+				let (_, selected_move) = model.mdtf(0, 1);
 				println!("j'ai fini");
 				// dbg!(&selected_move);
 				selected_move

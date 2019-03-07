@@ -56,8 +56,8 @@ impl Gameboard {
 
     pub fn expand(&self, stone: Stone) -> Vec<Gameboard> {
         let range: Vec<usize> = (0..SIZE as usize).collect();
-        let vector: Vec<Gameboard>= range.iter().enumerate().map(|(y, x)| self.set_stone_on_cell(y, *x, stone)).filter_map(|state| state).collect();
-        println!("len = {}", vector.len());
+        let vector: Vec<Gameboard>= range.iter().map(|y| range.iter().map(|x| self.set_stone_on_cell(*y, *x, stone)).filter_map(|state| state).collect()).collect::<Vec<Vec<Gameboard>>>().concat();
+        // println!("len = {}", vector.len());
         vector
     }
 }
