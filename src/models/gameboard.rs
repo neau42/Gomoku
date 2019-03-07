@@ -1,6 +1,3 @@
-use std::collections::HashSet;
-use std::cmp::min;
-use std::cmp::max;
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 
@@ -15,7 +12,7 @@ pub enum Stone {
 }
 
 /// Stores game board information.
-#[derive(Debug, Eq, Clone)]
+#[derive(Debug, Eq, Clone, Copy)]
 pub struct Gameboard {
 	pub size: usize,
     pub cells: [[Stone; SIZE]; SIZE],
@@ -50,76 +47,18 @@ impl Gameboard {
 
     //Check si avec cette etats : On a le bon nombre d'element aligner ou de capture
     pub fn is_finish_state(&self) -> bool {
-        true
+        false
     }
 
     pub fn eval(&self) -> isize {
         0
     }
 
-    pub fn expand(&self) -> Vec<Gameboard> {
-        Vec::new()
-    }
-
-    pub fn alpha_beta_with_memory(&mut self, all_state: &HashSet<Gameboard>, depth: usize, mut alpha: isize, mut beta: isize) -> isize {
-        if all_state.contains(self) {
-            if self.lowerbound >= beta {
-                return self.lowerbound;
-            }
-            if self.upperbound <= alpha {
-                return self.upperbound;
-            }
-            alpha = max(alpha, self.lowerbound);
-            beta = min(beta, self.upperbound);
-        }
-        if self.is_finish_state() || depth <= 0 {
-            return /*winning score or*/ self.eval();
-        }
-        // move bestmove ;
-        let mut current = std::isize::MIN;
-        //for (each possible move m
-        for mut new_state in self.expand() {
-            // make move m;
-            let score = - new_state.alpha_beta_with_memory(all_state, depth - 1, -beta, -alpha); 
-            // unmake move m;
-            if score >= current {
-                current = score;
-                // bestmove = m;
-                if score >= alpha {
-                    alpha = score;
-                    if score >= beta {
-                        break;
-                    }
-                }
-            }
-        }
-        if current <= alpha {
-            self.upperbound = current;
-        }
-        if current >= beta {
-            self.lowerbound = current;
-        }
-        return current;
-    }
-
-    pub fn mdtf(&mut self, all_state: HashSet<Gameboard>, mut g: isize, depth: usize) -> isize { //On utilise donc en général comme valeur de f la valeur retourné par l’algorithme lors d’une itération précédente
-        let mut upperbound = std::isize::MAX;
-        let mut lowerbound = std::isize::MIN;
-
-        while lowerbound != upperbound {
-            let beta: isize = match lowerbound {
-                g => g + 1,
-                _ => g,
-            };
-            g = self.alpha_beta_with_memory(&all_state, depth, beta - 1, beta);
-            if g < beta {
-                upperbound = g;
-            }
-            else {
-                lowerbound = g;
-            }
-        }
-        g
+    pub fn expand(&self, stone: Stone) -> Vec<Gameboard> {
+        let range: Vec<usize> = (0..SIZE as usize).collect();
+        let vector: Vec<Gameboard>= range.iter().enumerate().map(|(y, x)| self.set_stone_on_cell(y, *x, stone)).filter_map(|state| state).collect();
+        println!("len = {}", vector.len());
+        vector
     }
 }
 

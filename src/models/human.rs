@@ -1,7 +1,8 @@
 use crate::traits::player::*;
+use crate::models::gameboard::Gameboard;
 
 pub struct Human {
-    selected_move: Option<(usize, usize)>,
+    selected_move: Option<Gameboard>,
 }
 
 impl Human {
@@ -21,11 +22,11 @@ impl Player for Human {
         PlayerType::Human
     }
 
-    fn set_move(&mut self, selected_move: Option<(usize, usize)>) {
+    fn set_move(&mut self, selected_move: Option<Gameboard>) {
         self.selected_move = selected_move;
     }
 
-    fn get_move(&self) -> Option<(usize, usize)> {
+    fn get_move(&self) -> Option<Gameboard> {
         self.selected_move
     }
 }

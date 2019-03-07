@@ -62,12 +62,7 @@ impl GameBuilder {
             0 => Box::new(Human::new()),
             _ => Box::new(IA::new(self.second_ia_depth as u8)),
         };
-        Game {
-            state: Gameboard::new(),
-            black_player,
-            white_player,
-            is_black_turn: true,
-        }
+        Game::new(black_player, white_player)
     }
 }
 
