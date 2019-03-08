@@ -27,12 +27,12 @@ impl EventLoop {
 
         let mut events = vec![];
         events_loop.poll_events(|event| events.push(event));
-        if events.is_empty() && !self.ui_needs_update {
-            events_loop.run_forever(|event| {
-                events.push(event);
-                glutin::ControlFlow::Break
-            });
-        }
+        // if events.is_empty() && !self.ui_needs_update {
+        //     events_loop.run_forever(|event| {
+        //         events.push(event);
+        //         glutin::ControlFlow::Break
+        //     });
+        // }
 
         self.ui_needs_update = false;
         self.last_update = Instant::now();

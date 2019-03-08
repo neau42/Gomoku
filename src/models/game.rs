@@ -43,7 +43,7 @@ impl Game {
             return /*winning score or*/ (state.eval(), Some(state.clone()));
         }
         // move bestmove ;
-        let mut current = std::isize::MIN;
+        let mut current = isize::from(std::i16::MIN);
         //for (each possible move m
         for mut new_state in state.expand(self.current_stone) {
             // make move m;
@@ -71,8 +71,8 @@ impl Game {
     }
 
     pub fn mdtf(&mut self, mut g: isize, depth: usize) -> (isize, Option<Gameboard>) { //On utilise donc en général comme valeur de g la valeur retourné par l’algorithme lors d’une itération précédente
-        let mut upperbound = std::isize::MAX;
-        let mut lowerbound = std::isize::MIN;
+        let mut upperbound = isize::from(std::i16::MAX);
+        let mut lowerbound = isize::from(std::i16::MIN);
 		let mut bestmove: Option<Gameboard> = None;
         while lowerbound != upperbound {
             let beta: isize = match lowerbound {

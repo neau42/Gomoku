@@ -54,9 +54,9 @@ impl GameViewController for GameController {
 			},
 			_ => {
 				self.view.display_grid(ui, widget_ids, self.event, model, stone, false);
-				println!("je passe");
+				// println!("je passe");
 				let (_, selected_move) = model.mdtf(0, 1);
-				println!("j'ai fini");
+				// println!("j'ai fini");
 				// dbg!(&selected_move);
 				selected_move
 			},

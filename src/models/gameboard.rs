@@ -26,8 +26,8 @@ impl Gameboard {
 		Gameboard {
 			size: SIZE,
 			cells: [[Stone::NOPE; SIZE]; SIZE],
-            upperbound: std::isize::MAX,
-            lowerbound: std::isize::MIN,
+            upperbound: isize::from(std::i16::MAX),
+            lowerbound: isize::from(std::i16::MIN),
 		}
 	}
 
