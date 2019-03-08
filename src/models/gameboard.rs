@@ -46,10 +46,10 @@ impl Gameboard {
     pub fn check_capture(&self, y: usize, x: usize, actual_stone: Stone) -> bool {
         let directions: [(isize, isize); 8] = [(0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1,0), (-1,1)];
 
-        directions.iter().any(|(x, y)| {
+        directions.iter().any(|(tmp_x, tmp_y)| {
             (1..3 as isize).all(|i| {
-                let tmp_x = *x  * i;
-                let tmp_y = *y * i;
+                let tmp_x = *tmp_x  * i + x as isize;
+                let tmp_y = *tmp_y * i + y as isize;
                 if tmp_x < 0 || tmp_y < 0 {
                     return false;
                 }
