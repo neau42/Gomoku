@@ -71,6 +71,7 @@ impl Gameboard {
     }
 
     pub fn eval(&self) -> isize {
+        0
     }
 
     pub fn expand(&self, stone: Stone) -> Vec<Gameboard> {
