@@ -30,7 +30,9 @@ impl Gameboard {
             lowerbound: isize::from(std::i16::MIN),
 		}
 	}
+}
 
+impl Gameboard {
     pub fn set_stone_on_cell(&self, y: usize, x: usize, stone: Stone) -> Option<Gameboard> {
 		if self.cells[x][y] == Stone::NOPE {
             let mut new_state = self.clone();
@@ -40,8 +42,26 @@ impl Gameboard {
 			None
 		}
 	}
-}
 
+    pub fn check_capture(&self, y: usize, x: usize, actual_stone: Stone) -> bool {
+        let directions: [(isize, isize); 8] = [(0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1,0), (-1,1)];
+
+        directions.iter().any(|(x, y)| {
+            (1..3 as isize).all(|i| {
+                let tmp_x = *x  * i;
+                let tmp_y = *y * i;
+                if tmp_x < 0 || tmp_y < 0 {
+                    return false;
+                }
+                let tmp_stone = self.cells[tmp_x as usize][tmp_y as usize];
+                match i {
+                    1 | 2 => tmp_stone != actual_stone && tmp_stone != Stone::NOPE,
+                    _ => tmp_stone == actual_stone,
+                }
+            })
+        })
+	}
+}
 
 impl Gameboard {
 
@@ -51,7 +71,6 @@ impl Gameboard {
     }
 
     pub fn eval(&self) -> isize {
-        0
     }
 
     pub fn expand(&self, stone: Stone) -> Vec<Gameboard> {
