@@ -50,7 +50,7 @@ impl Gameboard {
             (1..3 as isize).all(|i| {
                 let tmp_x = *tmp_x  * i + x as isize;
                 let tmp_y = *tmp_y * i + y as isize;
-                if tmp_x < 0 || tmp_y < 0 {
+                if tmp_x < 0 || tmp_x >= self.size as isize || tmp_y < 0 || tmp_y >= self.size as isize {// ou superieur a size
                     return false;
                 }
                 let tmp_stone = self.cells[tmp_x as usize][tmp_y as usize];
