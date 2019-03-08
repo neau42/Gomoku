@@ -8,6 +8,8 @@ mod utils;
 mod widgets;
 mod traits;
 
+extern crate rand;
+
 mod minmax_alphabeta;
 
 use controllers::gameplay::*;

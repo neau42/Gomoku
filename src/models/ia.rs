@@ -1,4 +1,5 @@
 use crate::traits::player::*;
+use crate::models::gameboard::Gameboard;
 
 pub struct IA {
     depth: u8,
@@ -27,5 +28,6 @@ impl Player for IA {
 
     fn get_move(&self) -> Option<(usize, usize)> {
         //Call_algo 
+        None
     }
 }

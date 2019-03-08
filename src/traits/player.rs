@@ -1,3 +1,5 @@
+use crate::models::gameboard::Gameboard;
+
 #[derive(PartialEq)]
 pub enum PlayerType {
     Human,

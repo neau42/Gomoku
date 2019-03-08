@@ -57,10 +57,12 @@ impl GameViewController for GameController {
 			self.view.display_grid(ui, widget_ids, self.event, &model.state, player, color);
 		}
 		if let Some((y, x)) = player.get_move() {
-			if model.state.set_stone_on_cell(y, x, stone) {
-				model.is_black_turn = !model.is_black_turn;
-					minmax_alphabeta::algo(&mut model.state);
+			println!("get_move on cell: x:{} y:{}", x, y);
 
+			if let Some(new_state) = model.state.set_stone_on_cell(y, x, stone) {
+				model.is_black_turn = !model.is_black_turn;
+				model.state = new_state;
+				minmax_alphabeta::algo(&mut model.state);
 			}
 			player.set_move(None);
 		}

@@ -15,7 +15,7 @@ pub enum Stone {
 }
 
 /// Stores game board information.
-#[derive(Debug, Eq)]
+#[derive(Debug, Eq, Clone)]
 pub struct Gameboard {
 	pub size: usize,
     pub cells: [[Stone; SIZE]; SIZE],
@@ -40,12 +40,15 @@ impl Gameboard {
 		}
 	}
 
-	pub fn set_stone_on_cell(&mut self, y: usize, x: usize, stone: Stone) -> bool {
+    pub fn set_stone_on_cell(&self, y: usize, x: usize, stone: Stone) -> Option<Gameboard> {
+			println!("set_stone_on_cell: x:{} y:{}", x, y);
+
 		if self.cells[x][y] == Stone::NOPE {
-			self.cells[x][y] = stone;
-			true
+            let mut new_state = self.clone();
+			new_state.cells[x][y] = stone;
+            Some(new_state)
 		} else {
-			false
+			None
 		}
 	}
 }

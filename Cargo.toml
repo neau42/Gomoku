@@ -11,6 +11,7 @@ find_folder = "0.3.0"
 piston2d-opengl_graphics = "0.59.0"
 conrod = { version = "0.61.1", features = ["glium", "winit"] }
 conrod_derive = "0.63.0"
+rand = "0.6.5"
 
 [[bin]]
 name = "gomoku"

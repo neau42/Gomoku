@@ -1,4 +1,5 @@
 use crate::traits::player::*;
+use crate::models::gameboard::Gameboard;
 
 pub struct Human {
     selected_move: Option<(usize, usize)>,
