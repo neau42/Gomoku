@@ -4,6 +4,8 @@ use crate::traits::player::Player;
 use crate::models::gameboard::Gameboard;
 use crate::widgets::gameboard as CustomWidget;
 use crate::WidgetIds;
+use crate::models::gameboard::Stone;
+use crate::models::game::Game;
 use conrod::*;
 
 pub struct GameView {
@@ -21,14 +23,16 @@ impl GameView {
 		}
 	}
 
-	pub fn display_grid(&self, ui: &mut UiCell, widget_ids: &WidgetIds, event: fn(&mut Box<Player>, Option<(usize, usize)>), state: &Gameboard, player: &mut Box<dyn Player>, color: Color) {
-		if let Some((y, x)) = CustomWidget::Board::new(state, color)
+	pub fn display_grid(&self, ui: &mut UiCell, widget_ids: &WidgetIds, event: fn(&Gameboard, &mut Box<Player>, Option<(usize, usize)>, Stone), model: &mut Game, stone: Stone, do_event: bool) {
+		if let Some((y, x)) = CustomWidget::Board::new(&model.state, stone)
 			.middle_of(widget_ids.window_canvas)
 			.down_from(widget_ids.title, 15.0)
 			.w_h(self.size, self.size)
 			.set(widget_ids.grid, ui)
 			.was_clicked() {
-				event(player, Some((y, x)));
+				if (do_event) {
+					event(&model.state.clone(), model.get_current_player(), Some((y, x)), stone);
+				}
 			}
 	}
 

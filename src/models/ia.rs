@@ -7,7 +7,7 @@ pub struct IA {
 
 impl IA {
     pub fn new(depth: u8) -> IA {
-        println!("depth: {}", depth);
+        // println!("depth: {}", depth);
         IA {
             depth,
         }
@@ -23,10 +23,10 @@ impl Player for IA {
         PlayerType::Ia
     }
 
-    fn set_move(&mut self, selected_move: Option<(usize, usize)>) {
+    fn set_move(&mut self, selected_move: Option<Gameboard>) {
     }
 
-    fn get_move(&self) -> Option<(usize, usize)> {
+    fn get_move(&self) -> Option<Gameboard> {
         //Call_algo 
         None
     }

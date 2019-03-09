@@ -3,21 +3,23 @@ use crate::models::gameboard::{Gameboard, Stone, SIZE};
 use rand::Rng;
 // const SIZE: usize = 19;
 
-pub fn algo(gameboard: &mut Gameboard) {
-	let alpha = std::isize::MAX;
-	let beta = std::isize::MIN;
+pub fn algo(gameboard: &mut Gameboard, current_stone: Stone) -> (isize, Option<Gameboard>) {
+	let alpha = std::isize::MIN;
+	let beta = std::isize::MAX;
 
-	for y in 0..SIZE {
-		for x in 0..SIZE {
-			match gameboard.cells[x][y] {
-				Stone::WHITE => gameboard.white_stone[x][y] = true,
-				Stone::BLACK => gameboard.black_stone[x][y] = true,
-				_ => (),
-			}
-		}
-	}
+	// let mut white_stone: [[bool; SIZE]; SIZE] = [[false; SIZE]; SIZE];
+	// let mut black_stone: [[bool; SIZE]; SIZE] = [[false; SIZE]; SIZE];
+	// for y in 0..SIZE {
+	// 	for x in 0..SIZE {
+	// 		match gameboard.cells[x][y] {
+	// 			Stone::WHITE => white_stone[x][y] = true,
+	// 			Stone::BLACK => black_stone[x][y] = true,
+	// 			_ => (),
+	// 		}
+	// 	}
+	// }
 	printboard(&gameboard);
-	alphabeta(gameboard,1 ,std::isize::MIN + 1, std::isize::MAX, true);
+	alphabeta(gameboard, 3, alpha + 1, beta, true, current_stone)
 }
 
 
@@ -37,111 +39,100 @@ pub fn printboard(gameboard: & Gameboard) {
 
 
 
-pub fn eval_border(cells: [[Stone; SIZE]; SIZE], x: usize, y: usize, black_turn: bool) -> isize {
+pub fn eval_around(cells: [[Stone; SIZE]; SIZE], x: isize, y: isize, stone: Stone) -> Option<isize> {
+	if cells[x as usize][y as usize] == Stone::NOPE { return None;}
+	// println!("eval_around: x{}, y{} => {:?}", x, y, cells[x as usize][y as usize]);
 	let mut cmpt = 0;
-	let stone_ref;
 	let other_stone;
+	let around: [(isize, isize); 8] = [(x,y+1),
+		(x+1, y+1),
+		(x+1, y),
+		(x+1, y -1),
+		(x, y -1),
+		(x-1, y-1),
+		(x-1, y),
+		(x-1, y+1)];
 
-	if black_turn == true {
-		stone_ref = Stone::BLACK;
-		other_stone = Stone::WHITE;
+	if stone == Stone::BLACK {
+		 other_stone = Stone::WHITE;
 	} else {
-		stone_ref = Stone::WHITE;
-		other_stone = Stone::BLACK;
-
-	};
-	if cells[x][y] == stone_ref {
-		if x > 0 && y > 0 && x < SIZE - 1 && y < SIZE - 1 {
-			if cells[x - 1][y - 1] == stone_ref { cmpt += 2;}
-			if cells[x][y - 1] == stone_ref { cmpt += 2;}
-			if cells[x - 1][y] == stone_ref { cmpt += 2;}
-			if cells[x + 1][y + 1] == stone_ref { cmpt += 2;}
-			if cells[x][y + 1] == stone_ref { cmpt += 2;}
-			if cells[x + 1][y] == stone_ref { cmpt += 2;}
-			
-			if cells[x - 1][y - 1] == other_stone { cmpt += 2;}
-			if cells[x][y - 1] == other_stone { cmpt += 2;}
-			if cells[x - 1][y] == other_stone { cmpt += 2;}
-			if cells[x + 1][y + 1] == other_stone { cmpt += 2;}
-			if cells[x][y + 1] == other_stone { cmpt += 2;}
-			if cells[x + 1][y] == other_stone { cmpt += 2;}
-		}
+		 other_stone = Stone::BLACK;
 	}
-	// if cmpt > 0 {
-	// 	println!("+1 for x:{} y:{}", x, y);
-	// }
-		cmpt
+	for (x, y) in around.iter().filter(|(x, y)| *x >= 0 && *y >= 0 && *x < 19 && *y < 19) {
+				if cells[*x as usize][*y as usize] == stone {
+					cmpt = (3 + cmpt);
+				} else if cells[*x as usize][*y as usize] == other_stone {
+					cmpt = (1 + cmpt);
+				}
+	}
+	Some(cmpt)
 }
 
+pub fn eval(gameboard: & Gameboard, stone: Stone) -> isize {
+	let range:Vec<usize> = (0..SIZE as usize).collect();
 
-pub fn eval(gameboard: & Gameboard, black_turn: bool) -> isize {
-	let mut cmpt = 0;
+	let cmpt = range
+		.iter()
+		.flat_map(|y| range
+			.iter()
+			.map(move |x| eval_around(gameboard.cells, *x as isize, *y as isize, stone) )
+			.filter_map(|valid| valid))
+		.sum();
 
-	// println!("before eval, blackturn? {}", black_turn);
+	// for y in 0..SIZE {
+	// 	for x in 0..SIZE {
+	// 		if gameboard.cells[x][y] != Stone::NOPE {
+	// 			cmpt += eval_around(gameboard.cells, x as isize, y as isize, stone).unwrap();
+	// 		}
+	// 	}
+	// }
 
-	for y in 0..SIZE {
-		for x in 0..SIZE {
-			cmpt += eval_border(gameboard.cells, x, y, !black_turn);
-		}
-	}
-	// println!("EVAL: {}", cmpt);
 	cmpt
 }
 
-pub fn alphabeta(gameboard: & Gameboard, depth: i32, mut alpha: isize, mut beta: isize, black_turn: bool) -> (isize, Option<Gameboard>) {
-	// println!("alphabeta: ALPHA:{}, BETA:{}", alpha, beta);
+pub fn alphabeta(gameboard: & Gameboard, depth: i32, mut alpha: isize, mut beta: isize, noeud_max: bool, stone: Stone) -> (isize, Option<Gameboard>) {
+	
 
 	let mut new_board = gameboard.clone();
 
+
 	// if (game over or depth <= 0)
 	if depth <= 0 {
-	return (eval(gameboard, black_turn), None);
+	return (eval(gameboard, stone), None);
 	}
-	let mut best_board;
+	let mut best_board = gameboard.clone();
 
-	if black_turn == true {
-		for y in 0..SIZE {
-			for x in 0..SIZE {
-				if gameboard.cells[x][y] == Stone::NOPE {
-					new_board = gameboard.clone();
-					new_board.cells[x][y] = Stone::BLACK;
-					let (score, _) = alphabeta(&new_board, depth - 1, alpha, beta, false);
-					if score > alpha {
-						alpha = score;
-						best_board = new_board.clone();
-							println!("0000 best board");
-							printboard(&best_board);
-						if alpha >= beta {
-							break ;
-						}
-					}
+	if noeud_max == true {
+		for new_board in gameboard.expand(stone) {
+			let (score, _) = alphabeta(&new_board, depth - 1, alpha, beta, false, stone);
+			if score > alpha {
+				alpha = score;
+				best_board = new_board.clone();
+				if alpha >= beta {
+					break ;
 				}
 			}
 		}
+	(alpha, Some(best_board))
 	}
 	else {
-		for y in 0..SIZE {
-			for x in 0..SIZE {
-				if gameboard.cells[x][y] == Stone::NOPE {
-					new_board = gameboard.clone();
-					new_board.cells[x][y] = Stone::WHITE;
-					let (score, _) = alphabeta(&new_board, depth - 1, alpha, beta, true);
-					if score < beta {
-						beta = score;
-						best_board = new_board.clone();
-							println!("1111 best board:");
-							printboard(&best_board);
-
-						if alpha >= beta {
-							break ;
-						}
-					}
+		for new_board in gameboard.expand(stone) {
+			let (score, _) = alphabeta(&new_board, depth - 1, alpha, beta, true, stone);
+			if score < beta {
+				beta = score;
+				best_board = new_board.clone();
+				if alpha >= beta {
+					break ;
 				}
 			}
 		}
+	(beta, Some(best_board))
 
 	}
-	(alpha, Some(new_board))
+	// println!("best board:");
+
+	// printboard(&best_board);
+
 }
 //    for (each possible move m) {
 //       make move m;

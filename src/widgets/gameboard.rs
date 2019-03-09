@@ -15,7 +15,11 @@ pub struct Board<'a> {
 }
 
 impl<'a> Board<'a> {
-    pub fn new(board_state: &'a Gameboard, color: Color) -> Self {
+    pub fn new(board_state: &'a Gameboard, stone: Stone) -> Self {
+		let color = match stone {
+			Stone::BLACK => color::BLACK,
+			_ => color::WHITE
+		};
         Board {
             common: widget::CommonBuilder::default(),
 			board_state: board_state,

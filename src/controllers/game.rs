@@ -6,7 +6,7 @@ use crate::traits::view_model::GameViewModel;
 use crate::traits::player::*;
 use crate::views::Game::GameView;
 use crate::models::game::Game;
-use crate::models::gameboard::Stone;
+use crate::models::gameboard::*;
 
 use conrod::*;
 use conrod::UiCell;
@@ -21,7 +21,7 @@ pub enum GameEvent {
 
 pub struct GameController {
 	pub view: GameView,
-	event: fn(&mut Box<Player>, Option<(usize, usize)>),
+	event: fn(&Gameboard, &mut Box<Player>, Option<(usize, usize)>, Stone),
 }
 
 
@@ -29,8 +29,9 @@ pub struct GameController {
 impl GameViewController for GameController {
 	fn new(widget_ids: &WidgetIds) -> Box<GameController> {
 		let view = GameView::new();
-		let event = |player: &mut Box<Player>, selected_move: Option<(usize, usize)>| {
-			player.set_move(selected_move);
+		let event = |state: &Gameboard, player: &mut Box<Player>, selected_move: Option<(usize, usize)>, stone: Stone| {
+			let (y, x) = selected_move.unwrap();
+			player.set_move(state.set_stone_on_cell(y, x, stone));
 		};
 		let controller = GameController {
 			view,
@@ -46,26 +47,31 @@ impl GameViewController for GameController {
 			None => panic!("&GameViewModel isn't a Game!"),
 		};
 
-		let (color, stone, player) = if model.is_black_turn {
-			(color::WHITE, Stone::WHITE, &mut model.white_player)
-		}
-		else {
-			(color::BLACK, Stone::BLACK, &mut model.black_player)
-		};
+		let stone = model.current_stone.clone();
+		if let Some(new_state) = match model.get_current_player().get_type() {
+			PlayerType::Human => {
+				self.view.display_grid(ui, widget_ids, self.event, model, stone, true);
+				model.get_current_player().get_move()
+				// None//TMP
+			},
+			_ => {
+				self.view.display_grid(ui, widget_ids, self.event, model, stone, false);
+				// println!("je passe");
+				let (_, selected_move) = minmax_alphabeta::algo(&mut model.state, model.current_stone);
 
-		if player.get_type() == PlayerType::Human {
-			self.view.display_grid(ui, widget_ids, self.event, &model.state, player, color);
-		}
-		if let Some((y, x)) = player.get_move() {
-			println!("get_move on cell: x:{} y:{}", x, y);
-
-			if let Some(new_state) = model.state.set_stone_on_cell(y, x, stone) {
-				model.is_black_turn = !model.is_black_turn;
-				model.state = new_state;
-				minmax_alphabeta::algo(&mut model.state);
+				// let (_, selected_move) = model.mdtf(0, 1);
+				// println!("j'ai fini");
+				// dbg!(&selected_move);
+				selected_move
+			},
+		} {
+			model.state = new_state;
+			model.current_stone = match model.current_stone {
+				Stone::BLACK => Stone::WHITE,
+				_ => Stone::BLACK,
 			}
-			player.set_move(None);
 		}
+		model.get_current_player().set_move(None);
 	}
 
     fn get_type(&self) -> PageType {
