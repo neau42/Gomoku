@@ -18,8 +18,14 @@ pub fn algo(gameboard: &mut Gameboard, current_stone: Stone) -> (isize, Option<G
 	// 		}
 	// 	}
 	// }
+	let next_stone: Stone;
+	if current_stone == Stone::BLACK {
+		next_stone = Stone::WHITE;
+	} else {
+		next_stone = Stone::BLACK;
+	}
 	printboard(&gameboard);
-	alphabeta(gameboard, 3, alpha + 1, beta, true, current_stone)
+	alphabeta(gameboard, 1, alpha + 1, beta, true, current_stone, next_stone)
 }
 
 
@@ -90,21 +96,37 @@ pub fn eval(gameboard: & Gameboard, stone: Stone) -> isize {
 	cmpt
 }
 
-pub fn alphabeta(gameboard: & Gameboard, depth: i32, mut alpha: isize, mut beta: isize, noeud_max: bool, stone: Stone) -> (isize, Option<Gameboard>) {
+pub fn alphabeta(gameboard: & Gameboard, depth: i32, mut alpha: isize, mut beta: isize, noeud_max: bool, stone: Stone, next_stone: Stone) -> (isize, Option<Gameboard>) {
 	
 
-	let mut new_board = gameboard.clone();
-
+	// let mut new_board = gameboard.clone();
+	// println!("alphabeta!, board:: ");
+	printboard(gameboard);
 
 	// if (game over or depth <= 0)
 	if depth <= 0 {
-	return (eval(gameboard, stone), None);
+		return (eval(gameboard, stone), None);
 	}
 	let mut best_board = gameboard.clone();
 
+	// // // NEGA MAX ALPHA BETA? not work ;(
+	// for new_board in gameboard.expand(stone) {
+	// 	let (mut score, _) = alphabeta(&new_board, depth - 1, -beta, -alpha, !noeud_max, next_stone, stone);
+	// 	score = -score;
+	// 	if score >= alpha {
+	// 		alpha = score;
+	// 		best_board = new_board.clone();
+	// 		if alpha >= beta {
+	// 			break ;
+	// 		}
+	// 	}
+	// }
+	// (alpha, Some(best_board))
+
+	// MIN MAX ALPHA-BETA
 	if noeud_max == true {
 		for new_board in gameboard.expand(stone) {
-			let (score, _) = alphabeta(&new_board, depth - 1, alpha, beta, false, stone);
+			let (score, _) = alphabeta(&new_board, depth - 1, alpha, beta, !noeud_max, next_stone, stone);
 			if score > alpha {
 				alpha = score;
 				best_board = new_board.clone();
@@ -114,10 +136,9 @@ pub fn alphabeta(gameboard: & Gameboard, depth: i32, mut alpha: isize, mut beta:
 			}
 		}
 	(alpha, Some(best_board))
-	}
-	else {
+	} else {
 		for new_board in gameboard.expand(stone) {
-			let (score, _) = alphabeta(&new_board, depth - 1, alpha, beta, true, stone);
+			let (score, _) = alphabeta(&new_board, depth - 1, alpha, beta, !noeud_max, next_stone, stone);
 			if score < beta {
 				beta = score;
 				best_board = new_board.clone();
@@ -127,25 +148,5 @@ pub fn alphabeta(gameboard: & Gameboard, depth: i32, mut alpha: isize, mut beta:
 			}
 		}
 	(beta, Some(best_board))
-
 	}
-	// println!("best board:");
-
-	// printboard(&best_board);
-
 }
-//    for (each possible move m) {
-//       make move m;
-//       int score = -alphabêta(depth -
-// 	   1, -bêta, -alpha)
-//       unmake move m;
-//       if (score >= alpha){
-//          alpha = score ;
-//          bestMove = m ;
-//          if (alpha >= bêta)
-//             break;
-//       }
-//    }
-//    return alpha;
-// 	0
-// }
