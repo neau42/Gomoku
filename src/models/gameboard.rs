@@ -33,21 +33,28 @@ impl Gameboard {
 }
 
 impl Gameboard {
-    pub fn set_stone_on_cell(&self, y: usize, x: usize, stone: Stone) -> Option<Gameboard> {
+    pub fn set_stone_on_cell(&self, x: usize, y: usize, stone: Stone) -> Option<Gameboard> {
 		if self.cells[x][y] == Stone::NOPE {
-            let mut new_state = self.clone();
-			new_state.cells[x][y] = stone;
-            Some(new_state)
+            if self.check_double_tree(x, y, stone) {
+                println!("you did a double tree");
+                None
+            }
+            else {
+                let mut new_state = self.clone();
+			    new_state.cells[x][y] = stone;
+                Some(new_state)
+            }
 		} else {
 			None
 		}
 	}
 
-    pub fn check_capture(&self, y: usize, x: usize, actual_stone: Stone) -> bool {
+    // True if capture is possible
+    pub fn check_capture(&self, x: usize, y: usize, actual_stone: Stone) -> bool {
         let directions: [(isize, isize); 8] = [(0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1,0), (-1,1)];
 
         directions.iter().any(|(tmp_x, tmp_y)| {
-            (1..3 as isize).all(|i| {
+            (1..=3 as isize).all(|i| {
                 let tmp_x = *tmp_x  * i + x as isize;
                 let tmp_y = *tmp_y * i + y as isize;
                 if tmp_x < 0 || tmp_x >= self.size as isize || tmp_y < 0 || tmp_y >= self.size as isize {// ou superieur a size
@@ -60,6 +67,52 @@ impl Gameboard {
                 }
             })
         })
+	}
+
+    //True is double tree
+    pub fn check_double_tree(&self, x: usize, y: usize, actual_stone: Stone) -> bool {
+        let directions: [(isize, isize); 4] = [(0,1), (1,0), (1,1), (1,-1)];
+
+        let closure = |tmp_x: isize, tmp_y: isize| -> Vec<Stone> {
+            (1..=5 as isize).filter_map(|i| {
+                let tmp_x = tmp_x  * i + x as isize;
+                let tmp_y = tmp_y * i + y as isize;
+                if tmp_x < 0 || tmp_x >= self.size as isize || tmp_y < 0 || tmp_y >= self.size as isize {
+                    return None;
+                }
+                Some(self.cells[tmp_x as usize][tmp_y as usize])
+            }).collect()
+        };
+        
+        let nbr_tree = directions.iter().fold(0, |nbr_tree, (tmp_x, tmp_y)| {
+            let right_side = closure(*tmp_x, *tmp_y);
+            let mut left_side = closure(tmp_x * -1, tmp_y * -1);
+            left_side.reverse();
+            let line = [&left_side[..], &vec![actual_stone][..], &right_side[..]].concat();
+            let len = line.len();
+            if len < 6 {
+                return nbr_tree;
+            }
+            let is_tree: bool = (0..=(len - 6)).any(|i| {
+                line[i] == Stone::NOPE
+                && line[i + 5] == Stone::NOPE
+                && line[(i + 1)..(i + 5)].iter()
+                .fold(0, |sum, stone| {
+                    match stone {
+                        Stone::NOPE => sum + 2,
+                        actual_stone => sum + 1,
+                        _ => sum + 3,
+                    }
+                }) == 5
+            });
+            if is_tree {
+                nbr_tree + 1
+            }
+            else {
+                nbr_tree
+            }
+        });
+        nbr_tree >= 2
 	}
 }
 
@@ -76,7 +129,7 @@ impl Gameboard {
 
     pub fn expand(&self, stone: Stone) -> Vec<Gameboard> {
         let range: Vec<usize> = (0..SIZE as usize).collect();
-        let vector: Vec<Gameboard>= range.iter().map(|y| range.iter().map(|x| self.set_stone_on_cell(*y, *x, stone)).filter_map(|state| state).collect()).collect::<Vec<Vec<Gameboard>>>().concat();
+        let vector: Vec<Gameboard>= range.iter().flat_map(|y| range.iter().map(move |x| self.set_stone_on_cell(*x, *y, stone)).filter_map(|state| state)).collect();
         // println!("len = {}", vector.len());
         vector
     }

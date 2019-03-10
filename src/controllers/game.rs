@@ -28,8 +28,8 @@ impl GameViewController for GameController {
 	fn new(widget_ids: &WidgetIds) -> Box<GameController> {
 		let view = GameView::new();
 		let event = |state: &Gameboard, player: &mut Box<Player>, selected_move: Option<(usize, usize)>, stone: Stone| {
-			let (y, x) = selected_move.unwrap();
-			player.set_move(state.set_stone_on_cell(y, x, stone));
+			let (x, y) = selected_move.unwrap();
+			player.set_move(state.set_stone_on_cell(x, y, stone));
 		};
 		let controller = GameController {
 			view,

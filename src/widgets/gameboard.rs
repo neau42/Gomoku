@@ -36,8 +36,8 @@ enum Interaction { Idle, Hover, Press }
 #[allow(missing_copy_implementations)]
 pub struct InfoClick {
     pub is_click : u16,
-    pub y: usize,
     pub x: usize,
+    pub y: usize,
 }
 
 impl InfoClick {
@@ -46,7 +46,7 @@ impl InfoClick {
             None
         }
         else {
-            Some((self.y, self.x))
+            Some((self.x, self.y))
         }
     }
 }
