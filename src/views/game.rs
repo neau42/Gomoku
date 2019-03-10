@@ -23,16 +23,14 @@ impl GameView {
 		}
 	}
 
-	pub fn display_grid(&self, ui: &mut UiCell, widget_ids: &WidgetIds, event: fn(&Gameboard, &mut Box<Player>, Option<(usize, usize)>, Stone), model: &mut Game, stone: Stone, do_event: bool) {
-		if let Some((x, y)) = CustomWidget::Board::new(&model.state, stone)
+	pub fn display_grid(&self, ui: &mut UiCell, widget_ids: &WidgetIds, event: fn(&Gameboard, &mut Box<Player>, Option<(usize, usize)>, Stone), model: &mut Game, stone: Stone, is_human: bool) {
+		if let Some((x, y)) = CustomWidget::Board::new(&model.state, stone, is_human)
 			.middle_of(widget_ids.window_canvas)
 			.down_from(widget_ids.title, 15.0)
 			.w_h(self.size, self.size)
 			.set(widget_ids.grid, ui)
 			.was_clicked() {
-				if (do_event) {
-					event(&model.state.clone(), model.get_current_player(), Some((x, y)), stone);
-				}
+				event(&model.state.clone(), model.get_current_player(), Some((x, y)), stone);
 			}
 	}
 }

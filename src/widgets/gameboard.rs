@@ -11,11 +11,12 @@ pub struct Board<'a> {
     #[conrod(common_builder)]
     common: widget::CommonBuilder,
     board_state: &'a Gameboard,
+	is_human: bool,
 	color: Color,
 }
 
 impl<'a> Board<'a> {
-    pub fn new(board_state: &'a Gameboard, stone: Stone) -> Self {
+    pub fn new(board_state: &'a Gameboard, stone: Stone, is_human: bool) -> Self {
 		let color = match stone {
 			Stone::BLACK => color::BLACK,
 			_ => color::WHITE
@@ -23,6 +24,7 @@ impl<'a> Board<'a> {
         Board {
             common: widget::CommonBuilder::default(),
 			board_state: board_state,
+			is_human,
 			color,
         }
     }
@@ -128,9 +130,13 @@ impl<'a> Widget for Board<'a> {
      
 	    draw_lines(size, id, &state, rect, ui);
 		draw_hoshi(size, id, &state, rect, ui);
+		draw_stones(self.board_state, id, &state, rect, ui);
+
 
         let (interaction, is_click, x, y) = get_mouse_event(rect, self.board_state, id, ui);
-
+		if !self.is_human {
+			return InfoClick {is_click: 0, x, y};
+		}
 		if interaction == Interaction::Hover {
 			if self.board_state.cells[x][y] == Stone::NOPE {
 				draw_one_stone([x, y],
@@ -145,7 +151,6 @@ impl<'a> Widget for Board<'a> {
 				id, rect, ui, state.cell_index.stones[x + y * size]);
 			}
 		}
-		draw_stones(self.board_state, id, &state, rect, ui);
 		InfoClick {is_click, x, y}
     }
 }
