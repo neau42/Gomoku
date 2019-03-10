@@ -51,6 +51,7 @@ impl GameplayController {
     pub fn open_window(&self) -> Result<Display, DisplayCreationError> {
         let window_builder = WindowBuilder::new()
             .with_decorations(false)
+            .with_resizable(false)
             .with_dimensions((self.width, self.height).into());
         let context_builder = ContextBuilder::new()
             .with_vsync(true)
