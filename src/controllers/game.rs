@@ -7,6 +7,7 @@ use crate::traits::player::*;
 use crate::views::Game::GameView;
 use crate::models::game::Game;
 use crate::models::gameboard::*;
+use crate::models::ia::IA;
 
 use conrod::*;
 use conrod::UiCell;
@@ -38,32 +39,25 @@ impl GameViewController for GameController {
 		Box::new(controller)
 	}
 
-
 	fn show(&self, model: &mut Box<dyn GameViewModel>, ui: &mut UiCell, widget_ids: &WidgetIds) {
-		let model: &mut Game = match model.get_model().downcast_mut::<Game>() {
-			Some(model) => model,
-			None => panic!("&GameViewModel isn't a Game!"),
-		};
+		let model: &mut Game = model.get_model().downcast_mut::<Game>().unwrap();
+		let stone = model.current_stone;
+		let mut is_human = true;
 
-		let stone = model.current_stone.clone();
-		if let Some(new_state) = match model.get_current_player().get_type() {
-			PlayerType::Human => {
-				self.view.display_grid(ui, widget_ids, self.event, model, stone, true);
-				model.get_current_player().get_move()
-			},
-			_ => {
-				self.view.display_grid(ui, widget_ids, self.event, model, stone, false);
-				let (_, selected_move) = model.mdtf(0, 2);
-				selected_move
-			},
-		} {
-			model.state = new_state;
-			model.current_stone = match model.current_stone {
-				Stone::BLACK => Stone::WHITE,
-				_ => Stone::BLACK,
-			}
+		let current_player: &mut Box<Player> = model.get_current_player();
+		if current_player.get_type() == PlayerType::Ia { 
+			// current_player.downcast_mut::<IA>().unwrap();
+			// let (_, selected_move) = model.mdtf(0, 2);
+			is_human = false;
 		}
-		model.get_current_player().set_move(None);
+		let current_move = current_player.get_move();
+		current_player.set_move(None);
+		drop(current_player);
+		if current_move.is_some() {
+			model.state = current_move.unwrap();
+			model.current_stone.switch();
+		}
+		self.view.display_grid(ui, widget_ids, self.event, model, stone, is_human);
 	}
 
     fn get_type(&self) -> PageType {

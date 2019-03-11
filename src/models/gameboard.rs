@@ -11,6 +11,15 @@ pub enum Stone {
 	NOPE,
 }
 
+impl Stone {
+    pub fn switch(&mut self) {
+        *self = match *self {
+            Stone::BLACK => Stone::WHITE,
+            Stone::WHITE => Stone::BLACK,
+            _ => return,
+        }
+    }
+}
 /// Stores game board information.
 #[derive(Debug, Eq, Clone, Copy)]
 pub struct Gameboard {

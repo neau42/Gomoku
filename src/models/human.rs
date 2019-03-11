@@ -29,4 +29,5 @@ impl Player for Human {
     fn get_move(&self) -> Option<Gameboard> {
         self.selected_move
     }
+
 }

@@ -2,7 +2,7 @@ use crate::traits::player::*;
 use crate::models::gameboard::Gameboard;
 
 pub struct IA {
-    depth: u8,
+    pub depth: u8,
 }
 
 impl IA {
@@ -31,3 +31,4 @@ impl Player for IA {
         None
     }
 }
+
