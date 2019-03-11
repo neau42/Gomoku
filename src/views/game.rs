@@ -22,8 +22,8 @@ impl GameView {
 
 	pub fn display_grid(&self, ui: &mut UiCell, widget_ids: &WidgetIds, event: &GameEvent, model: &mut Game, is_human: bool) {
 		if let Some((x, y)) = CustomWidget::Board::new(&model.state, model.current_stone, is_human)
-			.middle_of(widget_ids.window_canvas)
-			.down_from(widget_ids.title, 15.0)
+			.top_left_of(widget_ids.window_canvas)
+			.down_from(widget_ids.title, 50.0)
 			.w_h(self.size, self.size)
 			.set(widget_ids.grid, ui)
 			.was_clicked() {

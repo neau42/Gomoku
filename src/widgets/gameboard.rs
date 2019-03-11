@@ -65,6 +65,26 @@ impl Iterator for InfoClick {
     }
 }
 
+/// get board idx from mouse position
+pub fn get_cell(x: f64, y: f64, rect: Rect, model: & Gameboard) -> Option<(usize, usize)> {
+	let size_px = rect.w();
+	let map_size = model.size;
+	let semi_cell_size = size_px / map_size as f64 / 2.0;
+
+	if x >= rect.x.start - semi_cell_size
+		&& x < rect.x.end + semi_cell_size
+		&& y >= rect.y.start - semi_cell_size
+		&& y < rect.y.end + semi_cell_size {
+		let stone_x = ((x - rect.x.start + semi_cell_size) / size_px * (map_size - 1) as f64) as usize;
+		let stone_y = ((rect.y.end - y + semi_cell_size) / size_px * (map_size - 1) as f64) as usize;
+		Some((stone_x, stone_y))
+	}
+	else {
+		None
+	}
+}
+
+
 fn get_mouse_event(rect: Rect, board_state: &Gameboard, button_id: conrod::widget::Id, ui: &UiCell) -> (Interaction, u16, usize, usize) {
 	let input = ui.widget_input(button_id);
 
@@ -75,12 +95,15 @@ fn get_mouse_event(rect: Rect, board_state: &Gameboard, button_id: conrod::widge
 		});
 
 	let is_click = (input.clicks().left().count() + input.taps().count()) as u16;
-
-	let (interaction, x, y, is_click) = match get_cell(x_mouse, y_mouse, rect, board_state) {
-	Some((x, y)) => (interaction, x, y, is_click),
-	_ => (Interaction::Idle, 0,0,0),
-	};
-    (interaction, is_click, x, y)
+	match interaction {
+		Interaction::Idle => (interaction, 0,0,0),
+		_ => {
+			match get_cell(x_mouse, y_mouse, rect, board_state) {
+				Some((x, y)) => (interaction, is_click, x, y),
+				None => (Interaction::Idle, 0,0,0),
+			}
+		}
+	}
 }
 
 ///INDEXS
@@ -155,27 +178,6 @@ impl<'a> Widget for Board<'a> {
     }
 }
 
-/// get board idx from mouse position
-pub fn get_cell(x: f64, y: f64, rect: Rect, model: & Gameboard) -> Option<(usize, usize)> {
-	let size_px = rect.x.end - rect.x.start;
-	let map_size = model.size;
-	let semi_cell_size = size_px / map_size as f64 / 2.0;
-
-	// Check that coordinates are inside board boundaries.
-	if x >= rect.x.start - semi_cell_size
-		&& x < rect.x.end + semi_cell_size
-		&& y >= rect.y.start - semi_cell_size
-		&& y < rect.x.end + semi_cell_size {
-		let stone_x = ((x - rect.x.start + semi_cell_size) / size_px * (map_size - 1) as f64) as usize;
-		let stone_y = ((rect.y.end - y + semi_cell_size) / size_px * (map_size - 1) as f64) as usize;
-		Some((stone_x, stone_y))
-	}
-	else {
-		None
-	}
-}
-
-
 /// draw gomoku gameboard lines
 fn draw_lines(size: usize, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
 	let x2 = rect.x.start + rect.w();
@@ -217,15 +219,12 @@ fn draw_lines(size: usize, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
 /// draw hoshi on gameboard
 fn draw_hoshi(size: usize, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
 	let mut cmpt = 0;
-	let stone_size = (rect.x.end - rect.x.start) / (size - 1) as f64;
+	let half_w = rect.w() / 2.0;
+	let stone_size = rect.w() / (size - 1) as f64;
 	for i in [3, (size - 1) / 2, size - 4].iter() {
 		for j in [3, (size - 1) / 2, size - 4].iter() {
 			conrod::widget::primitive::shape::rectangle::Rectangle::fill([15.0, 15.0])
-				.x_y_relative_to(
-					id,
-					rect.x.start + (*i as f64 * stone_size),
-					rect.y.start + (*j as f64 * stone_size)
-					)
+				.x_y_relative_to(id, (*i as f64 * stone_size) - half_w, (*j as f64 * stone_size) - half_w)
 				.color(color::BLACK)
 				.graphics_for(id)
 				.set(state.cell_index.hoshis[cmpt], ui);
@@ -236,7 +235,7 @@ fn draw_hoshi(size: usize, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
 
 /// draw all stones presents on board
 fn draw_stones(board_state: & Gameboard, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
-
+	let half_w = rect.w() / 2.0;
 	for i in 0..board_state.size * board_state.size {
 		match board_state.cells[i%board_state.size][i/board_state.size] {
 			Stone::WHITE =>	draw_one_stone(
@@ -257,12 +256,10 @@ fn draw_stones(board_state: & Gameboard, id: Id, state: &State, rect: Rect, ui: 
 /// draw one stone on board in [ind[0]][ind[1]] 
 fn draw_one_stone(ind: [usize; 2], color: Color, size: usize, id: Id, rect: Rect, ui: &mut UiCell, cell_id: Id) {
 	let stone_size = (rect.x.end - rect.x.start) / (size - 1) as f64;
-
 	let pos = [
-			ind[0] as f64 * stone_size - rect.x.end,
-			rect.y.end - ind[1] as f64 * stone_size
+			ind[0] as f64 * stone_size - rect.w() / 2.0,
+			rect.w() / 2.0 - ind[1] as f64 * stone_size
 			];
-
 		conrod::widget::primitive::shape::circle::Circle::fill(stone_size/2.0)
 			.x_y_relative_to(
 					id,

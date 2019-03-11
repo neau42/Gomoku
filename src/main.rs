@@ -19,17 +19,13 @@ widget_ids! {
         background,
         title,
         window_canvas,
-        window_canvas_y_scrollbar,
-        window_canvas_x_scrollbar,
         game_builder_canvas,
         dropdown_button_game_mode,
         toggle_button_weight_boxes,
         number_dialer_first_ia_depth,
         number_dialer_second_ia_depth,
         button_start,
-        text,
 		grid,
-		grid_select,
         button_undo,
     }
 }

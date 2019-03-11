@@ -1,4 +1,7 @@
 use crate::WidgetIds;
+use crate::widgets::gameboard as CustomWidget;
+use crate::models::game::Game;
+use crate::models::gameboard::*;
 use conrod::*;
 use conrod::UiCell;
 use conrod::image::Id;
@@ -19,8 +22,6 @@ impl WindowView {
             .color(color::TRANSPARENT)
             .scroll_kids()
             .set(widget_ids.window_canvas, ui);
-        widget::Scrollbar::x_axis(widget_ids.window_canvas).auto_hide(true).set(widget_ids.window_canvas_y_scrollbar, ui);
-        widget::Scrollbar::y_axis(widget_ids.window_canvas).auto_hide(true).set(widget_ids.window_canvas_x_scrollbar, ui);
     }
 
     pub fn display_background(&self, ui: &mut UiCell, widget_ids: &WidgetIds, background_id: Id) {
