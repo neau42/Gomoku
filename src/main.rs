@@ -30,6 +30,7 @@ widget_ids! {
         text,
 		grid,
 		grid_select,
+        button_undo,
     }
 }
 

@@ -1,5 +1,4 @@
 use crate::controllers::game_builder::GameBuilderController;
-use crate::models::game::Game;
 use crate::controllers::game::GameController;
 use crate::controllers::window::WindowController;
 use crate::traits::view_controller::GameViewController;

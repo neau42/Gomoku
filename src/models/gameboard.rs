@@ -20,6 +20,7 @@ impl Stone {
         }
     }
 }
+
 /// Stores game board information.
 #[derive(Debug, Eq, Clone, Copy)]
 pub struct Gameboard {
@@ -42,20 +43,18 @@ impl Gameboard {
 }
 
 impl Gameboard {
-    pub fn set_stone_on_cell(&self, x: usize, y: usize, stone: Stone) -> Option<Gameboard> {
+    pub fn make_move(&mut self, x: usize, y: usize, stone: Stone) -> bool {
 		if self.cells[x][y] == Stone::NOPE {
             if self.check_double_tree(x, y, stone) {
                 println!("you did a double tree");
-                None
+                return false;
             }
             else {
-                let mut new_state = self.clone();
-			    new_state.cells[x][y] = stone;
-                Some(new_state)
+			    self.cells[x][y] = stone;
+                return true;
             }
-		} else {
-			None
 		}
+        false
 	}
 
     // True if capture is possible
@@ -136,12 +135,12 @@ impl Gameboard {
         0
     }
 
-    pub fn expand(&self, stone: Stone) -> Vec<Gameboard> {
-        let range: Vec<usize> = (0..SIZE as usize).collect();
-        let vector: Vec<Gameboard>= range.iter().flat_map(|y| range.iter().map(move |x| self.set_stone_on_cell(*x, *y, stone)).filter_map(|state| state)).collect();
-        // println!("len = {}", vector.len());
-        vector
-    }
+    // pub fn expand(&self, stone: Stone) -> Vec<Gameboard> {
+    //     let range: Vec<usize> = (0..SIZE as usize).collect();
+    //     let vector: Vec<Gameboard>= range.iter().flat_map(|y| range.iter().map(move |x| self.make_move(*x, *y, stone)).filter_map(|state| state)).collect();
+    //     // println!("len = {}", vector.len());
+    //     vector
+    // }
 }
 
 

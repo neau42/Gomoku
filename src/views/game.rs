@@ -1,10 +1,7 @@
 //! Game view.
 use crate::controllers::game::GameEvent;
-use crate::traits::player::Player;
-use crate::models::gameboard::Gameboard;
 use crate::widgets::gameboard as CustomWidget;
 use crate::WidgetIds;
-use crate::models::gameboard::Stone;
 use crate::models::game::Game;
 use conrod::*;
 
@@ -23,14 +20,20 @@ impl GameView {
 		}
 	}
 
-	pub fn display_grid(&self, ui: &mut UiCell, widget_ids: &WidgetIds, event: fn(&Gameboard, &mut Box<Player>, Option<(usize, usize)>, Stone), model: &mut Game, stone: Stone, is_human: bool) {
-		if let Some((x, y)) = CustomWidget::Board::new(&model.state, stone, is_human)
+	pub fn display_grid(&self, ui: &mut UiCell, widget_ids: &WidgetIds, event: &GameEvent, model: &mut Game, is_human: bool) {
+		if let Some((x, y)) = CustomWidget::Board::new(&model.state, model.current_stone, is_human)
 			.middle_of(widget_ids.window_canvas)
 			.down_from(widget_ids.title, 15.0)
 			.w_h(self.size, self.size)
 			.set(widget_ids.grid, ui)
 			.was_clicked() {
-				event(&model.state.clone(), model.get_current_player(), Some((x, y)), stone);
+				if let GameEvent::Grid(event) = event {
+					event(model, x, y);
+				}
 			}
+	}
+
+	pub fn display_button_undo(&self, ui: &mut UiCell, widget_ids: &WidgetIds, event: &GameEvent, model: &mut Game) {
+
 	}
 }
