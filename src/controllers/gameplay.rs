@@ -17,8 +17,9 @@ use glium::backend::glutin::DisplayCreationError;
 use conrod::image::Map;
 use conrod::*;
 use conrod::glium::Surface;
+use ::image::open;
 use std::path::Path;
-
+use glium::texture::*;
 pub struct GameplayController {
     window_controller: WindowController,
     page_controller: Box<GameViewController>,
@@ -46,6 +47,7 @@ impl GameplayController {
             height,
         }
     }
+
 
     pub fn open_window(&self) -> Result<Display, DisplayCreationError> {
         let window_builder = WindowBuilder::new()
@@ -78,7 +80,6 @@ impl GameplayController {
 
     pub fn render_loop(&mut self, display : Display, mut renderer: Renderer, image_map: Map<Texture2d>) {
         let mut events = Events::new();
-        
         'render: loop {
             for event in events.next(&mut self.events_loop) {
                 if let Some(event) = convert_event(event.clone(), &display) {
@@ -125,11 +126,16 @@ impl GameplayController {
     }
 
     pub fn run(&mut self) {
-        let display = self.open_window().unwrap();
-        let renderer = Renderer::new(&display).unwrap();
+
+        let rgba_image = open(&Path::new("assets/images/wood.jpg")).unwrap().to_rgba();
+        let image_dimensions = rgba_image.dimensions();
+        let background = RawImage2d::from_raw_rgba_reversed(&rgba_image.into_raw(), image_dimensions);
         let mut image_map = Map::<Texture2d>::new();
 
-        self.window_controller.load_background(&mut image_map, &display);
+        let display = self.open_window().unwrap();
+        let renderer = Renderer::new(&display).unwrap();
+
+        self.window_controller.load_background(&mut image_map, &display, background);
         self.ui.fonts.insert_from_file(Path::new("assets/fonts/FiraSans-Regular.ttf")).unwrap();
         self.render_loop(display, renderer, image_map);
     }

@@ -1,8 +1,5 @@
 use crate::WidgetIds;
-use crate::widgets::gameboard as CustomWidget;
-use crate::models::game::Game;
-use crate::models::gameboard::*;
-use conrod::*;
+ use conrod::*;
 use conrod::UiCell;
 use conrod::image::Id;
 
