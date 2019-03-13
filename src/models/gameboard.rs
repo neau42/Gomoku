@@ -106,9 +106,11 @@ impl Gameboard {
                 && line[i + 5] == Stone::NOPE
                 && line[(i + 1)..(i + 5)].iter()
                 .fold(0, |sum, stone| {
+                    if (*stone == actual_stone) {
+                        return sum + 1
+                    }
                     match stone {
                         Stone::NOPE => sum + 2,
-                        actual_stone => sum + 1,
                         _ => sum + 3,
                     }
                 }) == 5
@@ -120,6 +122,7 @@ impl Gameboard {
                 nbr_tree
             }
         });
+        // println!("nbr_tree = {}", nbr_tree);
         nbr_tree >= 2
 	}
 }
