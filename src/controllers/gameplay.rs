@@ -100,14 +100,14 @@ impl GameplayController {
             if self.page_model.need_change_window() {
                 self.page_controller = match self.page_controller.get_type() {
                     PageType::GameBuilder => {
-                        let game_builder: &mut GameBuilder = match self.page_model.get_model().downcast_mut::<GameBuilder>() {
-                            Some(game_builder) => game_builder,
-                            None => panic!("&GameViewModel isn't a GameBuilder!"),
-                        };
+                        let game_builder: &mut GameBuilder = self.page_model.get_model().downcast_mut::<GameBuilder>().unwrap();
 						self.page_model = Box::new(game_builder.build());
 						GameController::new(&self.widget_ids)
 					},
-                    _ => GameBuilderController::new(&self.widget_ids),
+                    _ => { 
+						self.page_model = Box::new(GameBuilder::new());
+                        GameBuilderController::new(&self.widget_ids)
+                    },
                 }
             }
             let ui = &mut self.ui.set_widgets();

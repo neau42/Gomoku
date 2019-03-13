@@ -13,6 +13,7 @@ use std::collections::HashMap;
 pub enum GameEvent {
 	Grid(fn(&mut Game, usize, usize)),
 	ButtonUndo(fn(&mut Game)),
+	ButtonQuit(fn(&mut Game)),
 }
 
 pub struct GameController {
@@ -26,6 +27,7 @@ impl GameController {
 			if model.state.make_move(x, y, model.current_stone) {
 				model.all_state.push(model.state.clone());
 				model.current_stone.switch();
+				model.update_last_move_time();
 			}
         }));
 
@@ -35,6 +37,10 @@ impl GameController {
 				model.state = model.all_state.last().unwrap().clone();
 				model.current_stone.switch();
 			}
+		}));
+
+		self.events.insert(widget_ids.button_quit, GameEvent::ButtonQuit(|model: &mut Game| {
+			model.change_window();
 		}));
 	}
 }
@@ -62,6 +68,10 @@ impl GameViewController for GameController {
 		}
 		drop(current_player);
 		self.view.display_grid(ui, widget_ids, self.events.get(&widget_ids.grid).unwrap(), model, is_human);
+		self.view.display_player_turn(ui, widget_ids, model);
+		self.view.display_captures(ui, widget_ids, model.black_player.captures(), model.white_player.captures());
+		self.view.display_last_move_time(ui, widget_ids, &model.last_move_time[..]);
+		self.view.display_button_quit(ui, widget_ids, self.events.get(&widget_ids.button_quit).unwrap(), model);
 		self.view.display_button_undo(ui, widget_ids, self.events.get(&widget_ids.button_undo).unwrap(), model);
 		// if !is_human {
 		// 	model.state = current_move.unwrap();

@@ -3,6 +3,7 @@ use crate::controllers::game::GameEvent;
 use crate::widgets::gameboard as CustomWidget;
 use crate::WidgetIds;
 use crate::models::game::Game;
+use crate::models::gameboard::Stone;
 use conrod::*;
 
 pub struct GameView {
@@ -32,8 +33,70 @@ impl GameView {
 				}
 			}
 	}
+	pub fn display_player_turn(&self, ui: &mut UiCell, widget_ids: &WidgetIds, model: &mut Game) {
+		let text = match model.current_stone {
+			Stone::BLACK => "Player turn : Black",
+			_ => "Player turn : White"
+		};
+		widget::Text::new(text)
+            .right_from(widget_ids.grid, 50.0)
+            .font_size(25)
+            .color(color::BLACK)
+            .set(widget_ids.text_turn, ui);
+	}
+
+	pub fn display_captures(&self, ui: &mut UiCell, widget_ids: &WidgetIds, black_capture: u8, white_capture: u8) {
+		let text = format!("Black player capture: {}\nWhite player capture: {}", black_capture, white_capture);
+		widget::Text::new(&text[..])
+            .right_from(widget_ids.grid, 50.0)
+            .down_from(widget_ids.text_turn, 25.0)
+            .font_size(25)
+            .color(color::BLACK)
+            .set(widget_ids.text_captures, ui);
+	}
+
+	pub fn display_last_move_time(&self, ui: &mut UiCell, widget_ids: &WidgetIds, last_move_time: &str) {
+		widget::Text::new(last_move_time)
+            .right_from(widget_ids.grid, 50.0)
+            .down_from(widget_ids.text_captures, 25.0)
+            .font_size(25)
+            .color(color::BLACK)
+            .set(widget_ids.text_last_move_time, ui);
+	}
+
+	pub fn display_button_quit(&self, ui: &mut UiCell, widget_ids: &WidgetIds, event: &GameEvent, model: &mut Game) {
+        if widget::Button::new()
+            .h(75.0)
+			.w(150.0)
+            .bottom_right_of(widget_ids.grid)
+            .right_from(widget_ids.grid, 50.0)
+            .color(color::LIGHT_BROWN)
+            .border(1.0)
+            .label("Quit")
+            .set(widget_ids.button_quit, ui)
+            .was_clicked()
+        {
+            if let GameEvent::ButtonQuit(event) = event {
+                event(model);
+            }
+        }
+	}
 
 	pub fn display_button_undo(&self, ui: &mut UiCell, widget_ids: &WidgetIds, event: &GameEvent, model: &mut Game) {
-
+        if widget::Button::new()
+            .h(75.0)
+			.w(150.0)
+            .up_from(widget_ids.button_quit, 25.0)
+            .right_from(widget_ids.grid, 50.0)
+            .color(color::LIGHT_BROWN)
+            .border(1.0)
+            .label("Undo")
+            .set(widget_ids.button_undo, ui)
+            .was_clicked()
+        {
+            if let GameEvent::ButtonUndo(event) = event {
+                event(model);
+            }
+        }
 	}
 }

@@ -26,6 +26,10 @@ widget_ids! {
         number_dialer_second_ia_depth,
         button_start,
 		grid,
+        text_turn,
+        text_captures,
+        text_last_move_time,
+        button_quit,
         button_undo,
     }
 }
