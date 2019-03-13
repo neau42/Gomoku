@@ -1,4 +1,4 @@
-use crate::models::gameboard::{Gameboard, Stone, SIZE, AlignType};
+use crate::models::gameboard::*;
 
 pub fn algo(gameboard: &mut Gameboard, current_stone: Stone) -> (isize, Option<Gameboard>) {
 	let alpha = std::isize::MIN;
@@ -14,23 +14,6 @@ pub fn algo(gameboard: &mut Gameboard, current_stone: Stone) -> (isize, Option<G
 	alphabeta(gameboard, 1, alpha + 1, beta, true, current_stone, next_stone)
 }
 
-pub fn len_of_one_align(align: &(AlignType, usize, usize, usize, usize , bool, bool)) -> isize {
-
-	match align.0 {
-		AlignType::HORIZONTAL => (align.3 - align.1) as isize,
-		AlignType::VERTICAL => (align.4 - align.2) as isize,
-		AlignType::DIAGONAL1 => (align.3 - align.1) as isize,
-		AlignType::DIAGONAL2 => (align.3 - align.1) as isize,
-	}
-}
-
-pub fn is_left_open(align: &(AlignType, usize, usize, usize, usize , bool, bool)) -> bool {
-	align.5
-}
-
-pub fn is_right_open(align: &(AlignType, usize, usize, usize, usize , bool, bool)) -> bool {
-	align.6
-}
 
 pub fn printboard(gameboard: & Gameboard) {
 	println!("BOARD: ");
@@ -110,56 +93,92 @@ pub fn eval_all_directions(cells: [[Stone; SIZE]; SIZE], x: isize, y: isize, sto
 }
 
 
+
+
 pub fn eval(gameboard: & Gameboard, stone: Stone) -> isize {
 	// let range_h:Vec<usize> = (gameboard.win[0]..gameboard.win[2] as usize).collect();
 	// let range_v:Vec<usize> = (gameboard.win[1]..gameboard.win[3] as usize).collect();
 
-	println!("---------------------------------------\n\t\tALIGN WHITE: gameboard.align_list_white: len: {}", gameboard.align_list_white.len());
-	dbg!(&gameboard.align_list_white);
-	println!("---------------------------------------\n\t\tALIGN BLACK: gameboard.align_list_white: len: {}", gameboard.align_list_white.len());
-	dbg!(&gameboard.align_list_black);
+	// println!("---------------------------------------\n\t\tALIGN WHITE: gameboard.align_list_white: len: {}", gameboard.align_list_white.len());
+	// dbg!(&gameboard.align_list_white);
+	// println!("---------------------------------------\n\t\tALIGN BLACK: gameboard.align_list_white: len: {}", gameboard.align_list_white.len());
+	// dbg!(&gameboard.align_list_black);
 
 	let mut value: isize = 0;
+	let mut len;
 	if stone == Stone::WHITE {
 		for align in &gameboard.align_list_white {
-			value += len_of_one_align(align);
-			if is_left_open(align) {
+			len = len_of_one_align(align);
+			value += (2 * len);
+			if align.before_open == true {
 				value += 1;
 			}
-			if is_right_open(align) {
+			if align.after_open == true {
 				value += 1;
+			}
+			if align.with_hole == false {
+				value += 4;
+				if len > 4 {
+					value += 100;
+				}
 			}
 		}
 		for align in &gameboard.align_list_black {
-			value -= len_of_one_align(align);
-			if is_left_open(align) {
-				value += 1;
+			len = len_of_one_align(align);
+			value -= (2 * len);
+			if align.before_open == true {
+				value -= 1;
 			}
-			if is_right_open(align) {
-				value += 1;
+			if align.after_open == true {
+				value -= 1;
+			}
+			if align.with_hole == false {
+				value -= 4;
+				if len > 4 {
+					value -= 100;
+				}
 			}
 		}
 	}
 	else {
 		for align in &gameboard.align_list_black {
-			value += len_of_one_align(align);
-			if is_left_open(align) {
+			len = len_of_one_align(align);
+			value += (2 * len);
+			if align.before_open == true {
 				value += 1;
 			}
-			if is_right_open(align) {
+			if align.after_open == true {
 				value += 1;
+			}
+			if align.with_hole == false {
+				value += 4;
+				if len > 4 {
+					value += 100;
+				}
 			}
 		}
 		for align in &gameboard.align_list_white {
-			value -= len_of_one_align(align);
-			if is_left_open(align) {
-				value += 1;
+			len = len_of_one_align(align);
+			value -= (2 * len);
+			if align.before_open == true {
+				value -= 1;
 			}
-			if is_right_open(align) {
-				value += 1;
+			if align.after_open == true {
+				value -= 1;
+			}
+			if align.with_hole == false {
+				value -= 4;
+				if len > 4 {
+					value -= 100;
+				}
 			}
 		}
 	}
+
+
+	// println!("------------------------------\nEVAL: (stone:: {:?})", stone);
+	// gameboard.printboard();
+	// println!("======> value: {}", value);
 
 	// let value:isize = range_v.iter()
 	// 	.flat_map(|y| range_h
@@ -171,7 +190,7 @@ pub fn eval(gameboard: & Gameboard, stone: Stone) -> isize {
 }
 
 pub fn alphabeta(gameboard: & Gameboard, depth: i32, mut alpha: isize, mut beta: isize, noeud_max: bool, stone: Stone, next_stone: Stone) -> (isize, Option<Gameboard>) {
-	if depth <= 0 || gameboard.max_align() > 4 {
+	if depth <= 0 || gameboard.victory() == true {
 		return (eval(gameboard, stone), None);
 	}
 	let mut best_board = gameboard.clone();
@@ -203,8 +222,8 @@ pub fn alphabeta(gameboard: & Gameboard, depth: i32, mut alpha: isize, mut beta:
 			let (score, _) = alphabeta(&new_board, depth - 1, alpha, beta, !noeud_max, stone, next_stone);
 			if score > alpha {
 				alpha = score;
-				// println!("_________ new board: for MAX (stone: {:?}), value: {}, BOARD::", stone, score);
-				// printboard(&new_board);
+				println!("DEPTH: {} _________ new board: for MAX (stone: {:?}), value: {}, BOARD::", depth, stone, score);
+				printboard(&new_board);
 				best_board = new_board.clone();
 				if alpha >= beta {
 					break ;
@@ -216,8 +235,8 @@ pub fn alphabeta(gameboard: & Gameboard, depth: i32, mut alpha: isize, mut beta:
 		for new_board in gameboard.expand(next_stone) {
 			let (score, _) = alphabeta(&new_board, depth - 1, alpha, beta, !noeud_max, stone, next_stone);
 			if score < beta {
-				// println!("_________ new better board: for MIN (stone: {:?}), value: {}, BOARD::", stone, score);
-				// printboard(&new_board);
+				println!("DEPTH: {} _________ new better board: for MIN (stone: {:?}), value: {}, BOARD::", depth, stone, score);
+				printboard(&new_board);
 				beta = score;
 				best_board = new_board.clone();
 				if alpha >= beta {

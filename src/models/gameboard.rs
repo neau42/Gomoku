@@ -22,16 +22,17 @@ pub enum AlignType {
 	DIAGONAL2,
 }
 
-// #[derive(Debug, PartialEq, Eq, Clone)]
-// pub struct Alignement {
-// 	pub alignemnt_type: AlignType,
-// 	pub start_x: usize,
-// 	pub start_y: usize,
-// 	pub end_x: usize,
-// 	pub end_y: usize ,
-// 	pub before_open: bool,
-// 	pub after_open: bool,
-// }
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct Alignement {
+	pub alignement_type: AlignType,
+	pub start_x: usize,
+	pub start_y: usize,
+	pub end_x: usize,
+	pub end_y: usize ,
+	pub before_open: bool,
+	pub after_open: bool,
+	pub with_hole: bool,
+}
 
 /// Stores game board information.
 #[derive(Debug, Eq, Clone)]
@@ -40,8 +41,8 @@ pub struct Gameboard {
     pub cells: [[Stone; SIZE]; SIZE],
     pub upperbound: isize,
     pub lowerbound: isize,
-	pub align_list_black: Vec<(AlignType, usize, usize, usize, usize , bool, bool)>,
-	pub align_list_white: Vec<(AlignType, usize, usize, usize, usize , bool, bool)>,
+	pub align_list_black: Vec<Alignement>,
+	pub align_list_white: Vec<Alignement>,
 	pub win: [usize; 4], 
 }
 
@@ -128,8 +129,10 @@ impl Gameboard {
 		let mut len = 0;
 
 		for (x, y) in line.iter().filter(
-			|(x, _y)| *x >= 0 as isize 
-			&& *x < self.size as isize) {
+			|(x, y)| *x >= 0
+			&& *x < self.size as isize
+			&& *y >= 0
+			&& *y < self.size as isize) {
 
 			if self.cells[*x as usize][*y as usize] == Stone::NOPE {
 				if one_empty == true {
@@ -146,18 +149,31 @@ impl Gameboard {
 		(len, is_open, one_empty)
 	}
 
-	fn parse_around_cell(&self, align_type: AlignType, before_horizontal:[(isize, isize); 5], after_horizontal: [(isize, isize); 5] , x_orig: isize, y_orig: isize, stone: Stone) -> Option<(AlignType, usize, usize, usize, usize , bool, bool)> {
-		let (before_len, open_before, hole_before) = self.parse_arround_one(before_horizontal, stone);
-		let (after_len, open_after, hole_after) = self.parse_arround_one(after_horizontal, stone);
+	fn parse_around_cell(&self, align_type: AlignType, before_horizontal:[(isize, isize); 5], after_horizontal: [(isize, isize); 5] , x_orig: isize, y_orig: isize, stone: Stone) -> Option<Alignement> {
+		let (before_len, before_open, hole_before) = self.parse_arround_one(before_horizontal, stone);
+		let (after_len, after_open, hole_after) = self.parse_arround_one(after_horizontal, stone);
 
-		if before_len > 0 || after_len > 0 {
-			Some((align_type, (x_orig - before_len) as usize, y_orig as usize, (x_orig + after_len) as usize, y_orig as usize, open_before, open_after))
+
+		let hole = if hole_before == true || hole_after == true
+		{ true } else { false };
+
+		if before_len > 0 || after_len > 0{;
+			Some(Alignement {
+				alignement_type: align_type,
+				start_x: (x_orig - before_len) as usize,
+				start_y: y_orig as usize,
+				end_x: (x_orig + after_len) as usize,
+				end_y: y_orig as usize,
+				before_open,
+				after_open,
+				with_hole: hole
+			})
 		}
 		else { None	}
 	}
 
 
-	pub fn new_aligns_h(&self, x_orig: isize, y_orig: isize, stone: Stone) -> Option<(AlignType, usize, usize, usize, usize , bool, bool)> {
+	pub fn new_aligns_h(&self, x_orig: isize, y_orig: isize, stone: Stone) -> Option<Alignement> {
 		let before_horizontal: [(isize, isize); 5] = [
 			(x_orig - 1, y_orig),
 			(x_orig - 2, y_orig),
@@ -173,7 +189,7 @@ impl Gameboard {
 
 		self.parse_around_cell(AlignType::HORIZONTAL, before_horizontal, after_horizontal, x_orig, y_orig, stone)
 	}
-	pub fn new_aligns_v(&self, x_orig: isize, y_orig: isize, stone: Stone) -> Option<(AlignType, usize, usize, usize, usize , bool, bool)> {
+	pub fn new_aligns_v(&self, x_orig: isize, y_orig: isize, stone: Stone) -> Option<Alignement> {
 
 		let before_vertical: [(isize, isize); 5] = [
 			(x_orig, y_orig - 1),
@@ -190,7 +206,7 @@ impl Gameboard {
 
 		self.parse_around_cell(AlignType::VERTICAL, before_vertical, after_horizontal, x_orig, y_orig, stone)
 	}
-	pub fn new_aligns_d1(&self, x_orig: isize, y_orig: isize, stone: Stone) -> Option<(AlignType, usize, usize, usize, usize , bool, bool)> {
+	pub fn new_aligns_d1(&self, x_orig: isize, y_orig: isize, stone: Stone) -> Option<Alignement> {
 
 		let before_diag_1: [(isize, isize); 5] = [
 			(x_orig - 1, y_orig - 1),
@@ -208,7 +224,7 @@ impl Gameboard {
 		self.parse_around_cell(AlignType::DIAGONAL1, before_diag_1, after_diag_1, x_orig, y_orig, stone)
 	}
 
-	pub fn new_aligns_d2(&self, x_orig: isize, y_orig: isize, stone: Stone) -> Option<(AlignType, usize, usize, usize, usize , bool, bool)> {
+	pub fn new_aligns_d2(&self, x_orig: isize, y_orig: isize, stone: Stone) -> Option<Alignement> {
 
 
 		let before_diag_2: [(isize, isize); 5] = [
@@ -239,7 +255,7 @@ impl Gameboard {
 
 	pub fn set_align(&mut self, ref_gameboard: &Gameboard, x: usize, y: usize, stone: Stone) {
 
-    static ALIGN_FUNCTIONS: &[fn(&Gameboard, x_orig: isize, y_orig: isize, stone: Stone) -> Option<(AlignType, usize, usize, usize, usize , bool, bool)>;
+    static ALIGN_FUNCTIONS: &[fn(&Gameboard, x_orig: isize, y_orig: isize, stone: Stone) -> Option<Alignement>;
          4] = &[Gameboard::new_aligns_h, Gameboard::new_aligns_v,Gameboard::new_aligns_d1, Gameboard::new_aligns_d2];
 
 		if stone == Stone::BLACK {
@@ -248,7 +264,7 @@ impl Gameboard {
 				let test = align(&self, x as isize, y as isize, stone);
 				match test {
 					Some(t) => {
-						self.printboard();
+						// self.printboard();
 						self.align_list_black.push(t);
 					}
 					_ => (),
@@ -262,7 +278,7 @@ impl Gameboard {
 				let test = align(&self, x as isize, y as isize, stone);
 				match test {
 					Some(t) => {
-						self.printboard();
+						// self.printboard();
 						self.align_list_white.push(t);
 					}
 					_ => (),
@@ -329,43 +345,60 @@ pub fn get_better_align_on_one_cell(&self, x_orig: isize, y_orig: isize, after: 
 	align_len
 }
 
-	// test get victory!
-	pub fn max_align(&self) -> usize {
-		let mut value = 0;
 
-		for y in self.win[1] as isize..self.win[3] as isize {
-			for x in self.win[0] as isize..self.win[2] as isize {
-				let after_horizontal: [(isize, isize); 4] = [(x + 1, y),
-					(x + 2, y),
-					(x + 3, y),
-					(x + 4, y)];
-				let after_vertical: [(isize, isize); 4] = [(x, y + 1),
-					(x, y + 2),
-					(x, y + 3),
-					(x, y + 4)];
-				let after_diag_1: [(isize, isize); 4] = [(x + 1, y + 1),
-					(x + 2, y + 2),
-					(x + 3, y + 3),
-					(x + 4, y + 4)];
-				let after_diag_2: [(isize, isize); 4] = [(x + 1, y - 1),
-					(x + 2, y - 2),
-					(x + 3, y - 3),
-					(x + 4, y - 4)];
-				let afters = [after_horizontal, after_vertical, after_diag_1, after_diag_2];
-
-				let tmp = afters.iter().map(|after| self.get_better_align_on_one_cell(x, y, *after)).max();
-				match tmp {
-					Some(test) => { if test > value {value = test;}}
-					_ => (),
-				}
-
-		}}
-		if value > 4 {
-			println!("WIN\n\n\n WIN\n\nmax ALIGN : return {}", value);
-			self.printboard();
+	pub fn victory(&self) -> bool {
+		for align in &self.align_list_white {
+			if len_of_one_align(align) > 4 {
+				return (true);
+			}
 		}
-	value as usize
+		for align in &self.align_list_black {
+			if len_of_one_align(align) > 4 {
+				return (true);
+			}
+		}
+	false
 	}
+
+	// // test get victory!
+	// pub fn max_align(&self) -> usize {
+	// 	let mut value = 0;
+
+
+	
+	// 	for y in self.win[1] as isize..self.win[3] as isize {
+	// 		for x in self.win[0] as isize..self.win[2] as isize {
+	// 			let after_horizontal: [(isize, isize); 4] = [(x + 1, y),
+	// 				(x + 2, y),
+	// 				(x + 3, y),
+	// 				(x + 4, y)];
+	// 			let after_vertical: [(isize, isize); 4] = [(x, y + 1),
+	// 				(x, y + 2),
+	// 				(x, y + 3),
+	// 				(x, y + 4)];
+	// 			let after_diag_1: [(isize, isize); 4] = [(x + 1, y + 1),
+	// 				(x + 2, y + 2),
+	// 				(x + 3, y + 3),
+	// 				(x + 4, y + 4)];
+	// 			let after_diag_2: [(isize, isize); 4] = [(x + 1, y - 1),
+	// 				(x + 2, y - 2),
+	// 				(x + 3, y - 3),
+	// 				(x + 4, y - 4)];
+	// 			let afters = [after_horizontal, after_vertical, after_diag_1, after_diag_2];
+
+	// 			let tmp = afters.iter().map(|after| self.get_better_align_on_one_cell(x, y, *after)).max();
+	// 			match tmp {
+	// 				Some(test) => { if test > value {value = test;}}
+	// 				_ => (),
+	// 			}
+
+	// 	}}
+	// 	if value > 4 {
+	// 		println!("WIN\n\n\n WIN\n\nmax ALIGN : return {}", value);
+	// 		self.printboard();
+	// 	}
+	// value as usize
+	// }
 
 	pub fn set_window_actives_cells(&mut self, x: usize, y: usize) {
 		if self.win[0] >= x {
@@ -415,4 +448,13 @@ impl Hash for Gameboard {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.cells.hash(state);
     }
+}
+
+pub fn len_of_one_align(align: &Alignement) -> isize {
+	match align.alignement_type {
+		AlignType::HORIZONTAL => (align.end_x - align.start_x) as isize,
+		AlignType::VERTICAL => (align.end_y - align.start_y) as isize,
+		AlignType::DIAGONAL1 => (align.end_x - align.start_x) as isize,
+		AlignType::DIAGONAL2 => (align.end_x - align.start_x) as isize,
+	}
 }
