@@ -1,7 +1,4 @@
-use crate::models::gameboard::{Gameboard, Stone, SIZE};
-
-use rand::Rng;
-// const SIZE: usize = 19;
+use crate::models::gameboard::{Gameboard, Stone, SIZE, AlignType};
 
 pub fn algo(gameboard: &mut Gameboard, current_stone: Stone) -> (isize, Option<Gameboard>) {
 	let alpha = std::isize::MIN;
@@ -13,13 +10,27 @@ pub fn algo(gameboard: &mut Gameboard, current_stone: Stone) -> (isize, Option<G
 	} else {
 		next_stone = Stone::BLACK;
 	}
-	// printboard(&gameboard);
-	// println!("current_stone: {:?}", current_stone);
-	gameboard.set_window_actives_cells();
-
-	alphabeta(gameboard, 4, alpha + 1, beta, true, current_stone, next_stone)
+	// gameboard.set_window_actives_cells();
+	alphabeta(gameboard, 1, alpha + 1, beta, true, current_stone, next_stone)
 }
 
+pub fn len_of_one_align(align: &(AlignType, usize, usize, usize, usize , bool, bool)) -> isize {
+
+	match align.0 {
+		AlignType::HORIZONTAL => (align.3 - align.1) as isize,
+		AlignType::VERTICAL => (align.4 - align.2) as isize,
+		AlignType::DIAGONAL1 => (align.3 - align.1) as isize,
+		AlignType::DIAGONAL2 => (align.3 - align.1) as isize,
+	}
+}
+
+pub fn is_left_open(align: &(AlignType, usize, usize, usize, usize , bool, bool)) -> bool {
+	align.5
+}
+
+pub fn is_right_open(align: &(AlignType, usize, usize, usize, usize , bool, bool)) -> bool {
+	align.6
+}
 
 pub fn printboard(gameboard: & Gameboard) {
 	println!("BOARD: ");
@@ -61,22 +72,13 @@ pub fn eval_one_direction(cells: [[Stone; SIZE]; SIZE], x_orig: isize, y_orig: i
 			align_len += 1;
 		}
 		else { break; }
-		// if current_stone == Stone::NOPE /*&& prev_stone == Stone::NOPE */{ break; }
-		// else if current_stone == not_align_color { break; }
-		// else if current_stone == other_stone {
-		// 	cmpt = (cmpt - 1);// ((x-x_orig).abs().max((y-y_orig).abs()));
 	}
 	if align_len > 5 {
 		cmpt += 1000;
 	}
-	// println!();
 	if align_color != stone {
-		// println!("FINAL: {} (* -1!)", -cmpt);
 		-cmpt
-
 	} else {
-		// println!("FINAL: {}", cmpt);
-
 		cmpt
 	}
 }
@@ -104,21 +106,67 @@ pub fn eval_all_directions(cells: [[Stone; SIZE]; SIZE], x: isize, y: isize, sto
 	let afters = [after_horizontal, after_vertical, after_diag_1, after_diag_2];
 
 	let value = afters.iter().map(|after| eval_one_direction(cells, x, y, stone, *after, win)).sum();
-
 	Some(value)
 }
 
 
 pub fn eval(gameboard: & Gameboard, stone: Stone) -> isize {
-	let range_h:Vec<usize> = (gameboard.win[0]..gameboard.win[2] as usize).collect();
-	let range_v:Vec<usize> = (gameboard.win[1]..gameboard.win[3] as usize).collect();
+	// let range_h:Vec<usize> = (gameboard.win[0]..gameboard.win[2] as usize).collect();
+	// let range_v:Vec<usize> = (gameboard.win[1]..gameboard.win[3] as usize).collect();
 
-	let value:isize = range_v.iter()
-		.flat_map(|y| range_h
-			.iter()
-			.map(move |x| eval_all_directions(gameboard.cells, *x as isize, *y as isize, stone, gameboard.win) )
-			.filter_map(|some| some))
-		.sum();
+	println!("---------------------------------------\n\t\tALIGN WHITE: gameboard.align_list_white: len: {}", gameboard.align_list_white.len());
+	dbg!(&gameboard.align_list_white);
+	println!("---------------------------------------\n\t\tALIGN BLACK: gameboard.align_list_white: len: {}", gameboard.align_list_white.len());
+	dbg!(&gameboard.align_list_black);
+
+	let mut value: isize = 0;
+	if stone == Stone::WHITE {
+		for align in &gameboard.align_list_white {
+			value += len_of_one_align(align);
+			if is_left_open(align) {
+				value += 1;
+			}
+			if is_right_open(align) {
+				value += 1;
+			}
+		}
+		for align in &gameboard.align_list_black {
+			value -= len_of_one_align(align);
+			if is_left_open(align) {
+				value += 1;
+			}
+			if is_right_open(align) {
+				value += 1;
+			}
+		}
+	}
+	else {
+		for align in &gameboard.align_list_black {
+			value += len_of_one_align(align);
+			if is_left_open(align) {
+				value += 1;
+			}
+			if is_right_open(align) {
+				value += 1;
+			}
+		}
+		for align in &gameboard.align_list_white {
+			value -= len_of_one_align(align);
+			if is_left_open(align) {
+				value += 1;
+			}
+			if is_right_open(align) {
+				value += 1;
+			}
+		}
+	}
+
+	// let value:isize = range_v.iter()
+	// 	.flat_map(|y| range_h
+	// 		.iter()
+	// 		.map(move |x| eval_all_directions(gameboard.cells, *x as isize, *y as isize, stone, gameboard.win) )
+	// 		.filter_map(|some| some))
+	// 	.sum();
 	value
 }
 
@@ -149,6 +197,8 @@ pub fn alphabeta(gameboard: & Gameboard, depth: i32, mut alpha: isize, mut beta:
 	// MIN MAX ALPHA-BETA
 	if noeud_max == true {
 		for new_board in gameboard.expand(stone) {
+
+			// new_board.set_align(gameboard);
 			
 			let (score, _) = alphabeta(&new_board, depth - 1, alpha, beta, !noeud_max, stone, next_stone);
 			if score > alpha {
