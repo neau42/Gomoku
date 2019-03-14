@@ -31,7 +31,7 @@ impl GameViewController for GameController {
 		let view = GameView::new();
 		let event = |state: &Gameboard, player: &mut Box<Player>, selected_move: Option<(usize, usize)>, stone: Stone| {
 			let (y, x) = selected_move.unwrap();
-			player.set_move(state.set_stone_on_cell(y, x, stone));
+			player.set_move(state.set_stone_on_cell(x, y, stone));
 		};
 		let controller = GameController {
 			view,
@@ -52,12 +52,20 @@ impl GameViewController for GameController {
 			PlayerType::Human => {
 				self.view.display_grid(ui, widget_ids, self.event, model, stone, true);
 				model.get_current_player().get_move()
-				// None//TMP
 			},
 			_ => {
 				self.view.display_grid(ui, widget_ids, self.event, model, stone, false);
-				// println!("je passe");
 				let (_, selected_move) = minmax_alphabeta::algo(&mut model.state, model.current_stone);
+
+				let test = selected_move.clone();
+				match test {
+					Some(test) => {
+						println!("\nIA:");
+						test.printboard();
+						test.print_all_align();
+					},
+					None => (),
+				}
 
 				// let (_, selected_move) = model.mdtf(0, 1);
 				// println!("j'ai fini");
