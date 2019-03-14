@@ -89,7 +89,6 @@ impl GameBuilderView {
             .label("First Ia depth: ")
             .set(widget_ids.number_dialer_first_ia_depth, ui)
         {
-            println!("first ia");
             if let GameBuilderEvent::NumberDialerFirstIaDepth(event) = event {
                 event(model, new_depth);
             }
@@ -107,7 +106,6 @@ impl GameBuilderView {
             .label("Second Ia depth: ")
             .set(widget_ids.number_dialer_second_ia_depth, ui)
         {
-            println!("second ia");
             if let GameBuilderEvent::NumberDialerSecondIaDepth(event) = event {
                 event(model, new_depth);
             }

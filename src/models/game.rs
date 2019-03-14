@@ -47,13 +47,6 @@ impl Game {
 		}
 	}
 
-	pub fn get_current_player(&mut self) -> &mut Player {
-		match self.current_stone {
-			Stone::WHITE => &mut self.white_player,
-			_ => &mut self.black_player,
-		}
-	}
-
 	pub fn change_window(&mut self) {
 		self.change_window = true;
 	}

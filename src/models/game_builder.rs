@@ -67,10 +67,13 @@ impl GameBuilder {
 
         let black_player: Player =  match self.mode_index {
             0 | 1 => human_new(),
-            _ => ia_new(self.first_ia_depth)
+            _ => {
+                ia_new(self.first_ia_depth)
+            }
         };
         let white_player: Player =  match self.mode_index {
             0 => human_new(),
+            1 => ia_new(self.first_ia_depth),
             _ => ia_new(self.second_ia_depth)
         };
         Game::new(black_player, white_player)

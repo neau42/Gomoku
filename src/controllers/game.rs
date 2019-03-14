@@ -4,6 +4,7 @@ use crate::WidgetIds;
 use crate::traits::view_controller::*;
 use crate::traits::view_model::GameViewModel;
 use crate::views::game::GameView;
+use crate::models::gameboard::*;
 use crate::models::game::*;
 
 use conrod::UiCell;
@@ -60,13 +61,27 @@ impl GameViewController for GameController {
 	fn show(&self, model: &mut Box<dyn GameViewModel>, ui: &mut UiCell, widget_ids: &WidgetIds) {
 		let model: &mut Game = model.get_model().downcast_mut::<Game>().unwrap();
 		
-		let current_player: &mut Player = model.get_current_player();
 		let mut is_human = true;
-		if let Player::Ia{ia, ..} = current_player  {
-			// ia.do_stuff
+		if let Player::Ia{ia, ..} = match model.current_stone {
+			Stone::WHITE => &model.white_player,
+			_ => &model.black_player,
+		}
+		{
+			// // None possible ?
+			// println!("depth = {}", ia.depth);
+			match ia.negascout(&mut model.state, &model.current_stone, ia.depth, isize::from(std::i16::MIN), isize::from(std::i16::MAX)).1 {
+				Some(best_move) => {
+					if model.state.make_move(best_move.0, best_move.1, model.current_stone) {
+						model.all_state.push(model.state.clone());
+						model.current_stone.switch();
+						model.update_last_move_time();
+					}
+					// println!("je passe");
+				}
+				None => ()/*println!("banana")*/,
+			};
 			is_human = false;
 		}
-		drop(current_player);
 		self.view.display_grid(ui, widget_ids, self.events.get(&widget_ids.grid).unwrap(), model, is_human);
 		self.view.display_player_turn(ui, widget_ids, model);
 		self.view.display_captures(ui, widget_ids, model.black_player.captures(), model.white_player.captures());
