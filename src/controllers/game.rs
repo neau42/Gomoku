@@ -62,11 +62,12 @@ impl GameViewController for GameController {
 					Some(test) => {
 						println!("\nIA:");
 						test.printboard();
-						test.print_all_align();
+						println!("\nValue: {}, Max {}", test.value, test.max);
+
+						// test.print_all_align();
 					},
 					None => (),
 				}
-
 				// let (_, selected_move) = model.mdtf(0, 1);
 				// println!("j'ai fini");
 				// dbg!(&selected_move);
