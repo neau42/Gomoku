@@ -215,8 +215,8 @@ impl Gameboard {
                 }
                 let tmp_stone = self.cells[tmp_x as usize][tmp_y as usize];
                 match tmp_stone {
-                    Stone::NOPE => true,
-                    _ => false,
+                    Stone::NOPE => false,
+                    _ => true,
                 }
             })
         };
@@ -227,13 +227,14 @@ impl Gameboard {
                 .iter()
                 .filter(|x| *y > starting_y || **x >= starting_x)
                 .any(|x| {
-                    if is_neighbour(*x, *y) {
+                    if self.cells[*x][*y] == Stone::NOPE && is_neighbour(*x, *y) {
                         selected_move = Some((*x, *y));
                         return true;
                     }
                     false
                 })
             );
+        // dbg!(&selected_move);
         selected_move
     }
 }
