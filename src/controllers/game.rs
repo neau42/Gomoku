@@ -69,9 +69,16 @@ impl GameViewController for GameController {
 			_ => &model.black_player,
 		}
 		{
+			let best_move = if model.all_state.len() == 1 {
+				let position = model.state.size / 2;
+				Some((position, position))
+			}
+			else {
+				ia.negascout(&mut model.state, &model.current_stone, ia.depth, isize::from(std::i16::MIN), isize::from(std::i16::MAX)).1
+			};
 			// // None possible ?
 			// println!("depth = {}", ia.depth);
-			match ia.negascout(&mut model.state, &model.current_stone, ia.depth, isize::from(std::i16::MIN), isize::from(std::i16::MAX)).1 {
+			match best_move{
 				Some(best_move) => {
 					if model.state.make_move(best_move.0, best_move.1, model.current_stone) {
 						model.all_state.push(model.state.clone());
@@ -80,7 +87,7 @@ impl GameViewController for GameController {
 					}
 					// println!("je passe");
 				}
-				None => ()/*println!("banana")*/,
+				None => println!("banana"),
 			};
 			is_human = false;
 		}
