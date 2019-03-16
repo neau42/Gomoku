@@ -14,13 +14,14 @@ pub fn algo(gameboard: &mut Gameboard, current_stone: Stone) -> (isize, Option<G
 }
 
 pub fn eval(gameboard: & Gameboard, is_max: bool) -> isize {
-	if !is_max {
-		gameboard.value as isize
-	}
-	else {
-		- (gameboard.value as isize)
+	// if !is_max {
+	// 	gameboard.value as isize
+	// }
+	// else {
+	// 	- (gameboard.value as isize)
 
-	}
+	// }
+	0
 }
 
 pub fn alphabeta(gameboard: & Gameboard, depth: i32, mut alpha: isize, mut beta: isize, is_max: bool, stone: Stone, next_stone: Stone) -> (isize, Option<Gameboard>) {
