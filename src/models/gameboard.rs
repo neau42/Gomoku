@@ -31,7 +31,6 @@ pub struct Gameboard {
     pub upperbound: isize,
     pub lowerbound: isize,
 	pub value: isize,
-	pub max: isize,
 	pub win: [usize; 4], 
 }
 
@@ -44,26 +43,132 @@ impl Gameboard {
             upperbound: isize::from(std::i16::MAX),
             lowerbound: isize::from(std::i16::MIN),
 			value: 0,
-			max: 0,
 			win: [SIZE, SIZE, 0, 0],
 		}
 	}
 }
 
+pub fn eval_value(cells: &[[Stone; SIZE]; SIZE], x_orig: isize, y_orig: isize, stone: Stone) -> isize {
+	let mut value = 0;
+	let x_min = (x_orig - 5).max(0);
+	let x_max = (x_orig + 5).min(SIZE as isize - 1);
+	let y_min = (y_orig - 5).max(0);
+	let y_max = (y_orig + 5).min(SIZE as isize - 1);
+	// let mut diag1 = Vec::new();
+	// let mut diag2 = Vec::new();
+	// let mut test: u32 = 0;
+	// let mut test2: u32 =  0b11_11_11_11_11_11_11_11_11_11_11_11_11_11_11_11;
+
+	// println!("test1: {:#034b}", test);
+	// println!("test2: {:#034b}", test2);
+
+
+	let x_min = (x_orig - 5).max(0);
+	let x_max = (x_orig + 5).min(SIZE as isize - 1);
+	let y_min = (y_orig - 5).max(0);
+	let y_max = (y_orig + 5).min(SIZE as isize - 1);
+
+	let horizontal: Vec<Stone> = (x_min..=x_max).map(|x| cells[x as usize][y_orig as usize]).collect();
+	let vertical: Vec<Stone> = (y_min..=y_max).map(|y| cells[x_orig as usize][y as usize]).collect();
+
+    // let len = (x_max - x_min).min(y_max - y_min);
+    // let len_between_x_min_and_orignal_x = (x_orig - x_min) as usize; 
+    // let len_between_y_min_and_orignal_y = (y_orig - y_min) as usize;
+	// let min_len = len_between_y_min_and_orignal_y.min(len_between_x_min_and_orignal_x);
+
+
+    // let diag1: Vec<Stone> = (x_min..=x_min + len).enumerate().inspect(|(index, x)| println!("x: {}, y: {}", x, y_orig - min_len as isize + *index as isize)).map(|(index, x)| cells[x as usize][y_orig as usize - min_len + index]).collect();
+
+	
+
+	let dist_x = (x_max - x_min);
+    let dist_y = (y_max - y_min);
+    let diag1: Vec<Stone> = if dist_x < dist_y {
+        let len_origin = (x_orig - x_min) as isize; 
+        (x_min..=x_min + dist_x).enumerate().inspect(|(index, x)| println!("x: {}, y: {}", x, y_orig - len_origin + *index as isize)).map(|(index, x)| cells[x as usize][y_orig as usize - len_origin as usize + index]).collect()
+    }
+    else {
+        let len_origin = (y_orig - y_min) as isize; 
+        (y_min..=y_min + dist_y).enumerate().inspect(|(index, y)| println!("x: {}, y: {}", x_orig - len_origin + *index as isize, y)).map(|(index, y)| cells[x_orig as usize - len_origin as usize + index][y as usize]).collect()
+    };
+
+
+    // let diag2: Vec<Stone> = (x_min..=x_min + len).enumerate().inspect(|(index, x)| println!("x: {}, y: {}", x, y_min as usize - index)).map(|(index, x)| cells[x as usize][y_max as usize - index]).collect();
+	// println!("x_min: {} x_min + len: {}");
+	dbg!(&horizontal);
+	dbg!(&vertical);
+	dbg!(&diag1);
+	// dbg!(&diag2);
+
+	let other_stone = match stone {
+		Stone::WHITE => Stone::BLACK,
+		Stone::BLACK => Stone::WHITE,
+		_ => Stone::WHITE,
+	};
+	// let list = [horizontal, vertical, diag1, diag2];
+	// for elem in &list {
+	// 	value += eval_line(&elem, stone, other_stone);
+	// }
+	value
+}
+
+// pub fn eval_line(slice: &[Stone], stone: Stone, other_stone: Stone) -> isize {
+// 	// let test = [Stone::NOPE, stone, stone, stone, Stone::NOPE];
+// 	// let test = [Stone::NOPE, stone, stone, stone, Stone::NOPE];
+
+// 	let mut len = 0;
+// 	let mut a = 0;
+// 	let mut b = 0;
+
+
+// 	for e in slice {
+// 		match *e {
+// 			s if s == stone => {
+// 				len += 1;
+// 			},
+// 			s if s == other_stone => {
+				
+// 			},
+// 			_ => (),
+// 		}
+// 	}
+
+
+
+// 	0
+// }
+
 impl Gameboard {
     pub fn make_move(&mut self, x: usize, y: usize, stone: Stone) -> bool {
 		if self.cells[x][y] == Stone::NOPE {
-            // if self.check_double_tree(x, y, stone) {
-            //     println!("you did a double tree");
-            //     return false;
-            // }
-            // else {
-			    self.cells[x][y] = stone;
-                return true;
-            // }
+			self.cells[x][y] = stone;
+			println!("\n-------------------");
+			self.printboard();
+			self.value = eval_value(&self.cells, x as isize, y as isize, stone);
+			return true;
         }
         false
     }
+	
+	pub fn printboard(&self) {
+		print!("BOARD: \n   ");
+		for x in 0..SIZE {
+			print!("{0: <2} ", x);
+		}
+		println!("");
+
+		for y in 0..SIZE {
+			print!("{0: <2} ", y);
+			for x in 0..SIZE {
+				match self.cells[x][y] {
+					Stone::WHITE => print!("W  "),
+					Stone::BLACK => print!("B  "),
+					_ => print!(".  ")
+				}
+			}
+			println!("");
+		}
+	}
 
 	pub fn eval(&self) -> isize {
 		0
@@ -196,7 +301,6 @@ impl Gameboard {
     //     // println!("len = {}", vector.len());
     //     vector
     // }
-
 
     pub fn next_move(&self, last_move: Option<(usize, usize)>) -> Option<(usize, usize)> {
         let directions: [(isize, isize); 8] = [(0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1,0), (-1,1)];
