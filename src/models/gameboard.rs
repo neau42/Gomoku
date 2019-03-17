@@ -59,8 +59,6 @@ impl Gameboard {
     pub fn unmake_move(&mut self, x: usize, y: usize) {
         self.cells[x][y] = Stone::NOPE;
     }
-
-	
 	
 	pub fn update_possible_move(&mut self, x: usize, y: usize) {
         let directions: [(isize, isize); 8] = [(0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1,0), (-1,1)];
@@ -76,7 +74,6 @@ impl Gameboard {
 		})
 	}
 	
-
 	pub fn next_move(&self, last_move: Option<(usize, usize)>) -> Option<(usize, usize)> {
 		let directions: [(isize, isize); 8] = [(0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1,0), (-1,1)];
 		let range: Vec<usize> = (0..self.size as usize).collect();

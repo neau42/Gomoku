@@ -35,10 +35,21 @@ impl GameController {
         }));
 
 		self.events.insert(widget_ids.button_undo, GameEvent::ButtonUndo(|model: &mut Game| {
-			if model.all_state.len() > 1 {
-				model.all_state.pop();
-				model.state = model.all_state.last().unwrap().clone();
-				model.current_stone.switch();
+			match model.game_mode {
+				GameMode::PlayerVsPlayer => {
+					if model.all_state.len() > 1 {
+						model.all_state.pop();
+						model.state = model.all_state.last().unwrap().clone();
+						model.current_stone.switch();
+					}
+				},
+				_ => {
+					if model.all_state.len() > 2 {
+						model.all_state.pop();
+						model.all_state.pop();
+						model.state = model.all_state.last().unwrap().clone();
+					}
+				}
 			}
 		}));
 
@@ -85,7 +96,6 @@ impl GameViewController for GameController {
 						model.current_stone.switch();
 						model.update_last_move_time();
 					}
-					// println!("je passe");
 				}
 				None => println!("banana"),
 			};
@@ -96,7 +106,9 @@ impl GameViewController for GameController {
 		self.view.display_captures(ui, widget_ids, model.black_player.captures(), model.white_player.captures());
 		self.view.display_last_move_time(ui, widget_ids, &model.last_move_time[..]);
 		self.view.display_button_quit(ui, widget_ids, self.events.get(&widget_ids.button_quit).unwrap(), model);
-		self.view.display_button_undo(ui, widget_ids, self.events.get(&widget_ids.button_undo).unwrap(), model);
+		if (model.game_mode != GameMode::IaVsIa) {
+			self.view.display_button_undo(ui, widget_ids, self.events.get(&widget_ids.button_undo).unwrap(), model);
+		}
 		// if !is_human {
 		// 	model.state = current_move.unwrap();
 		// 	model.current_stone.switch();
