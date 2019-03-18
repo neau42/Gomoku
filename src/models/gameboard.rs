@@ -54,89 +54,67 @@ pub fn eval_value(cells: &[[Stone; SIZE]; SIZE], x_orig: isize, y_orig: isize, s
 	let x_max = (x_orig + 5).min(SIZE as isize - 1);
 	let y_min = (y_orig - 5).max(0);
 	let y_max = (y_orig + 5).min(SIZE as isize - 1);
-	// let mut diag1 = Vec::new();
-	// let mut diag2 = Vec::new();
-	// let mut test: u32 = 0;
-	// let mut test2: u32 =  0b11_11_11_11_11_11_11_11_11_11_11_11_11_11_11_11;
-
-	// println!("test1: {:#034b}", test);
-	// println!("test2: {:#034b}", test2);
-
-
-	let x_min = (x_orig - 5).max(0);
-	let x_max = (x_orig + 5).min(SIZE as isize - 1);
-	let y_min = (y_orig - 5).max(0);
-	let y_max = (y_orig + 5).min(SIZE as isize - 1);
 
 	let horizontal: Vec<Stone> = (x_min..=x_max).map(|x| cells[x as usize][y_orig as usize]).collect();
 	let vertical: Vec<Stone> = (y_min..=y_max).map(|y| cells[x_orig as usize][y as usize]).collect();
 
-    // let len = (x_max - x_min).min(y_max - y_min);
-    // let len_between_x_min_and_orignal_x = (x_orig - x_min) as usize; 
-    // let len_between_y_min_and_orignal_y = (y_orig - y_min) as usize;
-	// let min_len = len_between_y_min_and_orignal_y.min(len_between_x_min_and_orignal_x);
+	let len_origin_min = (y_orig - y_min).min(x_orig - x_min);
+	let len_origin_max = (y_max - y_orig).min(x_max - x_orig);
 
+	let diag1: Vec<Stone> = ((x_orig-len_origin_min)..=(x_orig + len_origin_max)).enumerate()
+	.map(|(index, x)| cells[x as usize][y_orig as usize - len_origin_min as usize + index])
+	.collect();
 
-    // let diag1: Vec<Stone> = (x_min..=x_min + len).enumerate().inspect(|(index, x)| println!("x: {}, y: {}", x, y_orig - min_len as isize + *index as isize)).map(|(index, x)| cells[x as usize][y_orig as usize - min_len + index]).collect();
+	let len_origin_min = (y_max - y_orig).min(x_orig - x_min);
+	let len_origin_max = (y_orig - y_min).min(x_max - x_orig);
+	let diag2: Vec<Stone> = ((x_orig-len_origin_min)..=(x_orig + len_origin_max)).enumerate()
+	.map(|(index, x)| cells[x as usize][y_orig as usize + len_origin_min as usize - index])
+	.collect();
 
-	
-
-	let dist_x = (x_max - x_min);
-    let dist_y = (y_max - y_min);
-    let diag1: Vec<Stone> = if dist_x < dist_y {
-        let len_origin = (x_orig - x_min) as isize; 
-        (x_min..=x_min + dist_x).enumerate().inspect(|(index, x)| println!("x: {}, y: {}", x, y_orig - len_origin + *index as isize)).map(|(index, x)| cells[x as usize][y_orig as usize - len_origin as usize + index]).collect()
-    }
-    else {
-        let len_origin = (y_orig - y_min) as isize; 
-        (y_min..=y_min + dist_y).enumerate().inspect(|(index, y)| println!("x: {}, y: {}", x_orig - len_origin + *index as isize, y)).map(|(index, y)| cells[x_orig as usize - len_origin as usize + index][y as usize]).collect()
-    };
-
-
-    // let diag2: Vec<Stone> = (x_min..=x_min + len).enumerate().inspect(|(index, x)| println!("x: {}, y: {}", x, y_min as usize - index)).map(|(index, x)| cells[x as usize][y_max as usize - index]).collect();
-	// println!("x_min: {} x_min + len: {}");
-	dbg!(&horizontal);
-	dbg!(&vertical);
-	dbg!(&diag1);
-	// dbg!(&diag2);
+	print_slice(&horizontal);
+	print_slice(&vertical);
+	print_slice(&diag1);
+	print_slice(&diag2);
 
 	let other_stone = match stone {
 		Stone::WHITE => Stone::BLACK,
 		Stone::BLACK => Stone::WHITE,
 		_ => Stone::WHITE,
 	};
-	// let list = [horizontal, vertical, diag1, diag2];
-	// for elem in &list {
-	// 	value += eval_line(&elem, stone, other_stone);
-	// }
+	let list = [horizontal, vertical, diag1, diag2];
+	for elem in &list {
+		value += eval_line(&elem, stone, other_stone);
+	}
 	value
 }
 
-// pub fn eval_line(slice: &[Stone], stone: Stone, other_stone: Stone) -> isize {
-// 	// let test = [Stone::NOPE, stone, stone, stone, Stone::NOPE];
-// 	// let test = [Stone::NOPE, stone, stone, stone, Stone::NOPE];
+pub fn print_slice(slice: &[Stone]) {
+	println!("------");
+	for e in slice {
+		match e {
+			Stone::WHITE => print!("x "),
+			Stone::BLACK => print!("o "),
+			Stone::NOPE => print!(". "),
+		}
+	}
+	println!("");
+}
 
-// 	let mut len = 0;
-// 	let mut a = 0;
-// 	let mut b = 0;
+pub fn analyze_slice(slice: &[Stone], actual_stone: Stone) -> isize {
 
+	42
+}
 
-// 	for e in slice {
-// 		match *e {
-// 			s if s == stone => {
-// 				len += 1;
-// 			},
-// 			s if s == other_stone => {
-				
-// 			},
-// 			_ => (),
-// 		}
-// 	}
+pub fn eval_line(slice: &[Stone], stone: Stone, other_stone: Stone) -> isize {
 
+	// let len = slice.len();
 
+	// while (len > 0) {
 
-// 	0
-// }
+	// }
+
+	0
+}
 
 impl Gameboard {
     pub fn make_move(&mut self, x: usize, y: usize, stone: Stone) -> bool {
