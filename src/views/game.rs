@@ -64,6 +64,15 @@ impl GameView {
             .set(widget_ids.text_last_move_time, ui);
 	}
 
+    pub fn display_result(&self, ui: &mut UiCell, widget_ids: &WidgetIds, result: &str) {
+		widget::Text::new(result)
+            .right_from(widget_ids.grid, 50.0)
+            .down_from(widget_ids.text_last_move_time, 25.0)
+            .font_size(25)
+            .set(widget_ids.text_result, ui);
+	}
+
+
 	pub fn display_button_quit(&self, ui: &mut UiCell, widget_ids: &WidgetIds, event: &GameEvent, model: &mut Game) {
         if widget::Button::new()
             .h(75.0)

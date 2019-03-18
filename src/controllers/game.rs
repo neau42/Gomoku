@@ -10,6 +10,7 @@ use crate::models::game::*;
 use conrod::UiCell;
 use conrod::widget::id::Id;
 use std::collections::HashMap;
+use conrod::*;
 
 // use crate::minmax_alphabeta;
 
@@ -41,6 +42,7 @@ impl GameController {
 						model.all_state.pop();
 						model.state = model.all_state.last().unwrap().clone();
 						model.current_stone.switch();
+						model.result = None;
 					}
 				},
 				_ => {
@@ -48,6 +50,7 @@ impl GameController {
 						model.all_state.pop();
 						model.all_state.pop();
 						model.state = model.all_state.last().unwrap().clone();
+						model.result = None;
 					}
 				}
 			}
@@ -105,6 +108,14 @@ impl GameViewController for GameController {
 		self.view.display_player_turn(ui, widget_ids, model);
 		self.view.display_captures(ui, widget_ids, model.black_player.captures(), model.white_player.captures());
 		self.view.display_last_move_time(ui, widget_ids, &model.last_move_time[..]);
+		if model.is_finish() {
+			let result: &str = match model.result.unwrap() {
+				GameResult::BlackWin => "BLACK PLAYER WIN!",
+				GameResult::WhiteWin => "WHITE PLAYER WIN!",
+				GameResult::Equality => "EQUALITY!",
+			};
+			self.view.display_result(ui, widget_ids, result);
+		}
 		self.view.display_button_quit(ui, widget_ids, self.events.get(&widget_ids.button_quit).unwrap(), model);
 		if (model.game_mode != GameMode::IaVsIa) {
 			self.view.display_button_undo(ui, widget_ids, self.events.get(&widget_ids.button_undo).unwrap(), model);

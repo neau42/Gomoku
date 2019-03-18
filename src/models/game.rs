@@ -19,6 +19,13 @@ pub enum GameMode {
 	IaVsIa,
 }
 
+#[derive(Debug,PartialEq, Eq, Copy, Clone)]
+pub enum GameResult {
+	BlackWin,
+	WhiteWin,
+	Equality,
+}
+
 impl GameMode {
 	pub fn new(game_mode: &str) -> GameMode {
 		match game_mode {
@@ -49,6 +56,7 @@ pub struct Game {
 	pub change_window: bool,
 	pub game_mode: GameMode,
 	timer: Instant,
+	pub result: Option<GameResult>,
 }
 
 /// Creates a new game board.
@@ -65,6 +73,7 @@ impl Game {
 			change_window: false,
 			game_mode: GameMode::new(game_mode),
 			timer: Instant::now(),
+			result: None,
 		}
 	}
 
@@ -77,6 +86,10 @@ impl Game {
 		let time = ((elapsed.as_secs() as f64) + (f64::from(elapsed.subsec_nanos()) / 1_000_000_000.0));
 		self.last_move_time = format!("Last move time: {}s", time);
 		self.timer = Instant::now();
+	}
+
+	pub fn is_finish(&self) -> bool {
+		self.result.is_some()
 	}
 }
 

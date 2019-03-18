@@ -33,6 +33,7 @@ widget_ids! {
         text_turn,
         text_captures,
         text_last_move_time,
+        text_result,
         button_quit,
         button_undo,
     }
