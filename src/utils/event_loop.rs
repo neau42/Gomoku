@@ -17,7 +17,7 @@ impl EventLoop {
         let proxy = events_loop.create_proxy();
         thread::spawn(move || {
             thread::sleep(Duration::from_millis(16));
-            proxy.wakeup().ok(); // wakeup can fail only if the event loop went away
+            proxy.wakeup().ok();
         });
         events_loop.poll_events(|event| events.push(event));
 

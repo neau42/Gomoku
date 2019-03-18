@@ -23,6 +23,7 @@ pub struct GameBuilderController {
     events: HashMap<Id, GameBuilderEvent>,
 }
 
+#[rustfmt::skip]
 impl GameBuilderController {
     fn set_events(&mut self, widget_ids: &WidgetIds) {
         self.events.insert(widget_ids.dropdown_button_game_mode, GameBuilderEvent::DropdownButtonGameMode(|model: &mut GameBuilder, mode_index: usize| {
@@ -47,6 +48,7 @@ impl GameBuilderController {
     }
 }
 
+#[rustfmt::skip]
 impl GameViewController for GameBuilderController {
     fn new(widget_ids: &WidgetIds) -> Box<GameBuilderController> {
         let view = GameBuilderView::new();

@@ -1,7 +1,7 @@
-use crate::traits::view_model::*;
+use crate::models::game::Player;
 use crate::models::game::*;
 use crate::models::ia::*;
-use crate::models::game::Player;
+use crate::traits::view_model::*;
 use std::any::Any;
 
 pub struct GameBuilder {
@@ -16,12 +16,17 @@ pub struct GameBuilder {
 }
 
 impl GameBuilder {
-     pub fn new() -> GameBuilder {
+    pub fn new() -> GameBuilder {
         let min_depth = 1.0 as f32;
         let max_depth = 10.0 as f32;
         GameBuilder {
             mode_index: 0,
-            game_modes: ["Player vs Player", "Player vs Ia", "Ia vs Player", "Ia vs Ia"],
+            game_modes: [
+                "Player vs Player",
+                "Player vs Ia",
+                "Ia vs Player",
+                "Ia vs Ia",
+            ],
             first_ia_depth: min_depth,
             second_ia_depth: min_depth,
             min_depth,
@@ -65,16 +70,14 @@ impl GameBuilder {
             }
         };
 
-        let black_player: Player =  match self.mode_index {
+        let black_player: Player = match self.mode_index {
             0 | 1 => human_new(),
-            _ => {
-                ia_new(self.first_ia_depth)
-            }
+            _ => ia_new(self.first_ia_depth),
         };
-        let white_player: Player =  match self.mode_index {
+        let white_player: Player = match self.mode_index {
             0 | 2 => human_new(),
             1 => ia_new(self.first_ia_depth),
-            _ => ia_new(self.second_ia_depth)
+            _ => ia_new(self.second_ia_depth),
         };
         Game::new(black_player, white_player, self.game_modes[self.mode_index])
     }

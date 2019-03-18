@@ -12,6 +12,7 @@ pub struct GameView {
 	pub hoshi_size: f64,
 }
 
+#[rustfmt::skip]
 impl GameView {
 	pub fn new() -> GameView {
 		GameView {

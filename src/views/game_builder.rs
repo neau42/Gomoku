@@ -6,6 +6,7 @@ use conrod::*;
 pub struct GameBuilderView {
 }
 
+#[rustfmt::skip]
 impl GameBuilderView {
     pub fn new() -> GameBuilderView {
         GameBuilderView {
