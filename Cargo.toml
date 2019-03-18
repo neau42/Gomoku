@@ -16,3 +16,6 @@ rand = "0.6.5"
 [[bin]]
 name = "gomoku"
 path = "src/main.rs"
+
+[profile.release]
+lto = true
