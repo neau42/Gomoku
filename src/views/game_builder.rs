@@ -47,7 +47,7 @@ impl GameBuilderView {
             .h(75.0)
             .middle_of(widget_ids.game_builder_canvas)
             .down_from(widget_ids.button_start, 25.0)
-            .max_visible_items(3)
+            .max_visible_items(4)
             .color(color::LIGHT_BROWN)
             .border(1.0)
             .scrollbar_on_top()

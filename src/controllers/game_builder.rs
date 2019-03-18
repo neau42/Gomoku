@@ -70,7 +70,7 @@ impl GameViewController for GameBuilderController {
         if model.mode_index != 0 {
             self.view.display_number_dialer_first_ia_depth(ui, widget_ids, self.events.get(&widget_ids.number_dialer_first_ia_depth).unwrap(), model);
         }
-        if model.mode_index == 2 {
+        if model.mode_index == 3 {
             self.view.display_number_dialer_second_ia_depth(ui, widget_ids, self.events.get(&widget_ids.number_dialer_second_ia_depth).unwrap(), model);
         }
     }

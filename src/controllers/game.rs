@@ -35,10 +35,21 @@ impl GameController {
         }));
 
 		self.events.insert(widget_ids.button_undo, GameEvent::ButtonUndo(|model: &mut Game| {
-			if model.all_state.len() > 1 {
-				model.all_state.pop();
-				model.state = model.all_state.last().unwrap().clone();
-				model.current_stone.switch();
+			match model.game_mode {
+				GameMode::PlayerVsPlayer => {
+					if model.all_state.len() > 1 {
+						model.all_state.pop();
+						model.state = model.all_state.last().unwrap().clone();
+						model.current_stone.switch();
+					}
+				},
+				_ => {
+					if model.all_state.len() > 2 {
+						model.all_state.pop();
+						model.all_state.pop();
+						model.state = model.all_state.last().unwrap().clone();
+					}
+				}
 			}
 		}));
 
@@ -69,18 +80,24 @@ impl GameViewController for GameController {
 			_ => &model.black_player,
 		}
 		{
+			let best_move = if model.all_state.len() == 1 {
+				let position = model.state.size / 2;
+				Some((position, position))
+			}
+			else {
+				ia.negascout(&mut model.state, &model.current_stone, ia.depth, isize::from(std::i16::MIN), isize::from(std::i16::MAX)).1
+			};
 			// // None possible ?
 			// println!("depth = {}", ia.depth);
-			match ia.negascout(&mut model.state, &model.current_stone, ia.depth, isize::from(std::i16::MIN), isize::from(std::i16::MAX)).1 {
+			match best_move{
 				Some(best_move) => {
 					if model.state.make_move(best_move.0, best_move.1, model.current_stone) {
 						model.all_state.push(model.state.clone());
 						model.current_stone.switch();
 						model.update_last_move_time();
 					}
-					// println!("je passe");
 				}
-				None => ()/*println!("banana")*/,
+				None => println!("banana"),
 			};
 			is_human = false;
 		}
@@ -89,7 +106,9 @@ impl GameViewController for GameController {
 		self.view.display_captures(ui, widget_ids, model.black_player.captures(), model.white_player.captures());
 		self.view.display_last_move_time(ui, widget_ids, &model.last_move_time[..]);
 		self.view.display_button_quit(ui, widget_ids, self.events.get(&widget_ids.button_quit).unwrap(), model);
-		self.view.display_button_undo(ui, widget_ids, self.events.get(&widget_ids.button_undo).unwrap(), model);
+		if (model.game_mode != GameMode::IaVsIa) {
+			self.view.display_button_undo(ui, widget_ids, self.events.get(&widget_ids.button_undo).unwrap(), model);
+		}
 		// if !is_human {
 		// 	model.state = current_move.unwrap();
 		// 	model.current_stone.switch();

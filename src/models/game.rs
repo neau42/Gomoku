@@ -11,6 +11,25 @@ pub enum Player {
     Ia{ia: IA, nbr_capture: u8},
 }
 
+#[derive(Debug,PartialEq, Eq)]
+pub enum GameMode {
+	PlayerVsPlayer,
+	PlayerVsIa,
+	IaVsPlayer,
+	IaVsIa,
+}
+
+impl GameMode {
+	pub fn new(game_mode: &str) -> GameMode {
+		match game_mode {
+			"Player vs Player" => GameMode::PlayerVsPlayer,
+			"Player vs Ia" => GameMode::PlayerVsIa,
+			"Ia vs Player" => GameMode::IaVsPlayer,
+			_ => GameMode::IaVsIa,
+		}
+	} 
+}
+
 impl Player {
 	pub fn captures(&self) -> u8 {
 		match self {
@@ -28,12 +47,13 @@ pub struct Game {
 	pub all_state: Vec<Gameboard>,
     pub current_stone: Stone,
 	pub change_window: bool,
+	pub game_mode: GameMode,
 	timer: Instant,
 }
 
 /// Creates a new game board.
 impl Game {
-	pub fn new(black_player: Player, white_player: Player) -> Game {
+	pub fn new(black_player: Player, white_player: Player, game_mode: &str) -> Game {
 		let start_state = Gameboard::new();
         Game {
             state: start_state.clone(),
@@ -43,7 +63,8 @@ impl Game {
 			all_state: vec![start_state],
             current_stone: Stone::BLACK,
 			change_window: false,
-			timer: Instant::now()
+			game_mode: GameMode::new(game_mode),
+			timer: Instant::now(),
 		}
 	}
 
