@@ -47,7 +47,6 @@ impl Gameboard {
 		0
 	}
 
-
 	pub fn update_possible_move(&mut self, x: usize, y: usize) {
         let directions: [(isize, isize); 8] = [(0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1,0), (-1,1)];
         directions.iter().for_each(|(tmp_x, tmp_y)| {
@@ -84,7 +83,7 @@ impl Gameboard {
 			directions.iter().any(|(tmp_x, tmp_y)| {
 				let tmp_x = *tmp_x + x as isize;
 				let tmp_y = *tmp_y + y as isize;
-				if tmp_x < 0 || tmp_x >= self.size as isize || tmp_y < 0 || tmp_y >= self.size as isize {// ou superieur a size
+				if tmp_x < 0 || tmp_x >= self.size as isize || tmp_y < 0 || tmp_y >= self.size as isize {
 					return false;
 				}
 				let tmp_stone = self.cells[tmp_x as usize][tmp_y as usize];
@@ -114,9 +113,13 @@ impl Gameboard {
 }
 
 impl Gameboard {
+	// pub fn apply_capture(&mut self) -> u8 {
+
+	// }
+
 	pub fn make_move(&mut self, x: usize, y: usize, stone: Stone) -> bool {
-		if self.cells[x][y] == Stone::NOPE && self.check_double_tree(x, y, stone) {
-				let nbr_capture = apply_capture();
+		if self.cells[x][y] == Stone::NOPE && !self.check_double_tree(x, y, stone) {
+				// let nbr_capture = apply_capture();
 				self.cells[x][y] = stone;
 			    self.update_possible_move(x, y);
                 return true;
@@ -129,6 +132,8 @@ impl Gameboard {
     }
 
 }
+
+
 
 impl Gameboard {
     // True if capture is possible
@@ -193,7 +198,7 @@ impl Gameboard {
                 nbr_tree
             }
         });
-        println!("nbr_tree = {}", nbr_tree);
+        // println!("nbr_tree = {}", nbr_tree);
         nbr_tree >= 2
 	}
 }
