@@ -1,8 +1,5 @@
 //! Gameboard
 
-use std::cmp::Ordering;
-use std::hash::{Hash, Hasher};
-
 /// Size of game board.
 pub const SIZE: usize = 19;
 
@@ -21,6 +18,13 @@ impl Stone {
             _ => return,
         }
     }
+
+	pub fn opposant(self) -> Stone {
+        match self {
+            Stone::BLACK => Stone::WHITE,
+            _ => Stone::BLACK,
+        }
+    }
 }
 
 /// Stores game board information.
@@ -30,6 +34,7 @@ pub struct Gameboard {
     pub cells: [[Stone; SIZE]; SIZE],
 	pub value: isize,
 	pub possible_moves: [[bool; SIZE]; SIZE],
+	pub selected_move: Option<(usize, usize)>,
 }
 
 /// Creates a new game board.
@@ -40,6 +45,7 @@ impl Gameboard {
 			cells: [[Stone::NOPE; SIZE]; SIZE],
 			value: 0,
 			possible_moves: [[false; SIZE]; SIZE],
+			selected_move: None,
 		}
 	}
 }
@@ -95,7 +101,7 @@ pub fn print_slice(slice: &[Stone]) {
 			Stone::NOPE => print!(". "),
 		}
 	}
-	println!("");
+	println!();
 }
 
 pub fn analyze_slice_of_6(slice: &[Stone], current_stone: &Stone, other_stone: &Stone) -> isize {
@@ -103,10 +109,7 @@ pub fn analyze_slice_of_6(slice: &[Stone], current_stone: &Stone, other_stone: &
 	println!("==> {:?}", slice);
 
 	match slice {
-		
 		test if test[0] == *current_stone && test[0] == test[1] && test[0] == test[2] && test[0] == test[3] && test[0] == test[4] => 42,
-		// [_, s0, s1, s2, s3, s4] if *s0 == current_stone && s0 == s1 && s0 == s2 && s0 == s3 && s0 == s4 => 42,
-		// [s0, s1, s2, s3, s4, _] if *s0 == current_stone && s0 == s1 && s0 == s2 && s0 == s3 && s0 == s4 => 42,
 		[Stone::NOPE, s1, s2, s3, s4, Stone::NOPE] => {
 			print!("[Stone::NOPE, s1, s2, s3, s4, Stone::NOPE]!  ");
 			match (s1,s2,s3,s4) {
@@ -134,26 +137,17 @@ pub fn analyze_slice_of_6(slice: &[Stone], current_stone: &Stone, other_stone: &
 					print!("align 1  ");
 					1
 				},		// align 3
-
-				// (Stone::NOPE, s1, s2, s3) if *s1 == *current_stone && s1 == s2 && s1 == s3 => {
-				// 	print!("align 3_3  ");
-				// 	3
-				// },		// align 3
+				(s1, s2, Stone::NOPE, Stone::NOPE) if *s1 == *current_stone && s1 == s2 => 1, 		// align 2
 				_ => 0,
 			}
 		}
-		// test if test[0] == *current_stone && test[0] == test[1] && test[0] == test[2] && test[0] == test[3] && test[0] == test[4] => 1,
-
-		[Stone::NOPE, s1, s2, Stone::NOPE, Stone::NOPE, Stone::NOPE] if *s1 == *current_stone && s1 == s2 => 1,
 		_ => 0,
 	}
 }
 
 pub fn eval_line(slice: &[Stone], current_stone: &Stone, other_stone: &Stone) -> isize {
-
 	let mut value = 0;
 	let mut len = slice.len();
-	// println!("eval_line, len: {}", len);
 	if len < 5 { return 0; }
 
 	while len > 6 {
@@ -174,16 +168,12 @@ pub fn eval_line(slice: &[Stone], current_stone: &Stone, other_stone: &Stone) ->
 
 impl Gameboard {
 
-	// pub fn eval(&self) -> isize {
-	// 	0
-	// }
-
 	pub fn update_possible_move(&mut self, x: usize, y: usize) {
         let directions: [(isize, isize); 8] = [(0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1,0), (-1,1)];
         directions.iter().for_each(|(tmp_x, tmp_y)| {
 			let tmp_x = *tmp_x + x as isize;
 			let tmp_y = *tmp_y + y as isize;
-			if tmp_x < 0 || tmp_x >= self.size as isize || tmp_y < 0 || tmp_y >= self.size as isize {
+			if tmp_x < 0 || tmp_x >= SIZE as isize || tmp_y < 0 || tmp_y >= SIZE as isize {
 				return;
 			}
 			if self.cells[tmp_x as usize][tmp_y as usize] == Stone::NOPE {
@@ -192,53 +182,28 @@ impl Gameboard {
 		})
 	}
 	
-	pub fn next_move(&self, last_move: Option<(usize, usize)>) -> Option<(usize, usize)> {
-		let directions: [(isize, isize); 8] = [(0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1,0), (-1,1)];
-		let range: Vec<usize> = (0..self.size as usize).collect();
-		let starting_move: Option<(usize, usize)> = match last_move {
-			Some(last_move) => {
-				match last_move {
-					_ if { last_move.0 == SIZE - 1 && last_move.1 == SIZE - 1} => None,
-					_ if { last_move.0 == SIZE - 1} => Some((0, last_move.1 + 1)),
-					_ => Some((last_move.0 + 1, last_move.1)),
-				}
-			},
-			None => Some((0, 0)),
-		};
-		if (starting_move.is_none()) {
-			return None;
-		}
-		let (starting_x, starting_y) = starting_move.unwrap();
-		let mut selected_move: Option<(usize, usize)> = None;
-		let is_neighbour = |x: usize, y: usize| -> bool {
-			directions.iter().any(|(tmp_x, tmp_y)| {
-				let tmp_x = *tmp_x + x as isize;
-				let tmp_y = *tmp_y + y as isize;
-				if tmp_x < 0 || tmp_x >= self.size as isize || tmp_y < 0 || tmp_y >= self.size as isize {
-					return false;
-				}
-				let tmp_stone = self.cells[tmp_x as usize][tmp_y as usize];
-				match tmp_stone {
-					Stone::NOPE => false,
-					_ => true,
-				}
-			})
-		};
-		range
-			.iter()
-			.filter(|y| **y >= starting_y)
-			.any(|y| range
-				.iter()
-				.filter(|x| *y > starting_y || **x >= starting_x)
+	pub fn next_move(&mut self, mut starting_x: usize, mut starting_y: usize) {
+        if starting_x >= SIZE {
+            starting_x = 0;
+            starting_y += 1;
+            if starting_y >= SIZE {
+                self.selected_move = None;
+                return;
+            }
+        }
+        self.selected_move = None;
+		(0..SIZE)
+			.filter(|y| *y >= starting_y)
+			.any(|y| (0..SIZE)
+				.filter(|x| y > starting_y || *x >= starting_x)
 				.any(|x| {
-					if self.cells[*x][*y] == Stone::NOPE && self.possible_moves[*x][*y] {
-						selected_move = Some((*x, *y));
+					if self.possible_moves[x][y] && self.cells[x][y] == Stone::NOPE {
+                        self.selected_move = Some((x, y));
 						return true;
 					}
 					false
 				})
-			);
-		selected_move
+        );
 	}
 }
 
@@ -267,7 +232,7 @@ impl Gameboard {
 		for x in 0..SIZE {
 			print!("{0: <2} ", x);
 		}
-		println!("");
+		println!();
 
 		for y in 0..SIZE {
 			print!("{0: <2} ", y);
@@ -278,7 +243,7 @@ impl Gameboard {
 					_ => print!(".  ")
 				}
 			}
-			println!("");
+			println!();
 		}
 	}
 

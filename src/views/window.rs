@@ -6,6 +6,7 @@ use conrod::image::Id;
 pub struct WindowView {
 }
 
+#[rustfmt::skip]
 impl WindowView {
     pub fn new() -> WindowView {
         WindowView {

@@ -1,25 +1,25 @@
-use crate::controllers::game_builder::GameBuilderController;
 use crate::controllers::game::GameController;
+use crate::controllers::game_builder::GameBuilderController;
 use crate::controllers::window::WindowController;
+use crate::models::game_builder::*;
 use crate::traits::view_controller::GameViewController;
 use crate::traits::view_controller::PageType;
 use crate::traits::view_model::*;
 use crate::utils::event_loop::EventLoop as Events;
-use crate::models::game_builder::*;
 use crate::WidgetIds;
 
-use conrod::backend::winit::convert_event;
 use conrod::backend::glium::glium::glutin::*;
 use conrod::backend::glium::glium::Display;
 use conrod::backend::glium::glium::*;
 use conrod::backend::glium::Renderer;
-use glium::backend::glutin::DisplayCreationError;
+use conrod::backend::winit::convert_event;
+use conrod::glium::Surface;
 use conrod::image::Map;
 use conrod::*;
-use conrod::glium::Surface;
+use glium::backend::glutin::DisplayCreationError;
+use glium::texture::*;
 use ::image::open;
 use std::path::Path;
-use glium::texture::*;
 pub struct GameplayController {
     window_controller: WindowController,
     page_controller: Box<GameViewController>,
@@ -31,6 +31,7 @@ pub struct GameplayController {
     height: u32,
 }
 
+#[rustfmt::skip]
 impl GameplayController {
     pub fn new(width: u32, height: u32, ui: Ui, widget_ids: WidgetIds) -> GameplayController {
         let window_controller = WindowController::new();
@@ -48,7 +49,6 @@ impl GameplayController {
         }
     }
 
-
     pub fn open_window(&self) -> Result<Display, DisplayCreationError> {
         let window_builder = WindowBuilder::new()
             .with_decorations(false)
@@ -61,8 +61,8 @@ impl GameplayController {
     }
 
     pub fn is_callback(&self, event: &Event) -> bool{
-        match event {
-            glutin::Event::WindowEvent { event, .. } => match event {
+         if let glutin::Event::WindowEvent { event, .. } = event {
+             match event {
                 glutin::WindowEvent::CloseRequested | glutin::WindowEvent::KeyboardInput {
                     input: glutin::KeyboardInput {
                         state: ElementState::Released,
@@ -73,7 +73,6 @@ impl GameplayController {
                 } => return true,
                 _ => ()
             }
-            _ => ()
         }
         false
     }
@@ -112,7 +111,7 @@ impl GameplayController {
             }
             let ui = &mut self.ui.set_widgets();
             self.window_controller.show(ui, &self.widget_ids);
-            self.page_controller.show(&mut self.page_model, ui, &self.widget_ids);
+            self.page_controller.show(&mut (*self.page_model), ui, &self.widget_ids);
 
             // Draw the `Ui` if it has changed.
             if let Some(primitives) = ui.draw_if_changed() {

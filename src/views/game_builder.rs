@@ -6,6 +6,7 @@ use conrod::*;
 pub struct GameBuilderView {
 }
 
+#[rustfmt::skip]
 impl GameBuilderView {
     pub fn new() -> GameBuilderView {
         GameBuilderView {
@@ -33,8 +34,7 @@ impl GameBuilderView {
             .border(1.0)
             .label("Start")
             .set(widget_ids.button_start, ui)
-            .was_clicked()
-        {
+            .was_clicked() {
             if let GameBuilderEvent::ButtonStart(event) = event {
                 event(model);
             }
@@ -42,17 +42,16 @@ impl GameBuilderView {
     }
 
     pub fn display_dropdown_button_game_mode(&self, ui: &mut UiCell, widget_ids: &WidgetIds, event: &GameBuilderEvent, model: &mut GameBuilder) {
-        for mode_index in widget::DropDownList::new(&model.game_modes, Some(model.mode_index))
-            .w_of(widget_ids.game_builder_canvas)
-            .h(75.0)
-            .middle_of(widget_ids.game_builder_canvas)
-            .down_from(widget_ids.button_start, 25.0)
-            .max_visible_items(4)
-            .color(color::LIGHT_BROWN)
-            .border(1.0)
-            .scrollbar_on_top()
-            .set(widget_ids.dropdown_button_game_mode, ui)
-        {
+        if let Some(mode_index) = widget::DropDownList::new(&model.game_modes, Some(model.mode_index))
+        .w_of(widget_ids.game_builder_canvas)
+        .h(75.0)
+        .middle_of(widget_ids.game_builder_canvas)
+        .down_from(widget_ids.button_start, 25.0)
+        .max_visible_items(4)
+        .color(color::LIGHT_BROWN)
+        .border(1.0)
+        .scrollbar_on_top()
+        .set(widget_ids.dropdown_button_game_mode, ui) {
             if let GameBuilderEvent::DropdownButtonGameMode(event) = event {
                 event(model, mode_index);
             }
@@ -70,8 +69,7 @@ impl GameBuilderView {
             .border(1.0)
             .label(&label[..])
             .set(widget_ids.toggle_button_weight_boxes, ui)
-            .last()
-        {
+            .last() {
             if let GameBuilderEvent::ToggleButtonWeightBoxes(event) = event {
                 event(model, value);
             }
@@ -79,7 +77,7 @@ impl GameBuilderView {
     }
 
     pub fn display_number_dialer_first_ia_depth(&self, ui: &mut UiCell, widget_ids: &WidgetIds, event: &GameBuilderEvent, model: &mut GameBuilder) {
-        for new_depth in widget::NumberDialer::new(model.first_ia_depth, model.min_depth, model.max_depth, 0)
+       if let Some(new_depth) = widget::NumberDialer::new(model.first_ia_depth, model.min_depth, model.max_depth, 0)
             .w_of(widget_ids.game_builder_canvas)
             .h(75.0)
             .middle_of(widget_ids.game_builder_canvas)
@@ -87,8 +85,7 @@ impl GameBuilderView {
             .color(color::LIGHT_BROWN)
             .border(1.0)
             .label("First Ia depth: ")
-            .set(widget_ids.number_dialer_first_ia_depth, ui)
-        {
+            .set(widget_ids.number_dialer_first_ia_depth, ui) {
             if let GameBuilderEvent::NumberDialerFirstIaDepth(event) = event {
                 event(model, new_depth);
             }
@@ -96,7 +93,7 @@ impl GameBuilderView {
     }
 
     pub fn display_number_dialer_second_ia_depth(&self, ui: &mut UiCell, widget_ids: &WidgetIds, event: &GameBuilderEvent, model: &mut GameBuilder) {
-        for new_depth in widget::NumberDialer::new(model.second_ia_depth, model.min_depth, model.max_depth, 0)
+       if let Some(new_depth) = widget::NumberDialer::new(model.second_ia_depth, model.min_depth, model.max_depth, 0)
             .w_of(widget_ids.game_builder_canvas)
             .h(75.0)
             .middle_of(widget_ids.game_builder_canvas)
@@ -104,8 +101,7 @@ impl GameBuilderView {
             .color(color::LIGHT_BROWN)
             .border(1.0)
             .label("Second Ia depth: ")
-            .set(widget_ids.number_dialer_second_ia_depth, ui)
-        {
+            .set(widget_ids.number_dialer_second_ia_depth, ui) {
             if let GameBuilderEvent::NumberDialerSecondIaDepth(event) = event {
                 event(model, new_depth);
             }

@@ -18,7 +18,7 @@ impl IA {
         false
     }
 
-    pub fn eval(&self, gameboard: & Gameboard) -> isize {
+    pub fn eval(&self, gameboard: &Gameboard) -> isize {
 		// println!("\n\n_____________");
 		// gameboard.printboard();
 		// println!("eval: {}", gameboard.value);
@@ -29,53 +29,52 @@ impl IA {
     /// si alpha < current < beta, alors current est la valeur minimax
     /// si current <= alpha, alors la vraie valeur minimax m vérifie : m <= current <= alpha
     /// si beta <= current alors la vraie valeur minimax m vérifie : beta <= current <= m
-    pub fn negascout(&self, state: &mut Gameboard, stone: &Stone, depth: u8, mut alpha: isize, beta: isize) -> (isize, Option<(usize, usize)>) {
-        if self.is_victory() ||  depth <= 0 {
-            return (self.eval(state), None);
+    pub fn negascout(&self, state: &mut Gameboard, stone: Stone, depth: u8, mut alpha: isize, beta: isize) -> isize {
+        if depth == 0 || self.is_victory() {
+            return self.eval(state);
         }
-// 		// state.printboard();
-        let original_possible_moves = state.possible_moves.clone();
-        let best_move = state.next_move(None);
-        if best_move.is_none() {
-            return (self.eval(state), None);
+        let original_possible_moves = state.possible_moves;
+        state.next_move(0,0);
+        if state.selected_move.is_none() {
+            return self.eval(state);
         }
-        let mut last_move = best_move.clone();
-        let mut best_move = best_move.unwrap();
-        
-        state.make_move(best_move.0, best_move.1, *stone);
-        let mut current = -self.negascout(state, stone, depth - 1, -beta, -alpha).0;
+        let mut best_move: (usize, usize) = state.selected_move.unwrap();
+        let mut last_move = best_move;
+
+        state.make_move(best_move.0, best_move.1, stone);
+        let mut current = -self.negascout(state, stone.opposant(), depth - 1, -beta, -alpha);
         state.unmake_move(best_move.0, best_move.1);
-        state.possible_moves = original_possible_moves.clone();
+        state.possible_moves = original_possible_moves;
         if current >= alpha {
             alpha = current;
         }
         if current < beta {
-            'move_loop: loop {
-                let single_move = state.next_move(last_move);
-                if single_move.is_none() {
-                    break 'move_loop;
+            loop {
+                state.next_move(last_move.0 + 1, last_move.1);
+                if state.selected_move.is_none() {
+                    break;
                 }
-                last_move = single_move.clone();
-                let single_move = single_move.unwrap();
-                state.make_move(single_move.0, single_move.1, *stone);
-                let mut score = -self.negascout(state, stone, depth - 1, -(alpha + 1), -alpha).0;
+                last_move = state.selected_move.unwrap();
+                state.make_move(last_move.0, last_move.1, stone);
+                let mut score = -self.negascout(state, stone.opposant(), depth - 1, -(alpha + 1), -alpha);
                 if score > alpha && score < beta {
-                    score = -self.negascout(state, stone, depth - 1, -beta, -alpha).0;
+                    score = -self.negascout(state, stone.opposant(), depth - 1, -beta, -alpha);
                 }
-                state.unmake_move(single_move.0, single_move.1);
-                state.possible_moves = original_possible_moves.clone();
+                state.unmake_move(last_move.0, last_move.1);
+                state.possible_moves = original_possible_moves;
                 if score > current {
                     current = score;
-                    best_move = single_move;
+                    best_move = last_move;
                     if score > alpha {
-                        alpha = score;
-                        if score > beta {
-                            break 'move_loop;
+                        if score >= beta {
+                            break;
                         }
+                        alpha = score;
                     }
                 }
             }
         }
-        return (current, Some(best_move));
+        state.selected_move = Some(best_move);
+        current
     }
 }

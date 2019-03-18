@@ -23,6 +23,7 @@ pub struct GameBuilderController {
     events: HashMap<Id, GameBuilderEvent>,
 }
 
+#[rustfmt::skip]
 impl GameBuilderController {
     fn set_events(&mut self, widget_ids: &WidgetIds) {
         self.events.insert(widget_ids.dropdown_button_game_mode, GameBuilderEvent::DropdownButtonGameMode(|model: &mut GameBuilder, mode_index: usize| {
@@ -47,6 +48,7 @@ impl GameBuilderController {
     }
 }
 
+#[rustfmt::skip]
 impl GameViewController for GameBuilderController {
     fn new(widget_ids: &WidgetIds) -> Box<GameBuilderController> {
         let view = GameBuilderView::new();
@@ -58,20 +60,20 @@ impl GameViewController for GameBuilderController {
         Box::new(controller)
     }
     
-    fn show(&self, model:  &mut Box<dyn GameViewModel>, ui: &mut UiCell, widget_ids: &WidgetIds) {
+    fn show(&self, model:  &mut dyn GameViewModel, ui: &mut UiCell, widget_ids: &WidgetIds) {
         let model: &mut GameBuilder = match model.get_model().downcast_mut::<GameBuilder>() {
             Some(model) => model,
             None => panic!("&GameViewModel isn't a GameBuilder!"),
         };
         self.view.display_canvas(ui, widget_ids);
-        self.view.display_button_start(ui, widget_ids, self.events.get(&widget_ids.button_start).unwrap(), model);
-        self.view.display_dropdown_button_game_mode(ui, widget_ids, self.events.get(&widget_ids.dropdown_button_game_mode).unwrap(), model); 
-        self.view.display_toggle_button(ui, widget_ids, self.events.get(&widget_ids.toggle_button_weight_boxes).unwrap(), model);
+        self.view.display_button_start(ui, widget_ids, &self.events[&widget_ids.button_start], model);
+        self.view.display_dropdown_button_game_mode(ui, widget_ids, &self.events[&widget_ids.dropdown_button_game_mode], model); 
+        self.view.display_toggle_button(ui, widget_ids, &self.events[&widget_ids.toggle_button_weight_boxes], model);
         if model.mode_index != 0 {
-            self.view.display_number_dialer_first_ia_depth(ui, widget_ids, self.events.get(&widget_ids.number_dialer_first_ia_depth).unwrap(), model);
+            self.view.display_number_dialer_first_ia_depth(ui, widget_ids, &self.events[&widget_ids.number_dialer_first_ia_depth], model);
         }
         if model.mode_index == 3 {
-            self.view.display_number_dialer_second_ia_depth(ui, widget_ids, self.events.get(&widget_ids.number_dialer_second_ia_depth).unwrap(), model);
+            self.view.display_number_dialer_second_ia_depth(ui, widget_ids, &self.events[&widget_ids.number_dialer_second_ia_depth], model);
         }
     }
 

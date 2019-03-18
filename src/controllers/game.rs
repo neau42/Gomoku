@@ -41,6 +41,7 @@ impl GameController {
 						model.all_state.pop();
 						model.state = model.all_state.last().unwrap().clone();
 						model.current_stone.switch();
+						model.result = None;
 					}
 				},
 				_ => {
@@ -48,6 +49,7 @@ impl GameController {
 						model.all_state.pop();
 						model.all_state.pop();
 						model.state = model.all_state.last().unwrap().clone();
+						model.result = None;
 					}
 				}
 			}
@@ -71,7 +73,7 @@ impl GameViewController for GameController {
 		Box::new(controller)
 	}
 
-	fn show(&self, model: &mut Box<dyn GameViewModel>, ui: &mut UiCell, widget_ids: &WidgetIds) {
+	fn show(&self, model: &mut dyn GameViewModel, ui: &mut UiCell, widget_ids: &WidgetIds) {
 		let model: &mut Game = model.get_model().downcast_mut::<Game>().unwrap();
 		
 		let mut is_human = true;
@@ -85,7 +87,8 @@ impl GameViewController for GameController {
 				Some((position, position))
 			}
 			else {
-				ia.negascout(&mut model.state, &model.current_stone, ia.depth, isize::from(std::i16::MIN), isize::from(std::i16::MAX)).1
+				ia.negascout(&mut model.state, model.current_stone, ia.depth, isize::from(std::i16::MIN), isize::from(std::i16::MAX));
+				model.state.selected_move
 			};
 			// // None possible ?
 			// println!("depth = {}", ia.depth);
@@ -101,13 +104,21 @@ impl GameViewController for GameController {
 			};
 			is_human = false;
 		}
-		self.view.display_grid(ui, widget_ids, self.events.get(&widget_ids.grid).unwrap(), model, is_human);
+		self.view.display_grid(ui, widget_ids, &self.events[&widget_ids.grid], model, is_human);
 		self.view.display_player_turn(ui, widget_ids, model);
 		self.view.display_captures(ui, widget_ids, model.black_player.captures(), model.white_player.captures());
 		self.view.display_last_move_time(ui, widget_ids, &model.last_move_time[..]);
-		self.view.display_button_quit(ui, widget_ids, self.events.get(&widget_ids.button_quit).unwrap(), model);
-		if (model.game_mode != GameMode::IaVsIa) {
-			self.view.display_button_undo(ui, widget_ids, self.events.get(&widget_ids.button_undo).unwrap(), model);
+		if model.is_finish() {
+			let result: &str = match model.result.unwrap() {
+				GameResult::BlackWin => "BLACK PLAYER WIN!",
+				GameResult::WhiteWin => "WHITE PLAYER WIN!",
+				GameResult::Equality => "EQUALITY!",
+			};
+			self.view.display_result(ui, widget_ids, result);
+		}
+		self.view.display_button_quit(ui, widget_ids, &self.events[&widget_ids.button_quit], model);
+		if model.game_mode != GameMode::IaVsIa {
+			self.view.display_button_undo(ui, widget_ids, &self.events[&widget_ids.button_undo], model);
 		}
 		// if !is_human {
 		// 	model.state = current_move.unwrap();
