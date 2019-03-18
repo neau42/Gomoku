@@ -3,7 +3,6 @@ use crate::models::gameboard::*;
 use crate::models::ia::*;
 use crate::traits::view_model::*;
 use std::any::Any;
-use std::time::Duration;
 use std::time::Instant;
 
 pub enum Player {
@@ -84,7 +83,7 @@ impl Game {
     pub fn update_last_move_time(&mut self) {
         let elapsed = self.timer.elapsed();
         let time =
-            ((elapsed.as_secs() as f64) + (f64::from(elapsed.subsec_nanos()) / 1_000_000_000.0));
+            (elapsed.as_secs() as f64) + (f64::from(elapsed.subsec_nanos()) / 1_000_000_000.0);
         self.last_move_time = format!("Last move time: {}s", time);
         self.timer = Instant::now();
     }

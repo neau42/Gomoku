@@ -10,7 +10,6 @@ mod traits;
 
 extern crate rand;
 
-mod minmax_alphabeta;
 
 use controllers::gameplay::*;
 use conrod::*;
@@ -40,7 +39,7 @@ widget_ids! {
 }
 
 fn main() {
-    let mut ui = UiBuilder::new([WIDTH as f64, HEIGHT as f64]).build();
+    let mut ui = UiBuilder::new([f64::from(WIDTH), f64::from(HEIGHT)]).build();
     let widget_ids = WidgetIds::new(ui.widget_id_generator());
 
     let mut gameplay: GameplayController = GameplayController::new(WIDTH, HEIGHT, ui, widget_ids);

@@ -23,7 +23,7 @@ impl<'a> Board<'a> {
         };
         Board {
             common: widget::CommonBuilder::default(),
-            board_state: board_state,
+            board_state,
             is_human,
             color,
         }
@@ -158,7 +158,6 @@ impl<'a> Widget for Board<'a> {
     }
 
     fn style(&self) -> Self::Style {
-        ()
     }
 
     fn update(self, args: widget::UpdateArgs<Self>) -> Self::Event {
@@ -179,30 +178,20 @@ impl<'a> Widget for Board<'a> {
         if !self.is_human {
             return InfoClick { is_click: 0, x, y };
         }
-        if interaction == Interaction::Hover {
-            if self.board_state.cells[x][y] == Stone::NOPE {
-                draw_one_stone(
-                    [x, y],
-                    (self.color).with_alpha(0.5),
-                    size,
-                    id,
-                    rect,
-                    ui,
-                    state.cell_index.stones[x + y * size],
-                );
-            }
-        } else if interaction == Interaction::Press {
-            if self.board_state.cells[x][y] == Stone::NOPE {
-                draw_one_stone(
-                    [x, y],
-                    self.color,
-                    size,
-                    id,
-                    rect,
-                    ui,
-                    state.cell_index.stones[x + y * size],
-                );
-            }
+        if (interaction == Interaction::Hover || interaction == Interaction::Press) && self.board_state.cells[x][y] == Stone::NOPE {
+            let color = match interaction {
+                Interaction::Hover => self.color.with_alpha(0.5),
+                _ => self.color,
+            };
+            draw_one_stone(
+                [x, y],
+                color,
+                size,
+                id,
+                rect,
+                ui,
+                state.cell_index.stones[x + y * size],
+            );
         }
         InfoClick { is_click, x, y }
     }
@@ -269,7 +258,6 @@ fn draw_hoshi(size: usize, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
 
 /// draw all stones presents on board
 fn draw_stones(board_state: &Gameboard, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
-    let half_w = rect.w() / 2.0;
     for i in 0..board_state.size * board_state.size {
         match board_state.cells[i % board_state.size][i / board_state.size] {
             Stone::WHITE => draw_one_stone(

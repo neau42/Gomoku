@@ -18,7 +18,7 @@ use conrod::image::Map;
 use conrod::*;
 use glium::backend::glutin::DisplayCreationError;
 use glium::texture::*;
-use image::open;
+use ::image::open;
 use std::path::Path;
 pub struct GameplayController {
     window_controller: WindowController,
@@ -61,8 +61,8 @@ impl GameplayController {
     }
 
     pub fn is_callback(&self, event: &Event) -> bool{
-        match event {
-            glutin::Event::WindowEvent { event, .. } => match event {
+         if let glutin::Event::WindowEvent { event, .. } = event {
+             match event {
                 glutin::WindowEvent::CloseRequested | glutin::WindowEvent::KeyboardInput {
                     input: glutin::KeyboardInput {
                         state: ElementState::Released,
@@ -73,7 +73,6 @@ impl GameplayController {
                 } => return true,
                 _ => ()
             }
-            _ => ()
         }
         false
     }
@@ -112,7 +111,7 @@ impl GameplayController {
             }
             let ui = &mut self.ui.set_widgets();
             self.window_controller.show(ui, &self.widget_ids);
-            self.page_controller.show(&mut self.page_model, ui, &self.widget_ids);
+            self.page_controller.show(&mut (*self.page_model), ui, &self.widget_ids);
 
             // Draw the `Ui` if it has changed.
             if let Some(primitives) = ui.draw_if_changed() {
