@@ -19,9 +19,9 @@ impl IA {
     }
 
     pub fn eval(&self, gameboard: &Gameboard) -> isize {
-		// println!("\n\n_____________");
-		// gameboard.printboard();
-		// println!("eval: {}", gameboard.value);
+		println!("\n\n_____________");
+		gameboard.printboard();
+		println!("eval: {}", gameboard.value);
 
 		-gameboard.value
     }
@@ -30,6 +30,7 @@ impl IA {
     /// si current <= alpha, alors la vraie valeur minimax m vérifie : m <= current <= alpha
     /// si beta <= current alors la vraie valeur minimax m vérifie : beta <= current <= m
     pub fn negascout(&self, state: &mut Gameboard, stone: Stone, depth: u8, mut alpha: isize, beta: isize) -> isize {
+		// println!("negascout");
 		let mut all_eval: Vec<((usize, usize), isize)> = Vec::new();
         if depth == 0 || self.is_victory() {
             return self.eval(state);
@@ -44,6 +45,7 @@ impl IA {
 
         state.make_move(best_move.0, best_move.1, stone);
         let mut current = -self.negascout(state, stone.opposant(), depth - 1, -beta, -alpha);
+		// println!("push [1] score {}", current);
 		all_eval.push((best_move, current));
         state.unmake_move(best_move.0, best_move.1);
         state.possible_moves = original_possible_moves;
@@ -59,9 +61,12 @@ impl IA {
                 last_move = state.selected_move.unwrap();
                 state.make_move(last_move.0, last_move.1, stone);
                 let mut score = -self.negascout(state, stone.opposant(), depth - 1, -(alpha + 1), -alpha);
+				// println!("push [2] score {}", score);
 				all_eval.push((last_move, score));
                 if score > alpha && score < beta {
                     score = -self.negascout(state, stone.opposant(), depth - 1, -beta, -alpha);
+					println!("push [2] score {}", score);
+
 					all_eval.push((last_move, score));
 
                 }
