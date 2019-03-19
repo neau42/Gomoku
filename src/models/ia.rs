@@ -91,37 +91,27 @@ impl IA {
 }
 
 pub fn print_all_state(all_eval: Vec<((usize, usize), isize)>) {
-
 	let mut print: bool;
-
+	print!("ALL STATES: \n   ");
 	for x in 0..SIZE {
-		print!("{0: <3} ", x);
+		print!("{0: <2} ", x);
 	}
 	println!();
 	for y in 0..SIZE {
-			print!("{0: <3} ", y);
+			print!("{0: <2} ", y);
 			for x in 0..SIZE {
 				print = false;
 				'geteval: for elem in &all_eval {
 					if elem.0 == (x as usize, y as usize) {
-						print!("{0: <4}", elem.1);
+						print!("{0: <3}", elem.1);
 						print = true;
 						break 'geteval;
 					}
 				}
 				if !print {
-						print!(".   ");
-
-
+						print!(".  ");
 				}
-				// 	Stone::BLACK => print!("B  "),
-				// 	_ => print!(".  ")
-				// }
 			}
 			println!();
 		}
-
-
-
-
 }
