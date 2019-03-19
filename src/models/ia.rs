@@ -65,8 +65,6 @@ impl IA {
 				all_eval.push((last_move, score));
                 if score > alpha && score < beta {
                     score = -self.negascout(state, stone.opposant(), depth - 1, -beta, -alpha);
-					println!("push [2] score {}", score);
-
 					all_eval.push((last_move, score));
 
                 }

@@ -264,7 +264,7 @@ impl Gameboard {
 			self.value = val.0;
 			if val.1 > 0 {
 
-				self.apply_capture(x, y, stone, other_stone, val.1); //////////////////////       APPLY CAPTURE !!!!!!!!!
+				self.apply_capture(x, y, stone, other_stone, val.1); //				       APPLY CAPTURE !!!!!!!!!
 				match stone {
 					Stone::WHITE => self.white_captures += val.1,
 					Stone::BLACK => self.black_captures += val.1,
