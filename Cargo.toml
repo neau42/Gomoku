@@ -17,5 +17,5 @@ rand = "0.6.5"
 name = "gomoku"
 path = "src/main.rs"
 
-[profile.release]
-lto = true
+# [profile.release]
+# lto = true

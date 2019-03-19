@@ -223,10 +223,14 @@ impl Gameboard {
 	pub fn apply_capture(&mut self, x: usize, y: usize, stone: Stone, other_Stone: Stone, mut nb_capture: usize) {
         let directions: [(isize, isize); 8] = [(0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1,0), (-1,1)];
 
+		println!("[apply_capture]");
 		while nb_capture > 0 {
+			println!("apply_capture: nb: {}", nb_capture);
 			directions.iter().any(|(tmp_x, tmp_y)| {
-				let mut old_x = None;
-				let mut old_y = None;
+				let mut x1 = None;
+				let mut x2 = None;
+				let mut y1 = None;
+				let mut y2 = None;
 				(1..=3 as isize).all(|i| {
 					let tmp_x = *tmp_x  * i + x as isize;
 					let tmp_y = *tmp_y * i + y as isize;
@@ -236,20 +240,33 @@ impl Gameboard {
 					let tmp_stone = self.cells[tmp_x as usize][tmp_y as usize];
 					match i {
 						1 => {
-								if (tmp_stone != stone && tmp_stone != Stone::NOPE) {
-									old_x = Some(tmp_x);
-									old_y = Some(tmp_y);
+								if tmp_stone != stone && tmp_stone != Stone::NOPE {
+									x1 = Some(tmp_x);
+									y1 = Some(tmp_y);
+									println!("1_ x1 {}, y1 {}", tmp_x, tmp_y);
+									true
+								} else {
+								false
 								}
-							tmp_stone != stone && tmp_stone != Stone::NOPE
 							},
 						2 => {
-							if (tmp_stone != stone && tmp_stone != Stone::NOPE) {
-								self.cells[old_x.unwrap() as usize][old_y.unwrap() as usize] = Stone::NOPE;
-								self.cells[tmp_x as usize][tmp_y as usize] = Stone::NOPE;
+								if tmp_stone != stone && tmp_stone != Stone::NOPE {
+									x2 = Some(tmp_x);
+									y2 = Some(tmp_y);
+									true 
+								} else {
+								false
+								}
 							}
-							tmp_stone != stone && tmp_stone != Stone::NOPE
+						_ => {
+							if tmp_stone == stone {
+								self.cells[x1.unwrap() as usize][y1.unwrap() as usize] = Stone::NOPE;
+								self.cells[x2.unwrap() as usize][y2.unwrap() as usize] = Stone::NOPE;
+								true
+							} else {
+								false
+							}
 						}
-						_ => tmp_stone == stone
 					}
 				})
 			});
@@ -258,8 +275,6 @@ impl Gameboard {
 	}
 
 	pub fn make_move(&mut self, x: usize, y: usize, stone: Stone) -> bool {
-
-
 		if self.cells[x][y] == Stone::NOPE && !self.check_double_tree(x, y, stone) {
 			let other_stone = match stone {
 					Stone::WHITE => Stone::BLACK,
@@ -272,9 +287,11 @@ impl Gameboard {
 			// self.printboard();
 			// println!("x: {}, y: {}", x, y);
 			let val = eval_value(&self.cells, x as isize, y as isize, &stone);
+
 			self.value = val.0;
 			if val.1 > 0 {
-				// self.apply_capture(x, y, stone, other_stone, val.1); //////////////////////       APPLY CAPTURE !!!!!!!!!
+
+				self.apply_capture(x, y, stone, other_stone, val.1); //////////////////////       APPLY CAPTURE !!!!!!!!!
 				match stone {
 					Stone::WHITE => self.white_captures += val.1,
 					Stone::BLACK => self.black_captures += val.1,
