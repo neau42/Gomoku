@@ -33,6 +33,8 @@ pub struct Gameboard {
 	pub size: usize,
     pub cells: [[Stone; SIZE]; SIZE],
 	pub value: isize,
+	pub white_captures : usize,
+	pub black_captures : usize,
 	pub possible_moves: [[bool; SIZE]; SIZE],
 	pub selected_move: Option<(usize, usize)>,
 }
@@ -44,14 +46,17 @@ impl Gameboard {
 			size: SIZE,
 			cells: [[Stone::NOPE; SIZE]; SIZE],
 			value: 0,
+			white_captures: 0,
+			black_captures: 0,
 			possible_moves: [[false; SIZE]; SIZE],
 			selected_move: None,
 		}
 	}
 }
 
-pub fn eval_value(cells: &[[Stone; SIZE]; SIZE], x_orig: isize, y_orig: isize, stone: &Stone) -> isize {
+pub fn eval_value(cells: &[[Stone; SIZE]; SIZE], x_orig: isize, y_orig: isize, stone: &Stone) -> (isize, usize) {
 	let mut value = 0;
+	let mut nb_captures = 0;
 	let x_min = (x_orig - 5).max(0);
 	let x_max = (x_orig + 5).min(SIZE as isize - 1);
 	let y_min = (y_orig - 5).max(0);
@@ -73,11 +78,6 @@ pub fn eval_value(cells: &[[Stone; SIZE]; SIZE], x_orig: isize, y_orig: isize, s
 	.map(|(index, x)| cells[x as usize][y_orig as usize + len_origin_min as usize - index])
 	.collect();
 
-	// print_slice(&horizontal);
-	// print_slice(&vertical);
-	// print_slice(&diag1);
-	// print_slice(&diag2);
-
 	let other_stone = match stone {
 		Stone::WHITE => Stone::BLACK,
 		Stone::BLACK => Stone::WHITE,
@@ -85,11 +85,16 @@ pub fn eval_value(cells: &[[Stone; SIZE]; SIZE], x_orig: isize, y_orig: isize, s
 	};
 	let list = [horizontal, vertical, diag1, diag2];
 	for elem in &list {
-		print_slice(&elem);
-		value += eval_line(&elem, stone, &other_stone);
+		// print_slice(&elem);
+		let eval = eval_line(&elem, stone, &other_stone);
+		value += eval.0;
+		if eval.1 > 0 {
+			// println!("CAPTURE for: {:?}",  elem);
+			nb_captures += eval.1;
+		}
 	}
-	println!("VALUE TOTAL =====> {}", value);
-	value
+	// println!("VALUE TOTAL =====> {}", value);
+	(value, nb_captures)
 }
 
 pub fn print_slice(slice: &[Stone]) {
@@ -104,66 +109,73 @@ pub fn print_slice(slice: &[Stone]) {
 	println!();
 }
 
-pub fn analyze_slice_of_6(slice: &[Stone], current_stone: &Stone, other_stone: &Stone) -> isize {
+pub fn analyze_slice_of_6(slice: &[Stone], current_stone: &Stone, other_stone: &Stone) -> (isize, usize) {
 
-	println!("==> {:?}", slice);
+	// println!("==> {:?}", slice);
 
 	match slice {
-		test if test[0] == *current_stone && test[0] == test[1] && test[0] == test[2] && test[0] == test[3] && test[0] == test[4] => 42,
+		test if test[0] == *current_stone && test[0] == test[1] && test[0] == test[2] && test[0] == test[3] && test[0] == test[4] => (42, 0),
+		[_, s1, s2, s3, s4, _] if s1 == current_stone && s2 == other_stone && s2 == s3 && s1 == s4 => {
+					// print!("capture! ");
+					(2,1)
+				},		// capture
+
 		[Stone::NOPE, s1, s2, s3, s4, Stone::NOPE] => {
-			print!("[Stone::NOPE, s1, s2, s3, s4, Stone::NOPE]!  ");
+			// print!("[Stone::NOPE, s1, s2, s3, s4, Stone::NOPE]!  ");
 			match (s1,s2,s3,s4) {
-				(s1, s2, s3, s4) if s1 == current_stone && s2 == other_stone && s2 == s3 && s1 == s4 => {
-					print!("capture! ");
-					2
-				},				// capture
+			// 	(s1, s2, s3, s4) if s1 == current_stone && s2 == other_stone && s2 == s3 && s1 == s4 => {
+			// 		print!("capture! ");
+			// 		(2,1)
+			// 	},		// capture
 				(s1, s2, s3, s4) if s1 == current_stone && s1 == s2 && s1 == s3 && s1 == s4 => {
-					print!("align 4! ");
-					4
+					// print!("align 4! ");
+					(4, 0)
 					},	// align 4
 				(s1, s2, s3, Stone::NOPE) if s1 == current_stone && s1 == s2 && s1 == s3 => {
-					print!("align 3_0  ");
-					3
+					// print!("align 3_0  ");
+					(3, 0)
 				},		// align 3
 				(s1, s2, Stone::NOPE, s3) if s1 == current_stone && s1 == s2 && s1 == s3 => {
-					print!("align 3_1  ");
-					3
+					// print!("align 3_1  ");
+					(3, 0)
 				},		// align 3
 				(s1, Stone::NOPE, s2, s3) if s1 == current_stone && s1 == s2 && s1 == s3 => {
-					print!("align 3_2  ");
-					3
+					// print!("align 3_2  ");
+					(3, 0)
 				},		// align 3
 				(s1, s2, Stone::NOPE, Stone::NOPE) if s1 == current_stone && s1 == s2 => {
-					print!("align 1  ");
-					1
+					// print!("align 1  ");
+					(1, 0)
 				},		// align 3
-				(s1, s2, Stone::NOPE, Stone::NOPE) if *s1 == *current_stone && s1 == s2 => 1, 		// align 2
-				_ => 0,
+				(s1, s2, Stone::NOPE, Stone::NOPE) if *s1 == *current_stone && s1 == s2 => (1, 0),		// align 2
+				_ => (0, 0),
 			}
 		}
-		_ => 0,
+		_ => (0, 0),
 	}
 }
 
-pub fn eval_line(slice: &[Stone], current_stone: &Stone, other_stone: &Stone) -> isize {
+pub fn eval_line(slice: &[Stone], current_stone: &Stone, other_stone: &Stone) -> (isize, usize) {
 	let mut value = 0;
+	let mut nb_captures = 0;
 	let mut len = slice.len();
-	if len < 5 { return 0; }
+	if len < 5 { return (0, 0); }
 
 	while len > 6 {
-		value += analyze_slice_of_6(&slice[len-6..len], current_stone, other_stone);
-		println!("value: {}", value);
+		let eval = analyze_slice_of_6(&slice[len-6..len], current_stone, other_stone);
+		value+=eval.0;
+		nb_captures+=eval.1;
+		// println!("value: {}", value);
 		len -= 1;
 	}
 	if len > 0 {
-		value += analyze_slice_of_6(&slice[0..len], current_stone, other_stone);
-		println!("value: {}", value);
-
+		let eval = analyze_slice_of_6(&slice[0..len], current_stone, other_stone);
+		value+=eval.0;
+		nb_captures+=eval.1;
+		// println!("value: {}", value);
 	}
-	println!("value of line: {}", value);
-
-
-	value
+	// println!("value of line: {}", value);
+	(value, nb_captures)
 }
 
 impl Gameboard {
@@ -208,21 +220,68 @@ impl Gameboard {
 }
 
 impl Gameboard {
-	// pub fn apply_capture(&mut self) -> u8 {
+	pub fn apply_capture(&mut self, x: usize, y: usize, stone: Stone, other_Stone: Stone, mut nb_capture: usize) {
+        let directions: [(isize, isize); 8] = [(0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1,0), (-1,1)];
 
-	// }
+		while nb_capture > 0 {
+			directions.iter().any(|(tmp_x, tmp_y)| {
+				let mut old_x = None;
+				let mut old_y = None;
+				(1..=3 as isize).all(|i| {
+					let tmp_x = *tmp_x  * i + x as isize;
+					let tmp_y = *tmp_y * i + y as isize;
+					if tmp_x < 0 || tmp_x >= self.size as isize || tmp_y < 0 || tmp_y >= self.size as isize {
+						return false;
+					}
+					let tmp_stone = self.cells[tmp_x as usize][tmp_y as usize];
+					match i {
+						1 => {
+								if (tmp_stone != stone && tmp_stone != Stone::NOPE) {
+									old_x = Some(tmp_x);
+									old_y = Some(tmp_y);
+								}
+							tmp_stone != stone && tmp_stone != Stone::NOPE
+							},
+						2 => {
+							if (tmp_stone != stone && tmp_stone != Stone::NOPE) {
+								self.cells[old_x.unwrap() as usize][old_y.unwrap() as usize] = Stone::NOPE;
+								self.cells[tmp_x as usize][tmp_y as usize] = Stone::NOPE;
+							}
+							tmp_stone != stone && tmp_stone != Stone::NOPE
+						}
+						_ => tmp_stone == stone
+					}
+				})
+			});
+			nb_capture -= 1;
+		}
+	}
 
 	pub fn make_move(&mut self, x: usize, y: usize, stone: Stone) -> bool {
+
+
 		if self.cells[x][y] == Stone::NOPE && !self.check_double_tree(x, y, stone) {
-				// let nbr_capture = apply_capture();
+			let other_stone = match stone {
+					Stone::WHITE => Stone::BLACK,
+					Stone::BLACK => Stone::WHITE,
+					_ => Stone::WHITE,
+				};
 			self.cells[x][y] = stone;
 			self.update_possible_move(x, y);
-			println!("\n-------------------");
-			self.printboard();
-			println!("x: {}, y: {}", x, y);
-			self.value = eval_value(&self.cells, x as isize, y as isize, &stone);
-
-                return true;
+			// println!("\n-------------------");
+			// self.printboard();
+			// println!("x: {}, y: {}", x, y);
+			let val = eval_value(&self.cells, x as isize, y as isize, &stone);
+			self.value = val.0;
+			if val.1 > 0 {
+				self.apply_capture(x, y, stone, other_stone, val.1);
+				match stone {
+					Stone::WHITE => self.white_captures += val.1,
+					Stone::BLACK => self.black_captures += val.1,
+					_ => (),
+				}
+			}
+			return true;
         }
         false
     }
@@ -252,7 +311,6 @@ impl Gameboard {
     }
 
 }
-
 
 impl Gameboard {
     // True if capture is possible
