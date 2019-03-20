@@ -11,8 +11,6 @@ use conrod::UiCell;
 use conrod::widget::id::Id;
 use std::collections::HashMap;
 
-// use crate::minmax_alphabeta;
-
 pub enum GameEvent {
 	Grid(fn(&mut Game, usize, usize)),
 	ButtonUndo(fn(&mut Game)),
@@ -92,7 +90,7 @@ impl GameViewController for GameController {
 			};
 			// // None possible ?
 			// println!("depth = {}", ia.depth);
-			match best_move{
+			match best_move {
 				Some(best_move) => {
 					if model.state.make_move(best_move.0, best_move.1, model.current_stone) {
 						model.all_state.push(model.state.clone());

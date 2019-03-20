@@ -97,17 +97,17 @@ pub fn eval_value(cells: &[[Stone; SIZE]; SIZE], x_orig: isize, y_orig: isize, s
 	(value, nb_captures)
 }
 
-pub fn print_slice(slice: &[Stone]) {
-	println!("------");
-	for e in slice {
-		match e {
-			Stone::WHITE => print!("x "),
-			Stone::BLACK => print!("o "),
-			Stone::NOPE => print!(". "),
-		}
-	}
-	println!();
-}
+// pub fn print_slice(slice: &[Stone]) {
+// 	println!("------");
+// 	for e in slice {
+// 		match e {
+// 			Stone::WHITE => print!("x "),
+// 			Stone::BLACK => print!("o "),
+// 			Stone::NOPE => print!(". "),
+// 		}
+// 	}
+// 	println!();
+// }
 
 pub fn analyze_slice_of_6(slice: &[Stone], current_stone: Stone, other_stone: Stone) -> (isize, usize) {
 
@@ -196,7 +196,7 @@ impl Gameboard {
 }
 
 impl Gameboard {
-	pub fn apply_capture(&mut self, x: usize, y: usize, stone: Stone, other_Stone: Stone, mut nb_capture: usize) {
+	pub fn apply_capture(&mut self, x: usize, y: usize, stone: Stone, other_stone: Stone, mut nb_capture: usize) {
         let directions: [(isize, isize); 8] = [(0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1,0), (-1,1)];
 
 		while nb_capture > 0 {
@@ -208,30 +208,25 @@ impl Gameboard {
 				(1..=3 as isize).all(|i| {
 					let tmp_x = *tmp_x  * i + x as isize;
 					let tmp_y = *tmp_y * i + y as isize;
-					if tmp_x < 0 || tmp_x >= self.size as isize || tmp_y < 0 || tmp_y >= self.size as isize {
+					if tmp_x < 0 || tmp_x >= SIZE as isize || tmp_y < 0 || tmp_y >= SIZE as isize {
 						return false;
 					}
 					let tmp_stone = self.cells[tmp_x as usize][tmp_y as usize];
-					match i {
-						1 => {
-								if tmp_stone != stone && tmp_stone != Stone::NOPE {
+						if i <= 2 {
+							if tmp_stone == other_stone {
+								if i == 1 {
 									x1 = Some(tmp_x);
 									y1 = Some(tmp_y);
-									true
 								} else {
-								false
-								}
-							},
-						2 => {
-								if tmp_stone != stone && tmp_stone != Stone::NOPE {
 									x2 = Some(tmp_x);
 									y2 = Some(tmp_y);
-									true 
-								} else {
-								false
 								}
+								true 
+							} else {
+							false
 							}
-						_ => {
+						}
+						else {
 							if tmp_stone == stone {
 								self.cells[x1.unwrap() as usize][y1.unwrap() as usize] = Stone::NOPE;
 								self.cells[x2.unwrap() as usize][y2.unwrap() as usize] = Stone::NOPE;
@@ -239,7 +234,6 @@ impl Gameboard {
 							} else {
 								false
 							}
-						}
 					}
 				})
 			});
