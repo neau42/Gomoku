@@ -2,6 +2,7 @@ use crate::controllers::game::GameController;
 use crate::controllers::game_builder::GameBuilderController;
 use crate::controllers::window::WindowController;
 use crate::models::game_builder::*;
+use crate::models::game::Game;
 use crate::traits::view_controller::GameViewController;
 use crate::traits::view_controller::PageType;
 use crate::traits::view_model::*;
@@ -36,7 +37,7 @@ impl GameplayController {
     pub fn new(width: u32, height: u32, ui: Ui, widget_ids: WidgetIds) -> GameplayController {
         let window_controller = WindowController::new();
         let page_controller = GameBuilderController::new(&widget_ids);
-        let page_model:  Box<dyn GameViewModel> = Box::new(GameBuilder::new());
+        let page_model:  Box<dyn GameViewModel> = Box::new(GameBuilder::new(None));
         GameplayController {
             window_controller,
             page_controller,
@@ -89,7 +90,14 @@ impl GameplayController {
                 if self.is_callback(&event) {
                    self.page_controller = match self.page_controller.get_type() {
                        PageType::Game => {
-						   self.page_model = Box::new(GameBuilder::new());
+                           let game = self.page_model.get_model().downcast_ref::<Game>().unwrap();
+                           let game = if game.is_finish() {
+                               None
+                           }
+                           else {
+                               Some(game.clone())
+                           };
+						   self.page_model = Box::new(GameBuilder::new(game));
 						   GameBuilderController::new(&self.widget_ids)
 					   },
                        _ => break 'render,
@@ -104,7 +112,14 @@ impl GameplayController {
 						GameController::new(&self.widget_ids)
 					},
                     _ => { 
-						self.page_model = Box::new(GameBuilder::new());
+                        let game = self.page_model.get_model().downcast_ref::<Game>().unwrap();
+                        let game = if game.is_finish() {
+                            None
+                        }
+                        else {
+                            Some(game.clone())
+                        };
+                        self.page_model = Box::new(GameBuilder::new(game));
                         GameBuilderController::new(&self.widget_ids)
                     },
                 }

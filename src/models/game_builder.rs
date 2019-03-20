@@ -13,10 +13,11 @@ pub struct GameBuilder {
     pub max_depth: f32,
     pub display_weight: bool,
     change_window: bool,
+    pub game: Option<Game>,
 }
 
 impl GameBuilder {
-    pub fn new() -> GameBuilder {
+    pub fn new(game: Option<Game>) -> GameBuilder {
         let min_depth = 1.0 as f32;
         let max_depth = 10.0 as f32;
         GameBuilder {
@@ -33,6 +34,7 @@ impl GameBuilder {
             max_depth,
             display_weight: false,
             change_window: false,
+            game,
         }
     }
 
@@ -79,7 +81,12 @@ impl GameBuilder {
             1 => ia_new(self.first_ia_depth),
             _ => ia_new(self.second_ia_depth),
         };
-        Game::new(black_player, white_player, self.game_modes[self.mode_index])
+        if self.game.is_some() {
+            Game::new_with_game(self.game.clone().unwrap(), black_player, white_player, self.game_modes[self.mode_index])
+        }
+        else {
+            Game::new(black_player, white_player, self.game_modes[self.mode_index])
+        }
     }
 }
 
