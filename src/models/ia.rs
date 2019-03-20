@@ -1,5 +1,6 @@
 use crate::models::gameboard::*;
 
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct IA {
     pub depth: u8,
 }
