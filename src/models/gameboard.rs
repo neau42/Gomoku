@@ -78,52 +78,30 @@ pub fn eval_value(cells: &[[Stone; SIZE]; SIZE], x_orig: isize, y_orig: isize, s
 	.map(|(index, x)| cells[x as usize][y_orig as usize + len_origin_min as usize - index])
 	.collect();
 
-	let other_stone = match stone {
-		Stone::WHITE => Stone::BLACK,
-		Stone::BLACK => Stone::WHITE,
-		_ => Stone::WHITE,
-	};
 	let list = [horizontal, vertical, diag1, diag2];
 	for elem in &list {
-		// print_slice(&elem);
-		let eval = eval_line(&elem, stone, other_stone);
+		let eval = eval_line(&elem, stone, stone.opposant());
 		value += eval.0;
 		if eval.1 > 0 {
-			// println!("CAPTURE for: {:?}",  elem);
 			nb_captures += eval.1;
 		}
 	}
-	// println!("VALUE TOTAL =====> {}", value);
 	(value, nb_captures)
 }
 
-// pub fn print_slice(slice: &[Stone]) {
-// 	println!("------");
-// 	for e in slice {
-// 		match e {
-// 			Stone::WHITE => print!("x "),
-// 			Stone::BLACK => print!("o "),
-// 			Stone::NOPE => print!(". "),
-// 		}
-// 	}
-// 	println!();
-// }
-
 pub fn analyze_slice_of_6(slice: &[Stone], current_stone: Stone, other_stone: Stone) -> (isize, usize) {
-
-	// println!("==> {:?}", slice);
 
 	match slice {
 		test if test[0] == current_stone && test[0] == test[1] && test[0] == test[2] && test[0] == test[3] && test[0] == test[4] => (42, 0),
 		[_, s1, s2, s3, s4, _] if *s1 == current_stone && *s2 == other_stone && s2 == s3 && s1 == s4 => (2,1),// capture
 		[Stone::NOPE, s1, s2, s3, s4, Stone::NOPE] => {
 			match (s1,s2,s3,s4) {
-				(s1, s2, s3, s4) if *s1 == current_stone && s1 == s2 && s1 == s3 && s1 == s4 => (4, 0),	// align 4
+				(s1, s2, s3, s4) if *s1 == current_stone && s1 == s2 && s1 == s3 && s1 == s4 => (4, 0),		// align 4
 				(s1, s2, s3, Stone::NOPE) if *s1 == current_stone && s1 == s2 && s1 == s3 => (3, 0),		// align 3
 				(s1, s2, Stone::NOPE, s3) if *s1 == current_stone && s1 == s2 && s1 == s3 => (3, 0),		// align 3
 				(s1, Stone::NOPE, s2, s3) if *s1 == current_stone && s1 == s2 && s1 == s3 => (3, 0),		// align 3
-				(s1, s2, Stone::NOPE, Stone::NOPE) if *s1 == current_stone && s1 == s2 => (1, 0),		// align 3
-				(s1, s2, Stone::NOPE, Stone::NOPE) if *s1 == current_stone && s1 == s2 => (1, 0),		// align 2
+				(s1, s2, Stone::NOPE, Stone::NOPE) if *s1 == current_stone && s1 == s2 => (1, 0),			// align 3
+				(s1, s2, Stone::NOPE, Stone::NOPE) if *s1 == current_stone && s1 == s2 => (1, 0),			// align 2
 				_ => (0, 0),
 			}
 		}
@@ -201,10 +179,8 @@ impl Gameboard {
 
 		while nb_capture > 0 {
 			directions.iter().any(|(tmp_x, tmp_y)| {
-				let mut x1 = None;
-				let mut x2 = None;
-				let mut y1 = None;
-				let mut y2 = None;
+				let mut xy1 = None;
+				let mut xy2 = None;
 				(1..=3 as isize).all(|i| {
 					let tmp_x = *tmp_x  * i + x as isize;
 					let tmp_y = *tmp_y * i + y as isize;
@@ -215,25 +191,19 @@ impl Gameboard {
 						if i <= 2 {
 							if tmp_stone == other_stone {
 								if i == 1 {
-									x1 = Some(tmp_x);
-									y1 = Some(tmp_y);
+									xy1 = Some((tmp_x, tmp_y));
 								} else {
-									x2 = Some(tmp_x);
-									y2 = Some(tmp_y);
+									xy2 = Some((tmp_x, tmp_y));
 								}
 								true 
-							} else {
-							false
-							}
+							} else { false }
 						}
 						else {
 							if tmp_stone == stone {
-								self.cells[x1.unwrap() as usize][y1.unwrap() as usize] = Stone::NOPE;
-								self.cells[x2.unwrap() as usize][y2.unwrap() as usize] = Stone::NOPE;
+								self.cells[xy1.unwrap().0 as usize][xy1.unwrap().1 as usize] = Stone::NOPE;
+								self.cells[xy2.unwrap().0 as usize][xy2.unwrap().1 as usize] = Stone::NOPE;
 								true
-							} else {
-								false
-							}
+							} else { false }
 					}
 				})
 			});
@@ -298,24 +268,24 @@ impl Gameboard {
 
 impl Gameboard {
     // True if capture is possible
-    pub fn check_capture(&self, x: usize, y: usize, actual_stone: Stone) -> bool {
-        let directions: [(isize, isize); 8] = [(0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1,0), (-1,1)];
+    // pub fn check_capture(&self, x: usize, y: usize, actual_stone: Stone) -> bool {
+    //     let directions: [(isize, isize); 8] = [(0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1,0), (-1,1)];
 
-        directions.iter().any(|(tmp_x, tmp_y)| {
-            (1..=3 as isize).all(|i| {
-                let tmp_x = *tmp_x  * i + x as isize;
-                let tmp_y = *tmp_y * i + y as isize;
-                if tmp_x < 0 || tmp_x >= self.size as isize || tmp_y < 0 || tmp_y >= self.size as isize {
-                    return false;
-                }
-                let tmp_stone = self.cells[tmp_x as usize][tmp_y as usize];
-                match i {
-                    1 | 2 => tmp_stone != actual_stone && tmp_stone != Stone::NOPE,
-                    _ => tmp_stone == actual_stone,
-                }
-            })
-        })
-	}
+    //     directions.iter().any(|(tmp_x, tmp_y)| {
+    //         (1..=3 as isize).all(|i| {
+    //             let tmp_x = *tmp_x  * i + x as isize;
+    //             let tmp_y = *tmp_y * i + y as isize;
+    //             if tmp_x < 0 || tmp_x >= self.size as isize || tmp_y < 0 || tmp_y >= self.size as isize {
+    //                 return false;
+    //             }
+    //             let tmp_stone = self.cells[tmp_x as usize][tmp_y as usize];
+    //             match i {
+    //                 1 | 2 => tmp_stone != actual_stone && tmp_stone != Stone::NOPE,
+    //                 _ => tmp_stone == actual_stone,
+    //             }
+    //         })
+    //     })
+	// }
 
 	pub fn check_double_tree(&self, x: usize, y: usize, actual_stone: Stone) -> bool {
         let directions: [(isize, isize); 4] = [(0,1), (1,0), (1,1), (1,-1)];

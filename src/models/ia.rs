@@ -45,7 +45,6 @@ impl IA {
 
         state.make_move(best_move.0, best_move.1, stone);
         let mut current = -self.negascout(state, stone.opposant(), depth - 1, -beta, -alpha);
-		// println!("push [1] score {}", current);
 		all_eval.push((best_move, current));
         state.unmake_move(best_move.0, best_move.1);
         state.possible_moves = original_possible_moves;
@@ -61,7 +60,6 @@ impl IA {
                 last_move = state.selected_move.unwrap();
                 state.make_move(last_move.0, last_move.1, stone);
                 let mut score = -self.negascout(state, stone.opposant(), depth - 1, -(alpha + 1), -alpha);
-				// println!("push [2] score {}", score);
 				all_eval.push((last_move, score));
                 if score > alpha && score < beta {
                     score = -self.negascout(state, stone.opposant(), depth - 1, -beta, -alpha);
@@ -83,12 +81,12 @@ impl IA {
             }
         }
         state.selected_move = Some(best_move);
-		print_all_state(all_eval);
+		print_all_state(all_eval, state);
         current
     }
 }
 
-pub fn print_all_state(all_eval: Vec<((usize, usize), isize)>) {
+pub fn print_all_state(all_eval: Vec<((usize, usize), isize)>, state: &Gameboard) {
 	let mut print: bool;
 	print!("ALL STATES: \n   ");
 	for x in 0..SIZE {
@@ -107,7 +105,13 @@ pub fn print_all_state(all_eval: Vec<((usize, usize), isize)>) {
 					}
 				}
 				if !print {
+					if state.cells[x][y] == Stone::WHITE {
+						print!(" {}[7;49;97mW{}[0m ", 27 as char, 27 as char);
+					} else if state.cells[x][y] == Stone::BLACK {
+						print!(" {}[7;49;90mB{}[0m ", 27 as char, 27 as char);
+					} else {
 						print!(".  ");
+					}
 				}
 			}
 			println!();
