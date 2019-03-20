@@ -94,6 +94,8 @@ pub fn analyze_slice_of_6(slice: &[Stone], current_stone: Stone, other_stone: St
 	match slice {
 		test if test[0] == current_stone && test[0] == test[1] && test[0] == test[2] && test[0] == test[3] && test[0] == test[4] => (42, 0),
 		[_, s1, s2, s3, s4, _] if *s1 == current_stone && *s2 == other_stone && s2 == s3 && s1 == s4 => (2,1),// capture
+		[s1, s2, s3, s4, _, _] if *s1 == current_stone && *s2 == other_stone && s2 == s3 && s1 == s4 => (2,1),// capture
+		[_, _, s1, s2, s3, s4] if *s1 == current_stone && *s2 == other_stone && s2 == s3 && s1 == s4 => (2,1),// capture
 		[Stone::NOPE, s1, s2, s3, s4, Stone::NOPE] => {
 			match (s1,s2,s3,s4) {
 				(s1, s2, s3, s4) if *s1 == current_stone && s1 == s2 && s1 == s3 && s1 == s4 => (4, 0),		// align 4
