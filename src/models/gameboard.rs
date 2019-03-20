@@ -149,7 +149,7 @@ impl Gameboard {
 			}
 		})
 	}
-	
+
 	pub fn next_move(&mut self, mut starting_x: usize, mut starting_y: usize) {
         if starting_x >= SIZE {
             starting_x = 0;
@@ -172,6 +172,16 @@ impl Gameboard {
 					false
 				})
         );
+	}
+
+	pub fn expand(&self) -> Vec<(usize, usize)> {
+		(0..SIZE)
+		.flat_map(|y| {
+			(0..SIZE)
+			.filter(move |&x| self.possible_moves[x][y as usize] && self.cells[x][y as usize] == Stone::NOPE)
+			.map(move |x| (x, y))
+		})
+		.collect()
 	}
 }
 
@@ -230,7 +240,7 @@ impl Gameboard {
 			self.value = val.0;
 			if val.1 > 0 {
 
-				self.apply_capture(x, y, stone, other_stone, val.1); //				       APPLY CAPTURE !!!!!!!!!
+				// self.apply_capture(x, y, stone, other_stone, val.1); //				       APPLY CAPTURE !!!!!!!!!
 				match stone {
 					Stone::WHITE => self.white_captures += val.1,
 					Stone::BLACK => self.black_captures += val.1,
@@ -291,7 +301,6 @@ impl Gameboard {
 
 	pub fn check_double_tree(&self, x: usize, y: usize, actual_stone: Stone) -> bool {
         let directions: [(isize, isize); 4] = [(0,1), (1,0), (1,1), (1,-1)];
-
         let closure = |tmp_x: isize, tmp_y: isize| -> Vec<Stone> {
             (1..=5 as isize).filter_map(|i| {
                 let tmp_x = tmp_x  * i + x as isize;
