@@ -88,9 +88,7 @@ impl GameViewController for GameController {
 				ia.negascout(&mut model.state, model.current_stone, ia.depth, isize::from(std::i16::MIN), isize::from(std::i16::MAX));
 				model.state.selected_move
 			};
-			// // None possible ?
-			// println!("depth = {}", ia.depth);
-			match best_move {
+			match best_move{
 				Some(best_move) => {
 					if model.state.make_move(best_move.0, best_move.1, model.current_stone) {
 						model.all_state.push(model.state.clone());
@@ -118,54 +116,9 @@ impl GameViewController for GameController {
 		if model.game_mode != GameMode::IaVsIa {
 			self.view.display_button_undo(ui, widget_ids, &self.events[&widget_ids.button_undo], model);
 		}
-		// if !is_human {
-		// 	model.state = current_move.unwrap();
-		// 	model.current_stone.switch();
-		// }
 	}
 
     fn get_type(&self) -> PageType {
         PageType::Game
     }
 }
-
-
-
-
-		// let model: &mut Game = match model.get_model().downcast_mut::<Game>() {
-		// 	Some(model) => model,
-		// 	None => panic!("&GameViewModel isn't a Game!"),
-		// };
-
-		// let stone = model.current_stone.clone();
-		// if let Some(new_state) = match model.get_current_player().get_type() {
-		// 	PlayerType::Human => {
-		// 		self.view.display_grid(ui, widget_ids, self.event, model, stone, true);
-		// 		model.get_current_player().get_move()
-		// 	},
-		// 	_ => {
-		// 		self.view.display_grid(ui, widget_ids, self.event, model, stone, false);
-		// 		let (_, selected_move) = minmax_alphabeta::algo(&mut model.state, model.current_stone);
-
-		// 		let test = selected_move.clone();
-		// 		match test {
-		// 			Some(test) => {
-		// 				println!("\nIA:");
-		// 				test.printboard();
-		// 				println!("\nValue: {}, Max {}", test.value, test.max);
-
-		// 				// test.print_all_align();
-		// 			},
-		// 			None => (),
-		// 		}
-		// 		// let (_, selected_move) = model.mdtf(0, 1);
-		// 		// println!("j'ai fini");
-		// 		// dbg!(&selected_move);
-		// 		selected_move
-		// 	},
-		// } {
-		// 	model.state = new_state;
-		// 	model.current_stone = match model.current_stone {
-		// 		Stone::BLACK => Stone::WHITE,
-		// 		_ => Stone::BLACK,
-		// 	}

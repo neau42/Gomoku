@@ -5,17 +5,29 @@ use crate::traits::view_model::*;
 use std::any::Any;
 use std::time::Instant;
 
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Player {
     Human { nbr_capture: u8 },
     Ia { ia: IA, nbr_capture: u8 },
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum GameMode {
     PlayerVsPlayer,
     PlayerVsIa,
     IaVsPlayer,
     IaVsIa,
+}
+
+impl GameMode {
+    pub fn get_index(&self) -> usize {
+        match self {
+            GameMode::PlayerVsPlayer => 0,
+            GameMode::PlayerVsIa => 1,
+            GameMode::IaVsPlayer => 2,
+            GameMode::IaVsIa => 3,
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
@@ -45,6 +57,7 @@ impl Player {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Game {
     pub state: Gameboard,
     pub black_player: Player,
@@ -74,6 +87,14 @@ impl Game {
             timer: Instant::now(),
             result: None,
         }
+    }
+
+    pub fn new_with_game(mut game: Game, black_player: Player, white_player: Player, game_mode: &str) -> Game {
+        game.black_player = black_player;
+        game.white_player = white_player;
+        game.game_mode = GameMode::new(game_mode);
+        game.change_window = false;
+        game
     }
 
     pub fn change_window(&mut self) {

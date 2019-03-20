@@ -24,7 +24,7 @@ impl GameBuilderView {
     }
 
 
-    pub fn display_button_start(&self, ui: &mut UiCell, widget_ids: &WidgetIds, event: &GameBuilderEvent, model: &mut GameBuilder) {
+    pub fn display_button_start(&self, ui: &mut UiCell, widget_ids: &WidgetIds, event: &GameBuilderEvent, model: &mut GameBuilder, start_text: &str) {
         if widget::Button::new()
             .w_of(widget_ids.game_builder_canvas)
             .h(75.0)
@@ -32,7 +32,7 @@ impl GameBuilderView {
             .down_from(widget_ids.title, 50.0)
             .color(color::LIGHT_BROWN)
             .border(1.0)
-            .label("Start")
+            .label(start_text)
             .set(widget_ids.button_start, ui)
             .was_clicked() {
             if let GameBuilderEvent::ButtonStart(event) = event {
