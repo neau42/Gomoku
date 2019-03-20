@@ -19,6 +19,17 @@ pub enum GameMode {
     IaVsIa,
 }
 
+impl GameMode {
+    pub fn get_index(&self) -> usize {
+        match self {
+            GameMode::PlayerVsPlayer => 0,
+            GameMode::PlayerVsIa => 1,
+            GameMode::IaVsPlayer => 2,
+            GameMode::IaVsIa => 3,
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum GameResult {
     BlackWin,
@@ -82,6 +93,7 @@ impl Game {
         game.black_player = black_player;
         game.white_player = white_player;
         game.game_mode = GameMode::new(game_mode);
+        game.change_window = false;
         game
     }
 
