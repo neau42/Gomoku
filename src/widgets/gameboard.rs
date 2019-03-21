@@ -16,9 +16,9 @@ pub struct Board<'a> {
 }
 
 impl<'a> Board<'a> {
-    pub fn new(board_state: &'a Gameboard, stone: Stone, is_human: bool) -> Self {
+    pub fn new(board_state: &'a Gameboard, stone: u8, is_human: bool) -> Self {
         let color = match stone {
-            Stone::BLACK => color::BLACK,
+            BLACK => color::BLACK,
             _ => color::WHITE,
         };
         Board {
@@ -260,9 +260,8 @@ fn draw_hoshi(size: usize, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
 /// draw all stones presents on board
 fn draw_stones(board_state: &Gameboard, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
     for i in 0..board_state.size * board_state.size {
-        let shift = (i / board_state.size) * 2; 
-        match (board_state.cells[i % board_state.size] >> shift) & 0b11 {
-            Stone::WHITE => draw_one_stone(
+        match get_stone!(board_state.cells, i % board_state.size, i / board_state.size) {
+            WHITE => draw_one_stone(
                 [i % board_state.size, i / board_state.size],
                 color::WHITE,
                 board_state.size,
@@ -271,7 +270,7 @@ fn draw_stones(board_state: &Gameboard, id: Id, state: &State, rect: Rect, ui: &
                 ui,
                 state.cell_index.stones[i],
             ),
-            Stone::BLACK => draw_one_stone(
+            BLACK => draw_one_stone(
                 [i % board_state.size, i / board_state.size],
                 color::BLACK,
                 board_state.size,

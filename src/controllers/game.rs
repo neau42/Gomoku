@@ -27,7 +27,7 @@ impl GameController {
 		self.events.insert(widget_ids.grid, GameEvent::Grid(|model: &mut Game, x: usize, y: usize| {
 			if model.state.make_move(x, y, model.current_stone) {
 				model.all_state.push(model.state.clone());
-				model.current_stone.switch();
+				model.current_stone = opposite_stone!(model.current_stone);
 				model.update_last_move_time();
 			}
         }));
@@ -38,7 +38,7 @@ impl GameController {
 					if model.all_state.len() > 1 {
 						model.all_state.pop();
 						model.state = model.all_state.last().unwrap().clone();
-						model.current_stone.switch();
+						model.current_stone = opposite_stone!(model.current_stone);
 						model.result = None;
 					}
 				},
@@ -76,7 +76,7 @@ impl GameViewController for GameController {
 		
 		let mut is_human = true;
 		if let Player::Ia{ia, ..} = match model.current_stone {
-			Stone::WHITE => &model.white_player,
+			WHITE => &model.white_player,
 			_ => &model.black_player,
 		}
 		{
@@ -93,7 +93,7 @@ impl GameViewController for GameController {
 				Some(best_move) => {
 					if model.state.make_move(best_move.0, best_move.1, model.current_stone) {
 						model.all_state.push(model.state.clone());
-						model.current_stone.switch();
+						model.current_stone = opposite_stone!(model.current_stone);
 						model.update_last_move_time();
 					}
 				}

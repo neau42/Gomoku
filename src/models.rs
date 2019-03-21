@@ -1,5 +1,5 @@
 pub mod game_builder;
 pub mod game;
-pub mod gameboard;
+#[macro_use] pub mod gameboard;
 pub mod window;
 pub mod ia;

@@ -1,8 +1,21 @@
 /// Size of game board.
 pub const SIZE: usize = 19;
+
 pub const NOPE: u8 = 0b00;
 pub const BLACK: u8 = 0b01;
 pub const WHITE: u8 = 0b10;
+
+macro_rules! get_stone {
+	($cells: expr, $x: expr, $y: expr) => {
+		($cells[$x] >> ($y * 2) & 0b11) as u8
+	};
+}
+
+macro_rules! opposite_stone {
+	($stone: expr) => {
+		!$stone & 0b11
+	};
+}
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Gameboard {

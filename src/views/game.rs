@@ -3,7 +3,7 @@ use crate::controllers::game::GameEvent;
 use crate::widgets::gameboard as CustomWidget;
 use crate::WidgetIds;
 use crate::models::game::Game;
-use crate::models::gameboard::Stone;
+use crate::models::gameboard::*;
 use conrod::*;
 
 pub struct GameView {
@@ -36,7 +36,7 @@ impl GameView {
 	}
 	pub fn display_player_turn(&self, ui: &mut UiCell, widget_ids: &WidgetIds, model: &mut Game) {
 		let text = match model.current_stone {
-			Stone::BLACK => "Player turn : Black",
+			BLACK => "Player turn : Black",
 			_ => "Player turn : White"
 		};
 		widget::Text::new(text)
