@@ -23,6 +23,12 @@ macro_rules! set_stone {
 	};
 }
 
+macro_rules! set_move {
+	($y: expr) => {
+		0b1 << $y
+	};
+}
+
 macro_rules! opposite_stone {
 	($stone: expr) => {
 		!$stone & 0b11
@@ -55,7 +61,7 @@ impl Gameboard {
 
     pub fn make_move(&mut self, x: usize, y: usize, stone: u8) -> bool {
         if get_stone!(self.cells[x], y) == NOPE {
-			    self.update_possible_move(x, y);
+			    self.update_possible_move(x as isize, y as isize);
 				self.cells[x] |= set_stone!(y, stone);
                 return true;
         }
@@ -66,7 +72,7 @@ impl Gameboard {
         self.cells[x] &= clear_stone!(y);
     }
 	
-	pub fn update_possible_move(&mut self, x: usize, y: usize) {
+	pub fn update_possible_move(&mut self, x: isize, y: isize) {
 		let min_x = (x - 1).max(0) as usize;
 		let min_y = (y - 1).max(0) as usize;
 		let max_x = (x + 1).min(self.size as isize - 1) as usize;
@@ -76,22 +82,12 @@ impl Gameboard {
 		let y = y as usize;
 		let moves = [(min_x, y), (min_x, min_y), (min_x, max_y), (max_x, y), (max_x, min_y), (max_x, max_y), (x, min_y), (x, max_y)];
 		moves
-			.into_iter()
-			.take(|new_move| {
-				self.cells[new_move.0][new_move.1] == Stone::NOPE && !self.possible_moves.contains(*new_move)
-			}).map(|new_move| *new_move).collect()
-		
-		let directions: [(isize, isize); 8] = [(0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1,0), (-1,1)];
-        directions.iter().for_each(|(tmp_x, tmp_y)| {
-			let tmp_x = *tmp_x + x as isize;
-			let tmp_y = *tmp_y + y as isize;
-			if tmp_x < 0 || tmp_x >= self.size as isize || tmp_y < 0 || tmp_y >= self.size as isize {
-				return;
-			}
-			if self.cells[tmp_x as usize] >> tmp_y & 0b1 == 0 {
-				self.possible_moves[tmp_x as usize] |= 0b1 << tmp_y;
-			}
-		})
+			.iter()
+			.for_each(|new_move| {
+				if get_stone!(self.cells[new_move.0], new_move.1) == NOPE {
+					self.possible_moves[new_move.0 as usize] |= set_move!(new_move.1)
+				}
+			})
 	}
 
 	pub fn next_move(&mut self, mut starting_x: usize, mut starting_y: usize) {
