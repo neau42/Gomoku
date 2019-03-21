@@ -178,7 +178,8 @@ impl<'a> Widget for Board<'a> {
         if !self.is_human {
             return InfoClick { is_click: 0, x, y };
         }
-        if (interaction == Interaction::Hover || interaction == Interaction::Press) && self.board_state.cells[x][y] == Stone::NOPE {
+        let shift = y * 2;
+        if (interaction == Interaction::Hover || interaction == Interaction::Press) && (self.board_state.cells[x] >> shift) & 0b11 == 0 {
             let color = match interaction {
                 Interaction::Hover => self.color.with_alpha(0.5),
                 _ => self.color,
@@ -259,7 +260,8 @@ fn draw_hoshi(size: usize, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
 /// draw all stones presents on board
 fn draw_stones(board_state: &Gameboard, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
     for i in 0..board_state.size * board_state.size {
-        match board_state.cells[i % board_state.size][i / board_state.size] {
+        let shift = (i / board_state.size) * 2; 
+        match (board_state.cells[i % board_state.size] >> shift) & 0b11 {
             Stone::WHITE => draw_one_stone(
                 [i % board_state.size, i / board_state.size],
                 color::WHITE,
