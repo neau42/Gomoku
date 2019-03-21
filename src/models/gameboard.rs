@@ -6,8 +6,20 @@ pub const BLACK: u8 = 0b01;
 pub const WHITE: u8 = 0b10;
 
 macro_rules! get_stone {
-	($cells: expr, $x: expr, $y: expr) => {
-		($cells[$x] >> ($y * 2) & 0b11) as u8
+	($line: expr, $y: expr) => {
+		($line >> ($y * 2) & 0b11) as u8
+	};
+}
+
+macro_rules! clear_stone {
+	($y: expr) => {
+		 !(11 << ($y * 2))
+	};
+}
+
+macro_rules! set_stone {
+	($y: expr, $stone: expr) => {
+		($stone as u64) << ($y * 2)
 	};
 }
 
@@ -42,22 +54,34 @@ impl Gameboard {
 	}
 
     pub fn make_move(&mut self, x: usize, y: usize, stone: u8) -> bool {
-        let shift = y * 2;
-        if (self.cells[x] >> shift) & 0b11 == 0  {
+        if get_stone!(self.cells[x], y) == NOPE {
 			    self.update_possible_move(x, y);
-				self.cells[x] |= (stone as u64) << shift;
+				self.cells[x] |= set_stone!(y, stone);
                 return true;
         }
         false
     }
 
 	pub fn unmake_move(&mut self, x: usize, y: usize) {
-		let shift = y * 2;
-        self.cells[x] = self.cells[x] & !(11 << shift);
+        self.cells[x] &= clear_stone!(y);
     }
 	
 	pub fn update_possible_move(&mut self, x: usize, y: usize) {
-        let directions: [(isize, isize); 8] = [(0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1,0), (-1,1)];
+		let min_x = (x - 1).max(0) as usize;
+		let min_y = (y - 1).max(0) as usize;
+		let max_x = (x + 1).min(self.size as isize - 1) as usize;
+		let max_y = (y + 1).min(self.size as isize - 1) as usize;
+
+		let x = x as usize;
+		let y = y as usize;
+		let moves = [(min_x, y), (min_x, min_y), (min_x, max_y), (max_x, y), (max_x, min_y), (max_x, max_y), (x, min_y), (x, max_y)];
+		moves
+			.into_iter()
+			.take(|new_move| {
+				self.cells[new_move.0][new_move.1] == Stone::NOPE && !self.possible_moves.contains(*new_move)
+			}).map(|new_move| *new_move).collect()
+		
+		let directions: [(isize, isize); 8] = [(0,1), (1,1), (1,0), (1,-1), (0,-1), (-1,-1), (-1,0), (-1,1)];
         directions.iter().for_each(|(tmp_x, tmp_y)| {
 			let tmp_x = *tmp_x + x as isize;
 			let tmp_y = *tmp_y + y as isize;

@@ -26,57 +26,39 @@ impl IA {
         0
     }
 
-
-	 /// si alpha < current < beta, alors current est la valeur minimax
+	/// si alpha < current < beta, alors current est la valeur minimax
     /// si current <= alpha, alors la vraie valeur minimax m vérifie : m <= current <= alpha
     /// si beta <= current alors la vraie valeur minimax m vérifie : beta <= current <= m
     pub fn negascout(&self, state: &mut Gameboard, stone: u8, depth: u8, mut alpha: isize, beta: isize) -> isize {
         if depth == 0 || self.is_victory() {
             return self.eval();
         }
-        let original_possible_moves = state.possible_moves.clone();
-        state.next_move(0,0);
-        if state.selected_move.is_none() {
-            return self.eval();
-        }
-        let mut best_move: (usize, usize) = state.selected_move.unwrap();
-        let mut last_move = best_move;
-
-        state.make_move(best_move.0, best_move.1, stone);
-        let mut current = -self.negascout(state, stone, depth - 1, -beta, -alpha);
-        state.unmake_move(best_move.0, best_move.1);
-        state.possible_moves = original_possible_moves.clone();
-        if current >= alpha {
-            alpha = current;
-        }
-        if current < beta {
-            loop {
-                // println!("depth = {}", depth);
-                state.next_move(last_move.0 + 1, last_move.1);
-                if state.selected_move.is_none() {
+        let mut best_move: Option<(usize, usize)> = None;
+        let mut current = isize::from(std::i16::MIN);
+        let mut last_move = (0, 0);
+        loop {
+            state.next_move(last_move.0, last_move.1);
+            let new_move = match state.selected_move {
+                Some(new_move) => new_move,
+                None => break,
+            };
+            let mut new_state = state.clone();
+            new_state.make_move(new_move.0, new_move.1, stone);
+            let mut score = -self.negascout(&mut new_state, opposite_stone!(stone), depth - 1, -(alpha + 1), -alpha);
+            if score > alpha && score < beta {
+                score = -self.negascout(&mut new_state, opposite_stone!(stone), depth - 1, -beta, -alpha);
+            }
+            if score > current {
+                current = score;
+                best_move = Some(new_move);
+                alpha = score.max(alpha);
+                if alpha >= beta {
                     break;
                 }
-                last_move = state.selected_move.unwrap();
-                state.make_move(last_move.0, last_move.1, stone);
-                let mut score = -self.negascout(state, stone, depth - 1, -(alpha + 1), -alpha);
-                if score > alpha && score < beta {
-                    score = -self.negascout(state, stone, depth - 1, -beta, -alpha);
-                }
-                state.unmake_move(last_move.0, last_move.1);
-                state.possible_moves = original_possible_moves.clone();
-                if score >= current {
-                    current = score;
-                    best_move = last_move;
-                    if score >= alpha {
-                        alpha = score;
-                        if score >= beta {
-                            break;
-                        }
-                    }
-                }
             }
+            last_move = (new_move.0 + 1, new_move.1);
         }
-        state.selected_move = Some(best_move);
-        current
+        state.selected_move = best_move;
+        alpha
     }
 }

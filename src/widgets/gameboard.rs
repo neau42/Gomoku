@@ -260,7 +260,7 @@ fn draw_hoshi(size: usize, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
 /// draw all stones presents on board
 fn draw_stones(board_state: &Gameboard, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
     for i in 0..board_state.size * board_state.size {
-        match get_stone!(board_state.cells, i % board_state.size, i / board_state.size) {
+        match get_stone!(board_state.cells[i % board_state.size], i / board_state.size) {
             WHITE => draw_one_stone(
                 [i % board_state.size, i / board_state.size],
                 color::WHITE,
