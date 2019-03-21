@@ -71,7 +71,7 @@ impl Iterator for InfoClick {
 /// get board idx from mouse position
 pub fn get_cell(x: f64, y: f64, rect: Rect, model: &Gameboard) -> Option<(usize, usize)> {
     let size_px = rect.w();
-    let map_size = model.size;
+    let map_size = SIZE;
     let semi_cell_size = size_px / map_size as f64 / 2.0;
 
     if x >= rect.x.start - semi_cell_size
@@ -153,7 +153,7 @@ impl<'a> Widget for Board<'a> {
 
     fn init_state(&self, id_gen: widget::id::Generator) -> Self::State {
         State {
-            cell_index: CellIndex::new(id_gen, self.board_state.size),
+            cell_index: CellIndex::new(id_gen, SIZE),
         }
     }
 
@@ -168,7 +168,7 @@ impl<'a> Widget for Board<'a> {
             ui,
             ..
         } = args;
-        let size = self.board_state.size;
+        let size = SIZE;
 
         draw_lines(size, id, &state, rect, ui);
         draw_hoshi(size, id, &state, rect, ui);
@@ -187,7 +187,6 @@ impl<'a> Widget for Board<'a> {
             draw_one_stone(
                 [x, y],
                 color,
-                size,
                 id,
                 rect,
                 ui,
@@ -259,21 +258,19 @@ fn draw_hoshi(size: usize, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
 
 /// draw all stones presents on board
 fn draw_stones(board_state: &Gameboard, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
-    for i in 0..board_state.size * board_state.size {
-        match get_stone!(board_state.cells[i % board_state.size], i / board_state.size) {
+    for i in 0..SIZE * SIZE {
+        match get_stone!(board_state.cells[i % SIZE], i / SIZE) {
             WHITE => draw_one_stone(
-                [i % board_state.size, i / board_state.size],
+                [i % SIZE, i / SIZE],
                 color::WHITE,
-                board_state.size,
                 id,
                 rect,
                 ui,
                 state.cell_index.stones[i],
             ),
             BLACK => draw_one_stone(
-                [i % board_state.size, i / board_state.size],
+                [i % SIZE, i / SIZE],
                 color::BLACK,
-                board_state.size,
                 id,
                 rect,
                 ui,
@@ -288,13 +285,12 @@ fn draw_stones(board_state: &Gameboard, id: Id, state: &State, rect: Rect, ui: &
 fn draw_one_stone(
     ind: [usize; 2],
     color: Color,
-    size: usize,
     id: Id,
     rect: Rect,
     ui: &mut UiCell,
     cell_id: Id,
 ) {
-    let stone_size = (rect.x.end - rect.x.start) / (size - 1) as f64;
+    let stone_size = (rect.x.end - rect.x.start) / (SIZE - 1) as f64;
     let pos = [
         ind[0] as f64 * stone_size - rect.w() / 2.0,
         rect.w() / 2.0 - ind[1] as f64 * stone_size,

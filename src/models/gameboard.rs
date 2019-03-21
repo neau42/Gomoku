@@ -37,7 +37,6 @@ macro_rules! opposite_stone {
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Gameboard {
-	pub size: usize,
     pub cells: [u64; SIZE],
 	pub possible_moves: [u32; SIZE],
     pub selected_move: Option<(usize, usize)>,
@@ -46,7 +45,6 @@ pub struct Gameboard {
 impl Gameboard {
 	pub fn new() -> Gameboard {
 		Gameboard {
-			size: SIZE,
 			cells: [0; SIZE],
 			possible_moves: [0; SIZE],
             selected_move: None,
@@ -75,8 +73,8 @@ impl Gameboard {
 	pub fn update_possible_move(&mut self, x: isize, y: isize) {
 		let min_x = (x - 1).max(0) as usize;
 		let min_y = (y - 1).max(0) as usize;
-		let max_x = (x + 1).min(self.size as isize - 1) as usize;
-		let max_y = (y + 1).min(self.size as isize - 1) as usize;
+		let max_x = (x + 1).min(SIZE as isize - 1) as usize;
+		let max_y = (y + 1).min(SIZE as isize - 1) as usize;
 
 		let x = x as usize;
 		let y = y as usize;

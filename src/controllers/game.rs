@@ -81,7 +81,7 @@ impl GameViewController for GameController {
 		}
 		{
 			let best_move = if model.all_state.len() == 1 {
-				let position = model.state.size / 2;
+				let position = SIZE / 2;
 				Some((position, position))
 			}
 			else {
