@@ -103,7 +103,7 @@ impl GameViewController for GameController {
 		}
 		self.view.display_grid(ui, widget_ids, &self.events[&widget_ids.grid], model, is_human);
 		self.view.display_player_turn(ui, widget_ids, model);
-		self.view.display_captures(ui, widget_ids, model.black_player.captures(), model.white_player.captures());
+		self.view.display_captures(ui, widget_ids, model.state.black_captures, model.state.white_captures);
 		self.view.display_last_move_time(ui, widget_ids, &model.last_move_time[..]);
 		if model.is_finish() {
 			let result: &str = match model.result.unwrap() {
