@@ -7,8 +7,8 @@ use std::time::Instant;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Player {
-    Human { nbr_capture: u8 },
-    Ia { ia: IA, nbr_capture: u8 },
+    Human,
+    Ia { ia: IA },
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -44,15 +44,6 @@ impl GameMode {
             "Player vs Ia" => GameMode::PlayerVsIa,
             "Ia vs Player" => GameMode::IaVsPlayer,
             _ => GameMode::IaVsIa,
-        }
-    }
-}
-
-impl Player {
-    pub fn captures(&self) -> u8 {
-        match self {
-            Player::Human { nbr_capture } => *nbr_capture,
-            Player::Ia { nbr_capture, .. } => *nbr_capture,
         }
     }
 }

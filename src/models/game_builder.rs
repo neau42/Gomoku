@@ -109,14 +109,11 @@ impl GameBuilder {
         let ia_new = |depth: f32| -> Player {
             Player::Ia {
                 ia: IA::new(depth as u8),
-                nbr_capture: 0 as u8,
             }
         };
 
         let human_new = || -> Player {
-            Player::Human {
-                nbr_capture: 0 as u8,
-            }
+            Player::Human
         };
 
         let black_player: Player = match self.mode_index {

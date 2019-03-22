@@ -132,7 +132,7 @@ pub struct Gameboard {
     pub cells: [u64; SIZE],
 	pub possible_moves: [u32; SIZE],
     pub selected_move: Option<(usize, usize)>,
-	pub black_capture: u8,
+	pub black_captures: u8,
 	pub white_captures: u8,
 }
 
@@ -142,13 +142,13 @@ impl Gameboard {
 			cells: [0; SIZE],
 			possible_moves: [0; SIZE],
             selected_move: None,
-			black_capture: 0,
+			black_captures: 0,
 			white_captures: 0,
 		}
 	}
 
 	pub fn is_final(&self) -> bool {
-		self.black_capture == 5
+		self.black_captures == 5
 		|| self.white_captures == 5
 		// ou alignment 5 sans capture possible
     }
@@ -174,7 +174,7 @@ impl Gameboard {
 		let (nb_captures, nb_trees) = self.count_captures_and_trees(list);
 		if nb_captures > 0 {
 			match stone {
-				BLACK => self.black_capture += nb_captures,
+				BLACK => self.black_captures += nb_captures,
 				_ => self.white_captures += nb_captures
 			}
 		}
@@ -183,7 +183,10 @@ impl Gameboard {
 
 	pub fn make_move(&mut self, x: usize, y: usize, stone: u8) -> bool {
 		if get_stone!(self.cells[x], y) == NOPE {
-			return self.try_make_move(x as isize, y as isize, stone);
+			if self.try_make_move(x as isize, y as isize, stone) {
+				self.cells[x] |= set_stone!(y, stone);
+				return true;
+			}
         }
         false
     }
