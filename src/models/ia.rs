@@ -19,10 +19,12 @@ impl IA {
         false
     }
 
-    pub fn eval(&self) -> isize {
-		// println!("\n\n_____________");
-		// gameboard.printboard();
-		// println!("eval: {}", gameboard.value);
+    pub fn eval(&self, state: &Gameboard, stone: u8) -> isize {
+		println!("\n\n______ EVAL _______");
+		printboard!(&state.cells);
+		let test: isize = eval!(state.cells, stone);
+		// let test =  eval_line!(state.cells[0]);
+		println!("TEST: {:?}", test);
         0
     }
 
@@ -31,7 +33,7 @@ impl IA {
     /// si beta <= current alors la vraie valeur minimax m vérifie : beta <= current <= m
     pub fn negascout(&self, state: &mut Gameboard, stone: u8, depth: u8, mut alpha: isize, beta: isize) -> isize {
         if depth == 0 || self.is_victory() {
-            return self.eval();
+            return self.eval(state, stone);
         }
         let mut best_move: Option<(usize, usize)> = None;
         let mut current = isize::from(std::i16::MIN);
@@ -64,7 +66,7 @@ impl IA {
 
     pub fn alphabeta(&self, state: &mut Gameboard, stone: u8, depth: u8, mut alpha: isize, beta: isize) -> isize {
         if depth == 0 || self.is_victory() {
-            return self.eval();
+            return self.eval(state, stone);
         }
         let mut best_move: Option<(usize, usize)> = None;
         let mut current = isize::from(std::i16::MIN);

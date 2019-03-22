@@ -34,6 +34,50 @@ macro_rules! opposite_stone {
 		!$stone & 0b11
 	};
 }
+macro_rules! eval_raw {
+	($raw: expr, $stone: expr) => {
+		{
+			if $raw == 0 {
+				return 0;
+			}
+			// let mut i = 0;
+			// let mut sum = 0;
+			// while i < SIZE * 2 {
+			// 	if (($raw >> i) & 0b11) {
+
+			// }
+			// }
+				println!("eval_raw: {:#064b}", $raw);
+			1
+		}
+	}
+}
+
+macro_rules! eval {
+	($cells: expr, $stone: expr) => {
+		(0..SIZE).map(|x| eval_raw!($cells[x], stone)).sum()
+	}
+}
+
+macro_rules! printboard {
+	($cells: expr) => {
+		print!("BOARD:\n   ");
+		for x in 0..SIZE { print!("{0: <2} ", x) };
+		println!();
+
+		for y in 0..SIZE {
+			print!("{0: <2} ", y);
+			for x in 0..SIZE {
+				match get_stone!($cells[x], y) {
+					WHITE => print!("W  "),
+					BLACK => print!("B  "),
+					_ => print!(".  ")
+				}
+			}
+			println!();
+		}
+	};
+}
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Gameboard {
@@ -53,7 +97,8 @@ impl Gameboard {
 }
 
 impl Gameboard {
-	pub fn eval(&self) -> isize {
+	pub fn eval(&self, state: Gameboard) -> isize {
+
 		0
 	}
 
@@ -112,4 +157,25 @@ impl Gameboard {
 				})
         );
 	}
+
+	// pub fn printboard(&self) {
+	// 	// print!("BOARD: \n   ");
+	// 	// for x in 0..SIZE {
+	// 	// 	print!("{0: <2} ", x);
+	// 	// }
+	// 	// println!();
+
+	// 	printboard!(self.cells);
+	// 	// for y in 0..SIZE {
+	// 	// 	print!("{0: <2} ", y);
+	// 	// 	for x in 0..SIZE {
+	// 	// 		match  get_stone!(self.cells[x], y) {
+	// 	// 			WHITE => print!("W  "),
+	// 	// 			BLACK => print!("B  "),
+	// 	// 			_ => print!(".  ")
+	// 	// 		}
+	// 	// 	}
+	// 	// 	println!();
+	// 	// }
+	// }
 }
