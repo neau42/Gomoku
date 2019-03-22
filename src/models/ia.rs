@@ -14,7 +14,6 @@ impl IA {
 }
 
 impl IA {
-    //Check si avec cette etats : On a le bon nombre d'element aligner ou de capture
     pub fn is_victory(&self) -> bool {
         false
     }
@@ -28,6 +27,9 @@ impl IA {
         0
     }
 
+}
+
+impl IA {
 	/// si alpha < current < beta, alors current est la valeur minimax
     /// si current <= alpha, alors la vraie valeur minimax m vérifie : m <= current <= alpha
     /// si beta <= current alors la vraie valeur minimax m vérifie : beta <= current <= m

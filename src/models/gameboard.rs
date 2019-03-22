@@ -79,11 +79,61 @@ macro_rules! printboard {
 	};
 }
 
+macro_rules! line_horizontal {
+	($cells: expr, $x_min: expr, $x_max: expr, $y: expr) => {
+		($x_min..=$x_max).enumerate().fold(0, |value, (index, x)| {
+			value | ((get_stone!($cells[x], $y) as u64) << (index * 2))
+		})
+	};
+}
+
+macro_rules! line_vertical {
+	($line: expr, $y_min: expr, $y_max: expr) => {
+		($line >> ($y_min * 2)) & ((1 << $y_max * 2 - 1) - 1)
+	};
+}
+
+macro_rules! up_diago {
+	($len_origin_min: expr, $len_origin_max: expr, $cells: expr, $x_orig: expr, $x_min: expr, $x_max: expr, $y_orig: expr, $y_min: expr, $y_max: expr) => {
+		(($x_orig - $len_origin_min)..=($x_orig + $len_origin_max))
+		.enumerate()
+		.fold(0, |value, (index, x)| {
+			value | ((get_stone!($cells[x], $y_orig - $len_origin_min + index) as u64) << (index * 2))
+		})
+	};
+
+	($cells: expr, $x_orig: expr, $x_min: expr, $x_max: expr, $y_orig: expr, $y_min: expr, $y_max: expr) => {
+		up_diago!(
+			($y_orig - $y_min).min($x_orig - $x_min),
+			($y_max - $y_orig).min($x_max - $x_orig),
+			$cells, $x_orig, $x_min, $x_max, $y_orig, $y_min, $y_max)
+	};
+}
+
+macro_rules! down_diago {
+	($len_origin_min: expr, $len_origin_max: expr, $cells: expr, $x_orig: expr, $x_min: expr, $x_max: expr, $y_orig: expr, $y_min: expr, $y_max: expr) => { 
+		(($x_orig - $len_origin_min)..=($x_orig + $len_origin_max))
+			.enumerate()
+			.fold(0, |value , (index, x)| {
+				value | ((get_stone!($cells[x], $y_orig + $len_origin_min - index) as u64) << (index * 2))
+			})
+	};
+
+	($cells: expr, $x_orig: expr, $x_min: expr, $x_max: expr, $y_orig: expr, $y_min: expr, $y_max: expr) => {
+		down_diago!(
+			($y_max - $y_orig).min($x_orig - $x_min),
+			($y_orig - $y_min).min($x_max - $x_orig),
+			$cells, $x_orig, $x_min, $x_max, $y_orig, $y_min, $y_max)
+	};
+}
+
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Gameboard {
     pub cells: [u64; SIZE],
 	pub possible_moves: [u32; SIZE],
     pub selected_move: Option<(usize, usize)>,
+	pub black_capture: u8,
+	pub white_captures: u8,
 }
 
 impl Gameboard {
@@ -92,21 +142,48 @@ impl Gameboard {
 			cells: [0; SIZE],
 			possible_moves: [0; SIZE],
             selected_move: None,
+			black_capture: 0,
+			white_captures: 0,
 		}
 	}
+
+	pub fn is_final(&self) -> bool {
+		self.black_capture == 5
+		|| self.white_captures == 5
+		// ou alignment 5 sans capture possible
+    }
 }
 
 impl Gameboard {
-	pub fn eval(&self, state: Gameboard) -> isize {
-
-		0
+	pub fn count_captures_and_trees(&mut self, list: [u64; 4]) -> (u8, u8) {
+		(0, 0)
 	}
 
-    pub fn make_move(&mut self, x: usize, y: usize, stone: u8) -> bool {
-        if get_stone!(self.cells[x], y) == NOPE {
-			    self.update_possible_move(x as isize, y as isize);
-				self.cells[x] |= set_stone!(y, stone);
-                return true;
+	pub fn try_make_move(&mut self, x: isize, y: isize, stone: u8) -> bool {
+		let x_min = (x - 5).max(0) as usize;
+		let x_max = (x + 5).min(SIZE as isize - 1) as usize;
+		let y_min = (y - 5).max(0) as usize;
+		let y_max = (y + 5).min(SIZE as isize - 1) as usize;
+
+		let horizontal: u64 = line_horizontal!(self.cells, x_min, x_max, y as usize);
+		let vertical: u64 = line_vertical!(self.cells[x as usize], y_min, y_max);
+		let down_diago: u64 = down_diago!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max);
+		let up_diago: u64 = up_diago!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max);
+		
+		let list = [horizontal, vertical, down_diago, up_diago];
+		let (nb_captures, nb_trees) = self.count_captures_and_trees(list);
+		if nb_captures > 0 {
+			match stone {
+				BLACK => self.black_capture += nb_captures,
+				_ => self.white_captures += nb_captures
+			}
+		}
+		nb_captures > 0 || nb_trees < 2
+	}
+
+	pub fn make_move(&mut self, x: usize, y: usize, stone: u8) -> bool {
+		if get_stone!(self.cells[x], y) == NOPE {
+			return self.try_make_move(x as isize, y as isize, stone);
         }
         false
     }
@@ -157,25 +234,7 @@ impl Gameboard {
 				})
         );
 	}
+}
 
-	// pub fn printboard(&self) {
-	// 	// print!("BOARD: \n   ");
-	// 	// for x in 0..SIZE {
-	// 	// 	print!("{0: <2} ", x);
-	// 	// }
-	// 	// println!();
-
-	// 	printboard!(self.cells);
-	// 	// for y in 0..SIZE {
-	// 	// 	print!("{0: <2} ", y);
-	// 	// 	for x in 0..SIZE {
-	// 	// 		match  get_stone!(self.cells[x], y) {
-	// 	// 			WHITE => print!("W  "),
-	// 	// 			BLACK => print!("B  "),
-	// 	// 			_ => print!(".  ")
-	// 	// 		}
-	// 	// 	}
-	// 	// 	println!();
-	// 	// }
-	// }
+impl Gameboard {
 }
