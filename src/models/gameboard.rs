@@ -5,6 +5,22 @@ pub const NOPE: u8 = 0b00;
 pub const BLACK: u8 = 0b01;
 pub const WHITE: u8 = 0b10;
 
+pub const WHITE_CAPTURE: u8 = WHITE | BLACK << 2 | BLACK << 4 | WHITE << 6;
+pub const BLACK_CAPTURE: u8 = BLACK | WHITE << 2 | WHITE << 4 | BLACK << 6;
+
+pub const BLACK_TREES: [u16; 4] = [
+	NOPE as u16 | (BLACK as u16) << 2 | (BLACK as u16) << 4 | (BLACK as u16) << 6 | (NOPE as u16) << 8 | (NOPE as u16) << 10,
+	NOPE as u16 | (BLACK as u16) << 2 | (BLACK as u16) << 4 | (NOPE as u16) << 6 | (BLACK as u16) << 8 | (NOPE as u16) << 10,
+	NOPE as u16 | (BLACK as u16) << 2 | (NOPE as u16) << 4 | (BLACK as u16) << 6 | (BLACK as u16) << 8 | (NOPE as u16) << 10,
+	NOPE as u16 | (NOPE as u16) << 2 | (BLACK as u16) << 4 | (BLACK as u16) << 6 | (BLACK as u16) << 8 | (NOPE as u16) << 10,
+	];
+pub const WHITE_TREES: [u16; 4] = [
+	NOPE as u16 | (WHITE as u16) << 2 | (WHITE as u16) << 4 | (WHITE as u16) << 6 | (NOPE as u16) << 8 | (NOPE as u16) << 10,
+	NOPE as u16 | (WHITE as u16) << 2 | (WHITE as u16) << 4 | (NOPE as u16) << 6 | (WHITE as u16) << 8 | (NOPE as u16) << 10,
+	NOPE as u16 | (WHITE as u16) << 2 | (NOPE as u16) << 4 | (WHITE as u16) << 6 | (WHITE as u16) << 8 | (NOPE as u16) << 10,
+	NOPE as u16 | (NOPE as u16) << 2 | (WHITE as u16) << 4 | (WHITE as u16) << 6 | (WHITE as u16) << 8 | (NOPE as u16) << 10,
+	];
+
 macro_rules! get_stone {
 	($line: expr, $y: expr) => {
 		($line >> ($y * 2) & 0b11) as u8
@@ -38,14 +54,14 @@ macro_rules! opposite_stone {
 macro_rules! line_horizontal {
 	($cells: expr, $x_min: expr, $x_max: expr, $y: expr) => {
 		($x_min..=$x_max).enumerate().fold(0, |value, (index, x)| {
-			value | ((get_stone!($cells[x], $y) as u64) << (index * 2))
+			value | ((get_stone!($cells[x], $y) as u32) << (index * 2))
 		})
 	};
 }
 
 macro_rules! line_vertical {
 	($line: expr, $y_min: expr, $y_max: expr) => {
-		($line >> ($y_min * 2)) & ((1 << $y_max * 2 - 1) - 1)
+		(($line >> ($y_min * 2)) as u32) & ((1 << $y_max * 2 - 1) - 1)
 	};
 }
 
@@ -54,7 +70,7 @@ macro_rules! up_diago {
 		(($x_orig - $len_origin_min)..=($x_orig + $len_origin_max))
 		.enumerate()
 		.fold(0, |value, (index, x)| {
-			value | ((get_stone!($cells[x], $y_orig - $len_origin_min + index) as u64) << (index * 2))
+			value | ((get_stone!($cells[x], $y_orig - $len_origin_min + index) as u32) << (index * 2))
 		})
 	};
 
@@ -71,7 +87,7 @@ macro_rules! down_diago {
 		(($x_orig - $len_origin_min)..=($x_orig + $len_origin_max))
 			.enumerate()
 			.fold(0, |value , (index, x)| {
-				value | ((get_stone!($cells[x], $y_orig + $len_origin_min - index) as u64) << (index * 2))
+				value | ((get_stone!($cells[x], $y_orig + $len_origin_min - index) as u32) << (index * 2))
 			})
 	};
 
@@ -81,6 +97,30 @@ macro_rules! down_diago {
 			($y_orig - $y_min).min($x_max - $x_orig),
 			$cells, $x_orig, $x_min, $x_max, $y_orig, $y_min, $y_max)
 	};
+}
+
+macro_rules! get_capture_form {
+	($stone: expr) => {
+		match $stone {
+			WHITE => WHITE_CAPTURE,
+			_ => BLACK_CAPTURE,
+		}
+	}
+}
+
+macro_rules! get_tree_forms {
+	($stone: expr) => {
+		match $stone {
+			WHITE => WHITE_TREES,
+			_ => BLACK_TREES,
+		}
+	}
+}
+
+macro_rules! concat_stones {
+	($line: expr, $nbr_stone: expr) => {
+		($line & ((1 << $nbr_stone * 2) - 1))
+	}
 }
 
 #[derive(Debug, Eq, PartialEq, Clone)]
@@ -109,11 +149,28 @@ impl Gameboard {
 		// ou alignment 5 sans capture possible
     }
 }
-
 impl Gameboard {
 
-	pub fn count_captures_and_trees(&mut self, list: [u64; 4]) -> (u8, u8) {
-		(0, 0)
+	pub fn count_captures_and_trees(&mut self, list: [u32; 4], x_orig: usize, y_orig: usize, stone: u8) -> (u8, u8) {
+		let capture_form: u8 = get_capture_form!(stone);
+		let tree_forms: [u16; 4] = get_tree_forms!(stone);
+		list.iter().fold((0, 0), |capture_tree, line| {
+			let mut nbr_capture_to_add = 0;
+			let mut nbr_tree_to_add = 0;
+			(0..7).for_each(|range| {
+				let line_to_check: u32 = (line >> (range * 2));
+				if line_to_check == 0 {
+					return;
+				}
+				if concat_stones!(line_to_check, 4) as u8 == capture_form {
+					nbr_capture_to_add += 1;
+				}
+				if tree_forms.contains(&(concat_stones!(line_to_check, 6) as u16)) {
+					nbr_tree_to_add += 1;
+				}
+			});
+			(capture_tree.0 + nbr_capture_to_add, capture_tree.1 + nbr_tree_to_add)
+		})
 	}
 
 	pub fn try_make_move(&mut self, x: isize, y: isize, stone: u8) -> bool {
@@ -122,19 +179,21 @@ impl Gameboard {
 		let y_min = (y - 5).max(0) as usize;
 		let y_max = (y + 5).min(SIZE as isize - 1) as usize;
 
-		let horizontal: u64 = line_horizontal!(self.cells, x_min, x_max, y as usize);
-		let vertical: u64 = line_vertical!(self.cells[x as usize], y_min, y_max);
-		let down_diago: u64 = down_diago!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max);
-		let up_diago: u64 = up_diago!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max);
+		self.cells[x as usize] |= set_stone!(y, stone);
+		let horizontal: u32 = line_horizontal!(self.cells, x_min, x_max, y as usize);
+		let vertical: u32 = line_vertical!(self.cells[x as usize], y_min, y_max);
+		let down_diago: u32 = down_diago!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max);
+		let up_diago: u32 = up_diago!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max);
 		
-		let list = [horizontal, vertical, down_diago, up_diago];
-		let (nb_captures, nb_trees) = self.count_captures_and_trees(list);
+		let list: [u32; 4] = [horizontal, vertical, down_diago, up_diago];
+		let (nb_captures, nb_trees) = self.count_captures_and_trees(list, x as usize, y as usize, stone);
 		if nb_captures > 0 {
 			match stone {
 				BLACK => self.black_captures += nb_captures,
 				_ => self.white_captures += nb_captures
 			}
 		}
+		self.cells[x as usize] &= clear_stone!(y);
 		nb_captures > 0 || nb_trees < 2
 	}
 
@@ -192,7 +251,7 @@ impl Gameboard {
 					}
 					false
 				})
-        );
+		);
 	}
 }
 
