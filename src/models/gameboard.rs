@@ -49,25 +49,28 @@ impl Gameboard {
 }
 impl Gameboard {
 
-	pub fn count_captures_and_trees(&mut self, list: [u32; 4], x_orig: usize, y_orig: usize, stone: u8) -> (u8, u8) {
-		let capture_form: u8 = get_capture_form!(stone);
+	pub fn count_tree(&self, tree_lines: [u32; 4], stone: u8) -> u8 {
 		let tree_forms: [u16; 4] = get_tree_forms!(stone);
-		list.iter().fold((0, 0), |capture_tree, line| {
-			let mut nbr_capture_to_add = 0;
-			let mut nbr_tree_to_add = 0;
-			(0..7).for_each(|range| {
+		tree_lines.iter().fold(0, |nbr_tree, line| {
+			if (0..7).any(|range| {
 				let line_to_check: u32 = (line >> (range * 2));
-				if line_to_check == 0 {
-					return;
-				}
-				if concat_stones!(line_to_check, 4) as u8 == capture_form {
-					nbr_capture_to_add += 1;
-				}
-				if tree_forms.contains(&(concat_stones!(line_to_check, 6) as u16)) {
-					nbr_tree_to_add += 1;
-				}
-			});
-			(capture_tree.0 + nbr_capture_to_add, capture_tree.1 + nbr_tree_to_add)
+				tree_forms.contains(&(concat_stones!(line_to_check, 6) as u16))
+			}) {
+				return nbr_tree + 1;
+			}
+			nbr_tree
+		})
+	}
+
+	pub fn count_capture(&mut self, capture_lines: [(u8, (isize, isize)); 8], x: usize, y: usize, stone: u8) -> u8 {
+		let capture_form: u8 = get_capture_form!(stone);
+		capture_lines.iter().fold(0, |nbr_capture, (line, coef)| {
+			if *line == capture_form {
+				self.cells[(x as isize + 1 * coef.0) as usize] &= clear_stone!((y as isize + 1 * coef.1) as usize);
+				self.cells[(x as isize + 2 * coef.0) as usize] &= clear_stone!((y as isize + 2 * coef.1) as usize);
+				return nbr_capture + 1;
+			}
+			nbr_capture
 		})
 	}
 
@@ -77,26 +80,30 @@ impl Gameboard {
 		let y_min = (y - 5).max(0) as usize;
 		let y_max = (y + 5).min(SIZE as isize - 1) as usize;
 
-		self.cells[x as usize] |= set_stone!(y, stone);
-		let horizontal: u32 = line_horizontal!(self.cells, x_min, x_max, y as usize);
-		let vertical: u32 = line_vertical!(self.cells[x as usize], y_min, y_max);
-		let down_diago: u32 = down_diago!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max);
-		let up_diago: u32 = up_diago!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max);
-		
-		let list: [u32; 4] = [horizontal, vertical, down_diago, up_diago];
-		let (nb_captures, nb_trees) = self.count_captures_and_trees(list, x as usize, y as usize, stone);
-		if nb_captures > 0 {
-			match stone {
-				BLACK => self.black_captures += nb_captures,
-				_ => self.white_captures += nb_captures
-			}
+		let diago_up_left = (y as usize - y_min).min(x as usize - x_min);
+		let diago_up_right = (y as usize - y_min).min(x_max - x as usize);
+		let diago_down_right = (y_max - y as usize).min(x_max - x as usize);
+		let diago_down_left = (y_max - y as usize).min(x as usize - x_min);
+
+		let capture_lines: [(u8, (isize, isize)); 8] = capture_lines!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max, diago_up_left, diago_down_right, diago_down_left, diago_up_right);
+		let nbr_capture = self.count_capture(capture_lines, x as usize, y as usize, stone);
+		if nbr_capture == 0 {
+			let tree_lines: [u32; 4] = tree_lines!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max, diago_up_left, diago_down_right, diago_down_left, diago_up_right);
+			let nbr_tree = self.count_tree(tree_lines, stone);
+			return nbr_tree < 2;
 		}
-		nb_captures > 0 || nb_trees < 2
+		match stone {
+			BLACK => self.black_captures += nbr_capture,
+			_ => self.white_captures += nbr_capture
+		}
+		true
 	}
 
 	pub fn make_move(&mut self, x: usize, y: usize, stone: u8) -> bool {
 		if get_stone!(self.cells[x], y) == NOPE {
+			self.cells[x] |= set_stone!(y, stone);
 			if self.try_make_move(x as isize, y as isize, stone) {
+				self.update_possible_move(x as isize, y as isize);
 				return true;
 			}
 			self.cells[x] &= clear_stone!(y);
@@ -141,8 +148,7 @@ impl Gameboard {
 			.any(|y| (0..SIZE)
 				.filter(|x| y > starting_y || *x >= starting_x)
 				.any(|x| {
-					let shift = y * 2;
-					if self.possible_moves[x] >> y & 0b1 == 1 && (self.cells[x] >> shift) & 0b11 == 0 {
+					if self.possible_moves[x] >> y & 0b1 == 1 && get_stone!(self.cells[x], y) == NOPE {
                         self.selected_move = Some((x, y));
 						return true;
 					}
