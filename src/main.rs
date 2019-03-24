@@ -1,7 +1,8 @@
 //! Gomoku!
 //! 
 #[macro_use] extern crate conrod_derive;
-#[macro_use] mod models;
+#[macro_use] mod macros;
+mod models;
 mod views;
 mod controllers;
 mod utils;
