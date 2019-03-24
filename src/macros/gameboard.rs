@@ -6,7 +6,7 @@ macro_rules! get_stone {
 
 macro_rules! clear_stone {
 	($y: expr) => {
-		 !(11 << ($y * 2))
+		 !(0b11 << ($y * 2) as u64)
 	};
 }
 
