@@ -13,6 +13,30 @@ impl IA {
     }
 }
 
+pub fn evale_one_line(mut line: u64, stone: u8) -> isize {
+	let mut value = 0;
+	let mut i: isize = 0;
+	// let 
+
+	let test = (stone + stone << 2 + stone << 4);
+	println!("eval_one_line: {:#064b}", line);
+	while i < 64 {
+		println!("line & 0b11_1111: {:#08b}", line & 0b11_1111);
+		match line & 0b11_1111 {
+			0 => {
+					println!("test+=5: {:#08b}", line & 0b11_1111);
+					i += 5;
+			},
+			_ => {
+					println!("test+=1: {:#08b}", line & 0b11_1111);
+					i += 1;
+			},
+		}
+		line >>= i;
+	}
+	value
+}
+
 impl IA {
     pub fn is_victory(&self) -> bool {
         false
@@ -23,22 +47,33 @@ impl IA {
 		printboard!(&state.cells);
 
 
+		let mut all: Vec<u64> = (0..SIZE).map(|y| line_horizontal!(state.cells, 0, SIZE - 1, y as usize)).collect();
+		let all_verti: Vec<u64> = (0..SIZE).map(|x| line_vertical!(state.cells[x as usize], 0 , SIZE -1)).collect();
+		let all_diag_d: Vec<u64> = (0..SIZE).map(|x| down_diago!(state.cells, x as usize, 0, SIZE - 1, 0, 0, SIZE - 1)).collect();
+		let all_diag_d2: Vec<u64> = (1..SIZE).map(|y| down_diago!(state.cells, SIZE - 1, 0, SIZE - 1, y as usize, 0, SIZE - 1)).collect();
+		// all_diag_d.extend(all_diag_d2);
+		let all_diag_u: Vec<u64> = (0..SIZE).map(|x| up_diago!(state.cells, x as usize, 0, SIZE -1, 0, 0, SIZE - 1)).collect();
+		let all_diag_u2: Vec<u64> = (1..SIZE).map(|y| up_diago!(state.cells, 0, 0, SIZE -1, y as usize, 0, SIZE - 1)).collect();
+		// all_diag_u.extend(all_diag_u2);
 
-		// let horizontal: u32 = line_horizontal!(self.cells, x_min, x_max, y as usize);
-		// let vertical: u32 = line_vertical!(self.cells[x as usize], y_min, y_max);
-		// let down_diago: u32 = down_diago!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max);
-		// let up_diago: u32 = up_diago!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max);
-		
-		// let list: [u32; 4] = [horizontal, vertical, down_diago, up_diago];
+		all.extend(all_verti);
+		all.extend(all_diag_d);
+		all.extend(all_diag_d2);
+		all.extend(all_diag_u);
+		all.extend(all_diag_u2);
+		all.retain(|&elem| elem != 0);
 
+		let mut value: isize = 0;
 
+		for e in all {
+			value += evale_one_line(e, stone);
+				println!("{:#066b}", e);
+		}
 
-
-
-		let test: isize = eval!(state.cells, stone);
+		// let test: isize = eval!(state.cells, stone);
 		// let test =  eval_line!(state.cells[0]);
-		println!("TEST: {:?}", test);
-        0
+		println!("TEST: {:?}", value);
+        value
     }
 
 }
@@ -55,21 +90,17 @@ impl IA {
         let mut current = isize::from(std::i16::MIN);
         let mut last_move = (0, 0);
         loop {
-			println!("loop 1");
             state.next_move(last_move.0, last_move.1);
             let new_move = match state.selected_move {
                 Some(new_move) => new_move,
                 None => break,
             };
-			println!("loop 2");
             let mut new_state = state.clone();
             new_state.make_move(new_move.0, new_move.1, stone);
-			println!("loop 3");
             let mut score = -self.negascout(&mut new_state, opposite_stone!(stone), depth - 1, -(alpha + 1), -alpha);
             if score > alpha && score < beta {
                 score = -self.negascout(&mut new_state, opposite_stone!(stone), depth - 1, -beta, -alpha);
             }
-			println!("score: {}", score);
             if score > current {
                 current = score;
                 best_move = Some(new_move);

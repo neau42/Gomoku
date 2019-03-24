@@ -31,14 +31,14 @@ macro_rules! opposite_stone {
 macro_rules! line_horizontal {
 	($cells: expr, $x_min: expr, $x_max: expr, $y: expr) => {
 		($x_min..=$x_max).enumerate().fold(0, |value, (index, x)| {
-			value | ((get_stone!($cells[x], $y) as u32) << (index * 2))
+			value | ((get_stone!($cells[x], $y) as u64) << (index * 2))
 		})
 	};
 }
 
 macro_rules! line_vertical {
 	($line: expr, $y_min: expr, $y_max: expr) => {
-		(($line >> ($y_min * 2)) as u32) & ((1 << $y_max * 2 - 1) - 1)
+		(($line >> ($y_min * 2)) as u64) & ((1 << $y_max * 2 - 1) - 1)
 	};
 }
 
@@ -47,7 +47,7 @@ macro_rules! up_diago {
 		(($x_orig - $len_origin_min)..=($x_orig + $len_origin_max))
 		.enumerate()
 		.fold(0, |value, (index, x)| {
-			value | ((get_stone!($cells[x], $y_orig - $len_origin_min + index) as u32) << (index * 2))
+			value | ((get_stone!($cells[x], $y_orig - $len_origin_min + index) as u64) << (index * 2))
 		})
 	};
 
@@ -64,7 +64,7 @@ macro_rules! down_diago {
 		(($x_orig - $len_origin_min)..=($x_orig + $len_origin_max))
 			.enumerate()
 			.fold(0, |value , (index, x)| {
-				value | ((get_stone!($cells[x], $y_orig + $len_origin_min - index) as u32) << (index * 2))
+				value | ((get_stone!($cells[x], $y_orig + $len_origin_min - index) as u64) << (index * 2))
 			})
 	};
 

@@ -79,10 +79,10 @@ impl Gameboard {
 		println!("try_make_move");
 
 		self.cells[x as usize] |= set_stone!(y, stone);
-		let horizontal: u32 = line_horizontal!(self.cells, x_min, x_max, y as usize);
-		let vertical: u32 = line_vertical!(self.cells[x as usize], y_min, y_max);
-		let down_diago: u32 = down_diago!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max);
-		let up_diago: u32 = up_diago!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max);
+		let horizontal: u32 = line_horizontal!(self.cells, x_min, x_max, y as usize) as u32;
+		let vertical: u32 = line_vertical!(self.cells[x as usize], y_min, y_max) as u32;
+		let down_diago: u32 = down_diago!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max) as u32;
+		let up_diago: u32 = up_diago!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max) as u32;
 		
 		let list: [u32; 4] = [horizontal, vertical, down_diago, up_diago];
 		let (nb_captures, nb_trees) = self.count_captures_and_trees(list, x as usize, y as usize, stone);
@@ -98,6 +98,8 @@ impl Gameboard {
 	pub fn make_move(&mut self, x: usize, y: usize, stone: u8) -> bool {
 		if get_stone!(self.cells[x], y) == NOPE {
 			if self.try_make_move(x as isize, y as isize, stone) {
+				self.update_possible_move(x as isize, y as isize);
+
 				return true;
 			}
 			self.cells[x] &= clear_stone!(y);
@@ -136,8 +138,8 @@ impl Gameboard {
                 return;
             }
         }
-		println!("TEST");
-		dbg!(&self.possible_moves);
+		// println!("TEST");
+		// dbg!(&self.possible_moves);
         self.selected_move = None;
 		(0..SIZE)
 			.filter(|y| *y >= starting_y)
