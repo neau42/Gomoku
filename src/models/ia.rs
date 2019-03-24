@@ -21,6 +21,20 @@ impl IA {
     pub fn eval(&self, state: &Gameboard, stone: u8) -> isize {
 		println!("\n\n______ EVAL _______");
 		printboard!(&state.cells);
+
+
+
+		// let horizontal: u32 = line_horizontal!(self.cells, x_min, x_max, y as usize);
+		// let vertical: u32 = line_vertical!(self.cells[x as usize], y_min, y_max);
+		// let down_diago: u32 = down_diago!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max);
+		// let up_diago: u32 = up_diago!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max);
+		
+		// let list: [u32; 4] = [horizontal, vertical, down_diago, up_diago];
+
+
+
+
+
 		let test: isize = eval!(state.cells, stone);
 		// let test =  eval_line!(state.cells[0]);
 		println!("TEST: {:?}", test);
