@@ -82,7 +82,7 @@ macro_rules! printboard {
 macro_rules! line_horizontal {
 	($cells: expr, $x_min: expr, $x_max: expr, $y: expr) => {
 		($x_min..=$x_max).enumerate().fold(0, |value, (index, x)| {
-			value | ((get_stone!($cells[x], $y) as u64) << (index * 2))
+			value | ((get_stone!($cells[x], $y) as u32) << (index * 2))
 		})
 	};
 }
@@ -98,7 +98,7 @@ macro_rules! up_diago {
 		(($x_orig - $len_origin_min)..=($x_orig + $len_origin_max))
 		.enumerate()
 		.fold(0, |value, (index, x)| {
-			value | ((get_stone!($cells[x], $y_orig - $len_origin_min + index) as u64) << (index * 2))
+			value | ((get_stone!($cells[x], $y_orig - $len_origin_min + index) as u32) << (index * 2))
 		})
 	};
 
@@ -115,7 +115,7 @@ macro_rules! down_diago {
 		(($x_orig - $len_origin_min)..=($x_orig + $len_origin_max))
 			.enumerate()
 			.fold(0, |value , (index, x)| {
-				value | ((get_stone!($cells[x], $y_orig + $len_origin_min - index) as u64) << (index * 2))
+				value | ((get_stone!($cells[x], $y_orig + $len_origin_min - index) as u32) << (index * 2))
 			})
 	};
 
@@ -155,7 +155,7 @@ impl Gameboard {
 }
 
 impl Gameboard {
-	pub fn count_captures_and_trees(&mut self, list: [u64; 4]) -> (u8, u8) {
+	pub fn count_captures_and_trees(&mut self, list: [u32; 4], stone: u8) -> (u8, u8) {
 		(0, 0)
 	}
 
@@ -165,13 +165,20 @@ impl Gameboard {
 		let y_min = (y - 5).max(0) as usize;
 		let y_max = (y + 5).min(SIZE as isize - 1) as usize;
 
-		let horizontal: u64 = line_horizontal!(self.cells, x_min, x_max, y as usize);
-		let vertical: u64 = line_vertical!(self.cells[x as usize], y_min, y_max);
-		let down_diago: u64 = down_diago!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max);
-		let up_diago: u64 = up_diago!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max);
+		println!("try_make_move [{}] [{}]", x, y);
+		let horizontal: u32 = line_horizontal!(self.cells, x_min, x_max, y as usize);
+		let vertical: u32 = line_vertical!(self.cells[x as usize] as u32, y_min as u32, y_max as u32);
+		let down_diago: u32 = down_diago!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max);
+		let up_diago: u32 = up_diago!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max);
 		
 		let list = [horizontal, vertical, down_diago, up_diago];
-		let (nb_captures, nb_trees) = self.count_captures_and_trees(list);
+			println!("horizontal: {:#024b}", horizontal);
+			println!("vertical  : {:#024b}", vertical);
+			println!("down_diago: {:#024b}", down_diago);
+			println!("up_diago  : {:#024b}", up_diago);
+			printboard!(self.cells);
+
+		let (nb_captures, nb_trees) = self.count_captures_and_trees(list, stone);
 		if nb_captures > 0 {
 			match stone {
 				BLACK => self.black_captures += nb_captures,
