@@ -136,6 +136,8 @@ impl Gameboard {
                 return;
             }
         }
+		println!("TEST");
+		dbg!(&self.possible_moves);
         self.selected_move = None;
 		(0..SIZE)
 			.filter(|y| *y >= starting_y)

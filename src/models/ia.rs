@@ -55,17 +55,21 @@ impl IA {
         let mut current = isize::from(std::i16::MIN);
         let mut last_move = (0, 0);
         loop {
+			println!("loop 1");
             state.next_move(last_move.0, last_move.1);
             let new_move = match state.selected_move {
                 Some(new_move) => new_move,
                 None => break,
             };
+			println!("loop 2");
             let mut new_state = state.clone();
             new_state.make_move(new_move.0, new_move.1, stone);
+			println!("loop 3");
             let mut score = -self.negascout(&mut new_state, opposite_stone!(stone), depth - 1, -(alpha + 1), -alpha);
             if score > alpha && score < beta {
                 score = -self.negascout(&mut new_state, opposite_stone!(stone), depth - 1, -beta, -alpha);
             }
+			println!("score: {}", score);
             if score > current {
                 current = score;
                 best_move = Some(new_move);
