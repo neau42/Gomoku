@@ -16,24 +16,98 @@ impl IA {
 pub fn evale_one_line(mut line: u64, stone: u8) -> isize {
 	let mut value = 0;
 	let mut i: isize = 0;
-	// let 
+	let mut j: isize = 0;
 
-	let test = (stone + stone << 2 + stone << 4);
-	println!("eval_one_line: {:#064b}", line);
 	while i < 64 {
-		println!("line & 0b11_1111: {:#08b}", line & 0b11_1111);
-		match line & 0b11_1111 {
-			0 => {
-					println!("test+=5: {:#08b}", line & 0b11_1111);
-					i += 5;
+		match (line & 0b1111_1111_1111) as u16 {
+			0b0000_0000_0000 => {  // ALIGN NULL
+					// println!("test(+=1): {:#08b}", line & 0b11_1111);
+					j = 10;
+					i += 10;
 			},
+			0b0010_1010_1001 => {  // ALIGN 4/
+					value -= 3;
+					j = 10;
+					i += 10;
+			},
+			// 0b1010_1010_1000
+			0b0010_1010_1010 => {  // ALIGN 5
+					value -= 100;
+					j = 10;
+					i += 10;
+			},
+			0b0010_1010_1000 => {  // ALIGN 4
+					value -= 10;
+					j = 10;
+					i += 10;
+			},
+			0b0000_1010_1000 => { // ALIGN 3
+					value -= 3;
+					j = 10;
+					i += 10;
+			},
+			0b0010_1000_1000 => { // ALIGN 3
+					value -= 3;
+					j = 10;
+					i += 10;
+			},
+			0b0010_0010_1000 => { // ALIGN 3
+					value -= 3;
+					j = 10;
+					i += 10;
+			},
+			0b0000_1010_0000 => { //ALIGN 2
+					value -= 2;
+					j = 10;
+					i += 10;
+			},
+
+			0b0001_0101_0101 => {  // ALIGN 5
+					value -= 100;
+					j = 10;
+					i += 10;
+			},
+
+			0b0001_0101_0110 => {  // ALIGN 4/
+					value += 3;
+					j = 10;
+					i += 10;
+			},
+			0b0001_0101_0100 => {  // ALIGN 4
+					value += 10;
+					j = 10;
+					i += 10;
+			},
+			0b0000_0101_0100 => { // ALIGN 3
+					value += 3;
+					j = 10;
+					i += 10;
+			},
+			0b0001_0001_0100 => { // ALIGN 3
+					value += 3;
+					j = 10;
+					i += 10;
+			},
+			0b0001_0100_0100 => { // ALIGN 3
+					value += 3;
+					j = 10;
+					i += 10;
+			},
+			0b0000_0101_0000 => { //ALIGN 2
+					value += 2;
+					j = 10;
+					i += 10;
+			},
+
 			_ => {
-					println!("test+=1: {:#08b}", line & 0b11_1111);
+					j = 1;
 					i += 1;
 			},
 		}
-		line >>= i;
+		line >>= j;
 	}
+	// println!("VALUE: {}", value);
+
 	value
 }
 
@@ -43,18 +117,26 @@ impl IA {
     }
 
     pub fn eval(&self, state: &Gameboard, stone: u8) -> isize {
-		println!("\n\n______ EVAL _______");
-		printboard!(&state.cells);
+		// println!("\n\n______ EVAL _______");
+		// printboard!(&state.cells);
 
 
 		let mut all: Vec<u64> = (0..SIZE).map(|y| line_horizontal!(state.cells, 0, SIZE - 1, y as usize)).collect();
 		let all_verti: Vec<u64> = (0..SIZE).map(|x| line_vertical!(state.cells[x as usize], 0 , SIZE -1)).collect();
-		let all_diag_d: Vec<u64> = (0..SIZE).map(|x| down_diago!(state.cells, x as usize, 0, SIZE - 1, 0, 0, SIZE - 1)).collect();
-		let all_diag_d2: Vec<u64> = (1..SIZE).map(|y| down_diago!(state.cells, SIZE - 1, 0, SIZE - 1, y as usize, 0, SIZE - 1)).collect();
-		// all_diag_d.extend(all_diag_d2);
-		let all_diag_u: Vec<u64> = (0..SIZE).map(|x| up_diago!(state.cells, x as usize, 0, SIZE -1, 0, 0, SIZE - 1)).collect();
-		let all_diag_u2: Vec<u64> = (1..SIZE).map(|y| up_diago!(state.cells, 0, 0, SIZE -1, y as usize, 0, SIZE - 1)).collect();
-		// all_diag_u.extend(all_diag_u2);
+		let all_diag_d: Vec<u64> = (0..SIZE).map(|x| down_diago_orig!(state.cells, x as usize, 0, SIZE - 1, 0, 0, SIZE - 1)).collect();
+		// let all_diag_d_test: Vec<u64> = (0..SIZE).map(|x| down_diago!(state.cells, 0, SIZE - 1, x, 0)).collect();
+		let all_diag_d2: Vec<u64> = (1..SIZE).map(|y| down_diago_orig!(state.cells, SIZE - 1, 0, SIZE - 1, y as usize, 0, SIZE - 1)).collect();
+		// let all_diag_d2_test: Vec<u64> = (1..SIZE).map(|y| down_diago!(state.cells, 0, SIZE - 1, 0, y)).collect();
+		let all_diag_u: Vec<u64> = (0..SIZE).map(|x| up_diago_orig!(state.cells, x as usize, 0, SIZE -1, 0, 0, SIZE - 1)).collect();
+		let all_diag_u2: Vec<u64> = (1..SIZE).map(|y| up_diago_orig!(state.cells, 0, 0, SIZE -1, y as usize, 0, SIZE - 1)).collect();
+
+
+
+
+		// dbg!(&all_diag_d);
+		// dbg!(&all_diag_d_test);
+		// dbg!(&all_diag_d2);
+		// dbg!(&all_diag_d2_test);
 
 		all.extend(all_verti);
 		all.extend(all_diag_d);
@@ -66,21 +148,22 @@ impl IA {
 		let mut value: isize = 0;
 
 		for e in all {
+			// println!("{:#066b}", e);
 			value += evale_one_line(e, stone);
-				println!("{:#066b}", e);
 		}
 
 		// let test: isize = eval!(state.cells, stone);
 		// let test =  eval_line!(state.cells[0]);
-		println!("TEST: {:?}", value);
+		// println!("TEST: {:?}", value);
         value
     }
 
 }
 
 impl IA {
-	/// si alpha < current < beta, alors current est la valeur minimax
+	/// s6 alpha < current < beta, alors current est la valeur minimax
     /// si current <= alpha, alors la vraie valeur minimax m vérifie : m <= current <= alpha
+	/// 	/// s6 alpha < current < beta, alor:::: est la valeur minimax
     /// si beta <= current alors la vraie valeur minimax m vérifie : beta <= current <= m
     pub fn negascout(&self, state: &mut Gameboard, stone: u8, depth: u8, mut alpha: isize, beta: isize) -> isize {
         if depth == 0 || self.is_victory() {
