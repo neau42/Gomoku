@@ -113,18 +113,6 @@ macro_rules! concat_stones {
 	}
 }
 
-// macro_rules! eval_raw {
-// 	($cell: expr, $stone: expr) => {
-// 		0
-// 	}
-// }
-
-// macro_rules! eval {
-// 	($cells: expr, $stone: expr) => {
-// 		(0..SIZE).map(|x| eval_raw!($cells[x], stone)).sum()
-// 	}
-// }
-
 macro_rules! printboard {
 	($cells: expr) => {
 		print!("BOARD:\n   ");

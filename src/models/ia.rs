@@ -107,13 +107,7 @@ pub fn evale_one_line(mut line: u64, stone: u8) -> isize {
 		}
 		line >>= j;
 	}
-	if stone == WHITE {
-		// println!("±value: {} ",-value);
-		-value
-	} else {
-		// println!("±value: {} ",value);
-		value
-	}
+	value
 }
 
 impl IA {
@@ -125,23 +119,12 @@ impl IA {
 		// println!("\n\n______ EVAL _______");
 		// printboard!(&state.cells);
 
-
 		let mut all: Vec<u64> = (0..SIZE).map(|y| line_horizontal!(state.cells, 0, SIZE - 1, y as usize)).collect();
 		let all_verti: Vec<u64> = (0..SIZE).map(|x| line_vertical!(state.cells[x as usize], 0 , SIZE -1)).collect();
 		let all_diag_d: Vec<u64> = (0..SIZE).map(|x| down_diago_orig!(state.cells, x as usize, 0, SIZE - 1, 0, 0, SIZE - 1)).collect();
-		// let all_diag_d_test: Vec<u64> = (0..SIZE).map(|x| down_diago!(state.cells, 0, SIZE - 1, x, 0)).collect();
 		let all_diag_d2: Vec<u64> = (1..SIZE).map(|y| down_diago_orig!(state.cells, SIZE - 1, 0, SIZE - 1, y as usize, 0, SIZE - 1)).collect();
-		// let all_diag_d2_test: Vec<u64> = (1..SIZE).map(|y| down_diago!(state.cells, 0, SIZE - 1, 0, y)).collect();
 		let all_diag_u: Vec<u64> = (0..SIZE).map(|x| up_diago_orig!(state.cells, x as usize, 0, SIZE -1, 0, 0, SIZE - 1)).collect();
 		let all_diag_u2: Vec<u64> = (1..SIZE).map(|y| up_diago_orig!(state.cells, 0, 0, SIZE -1, y as usize, 0, SIZE - 1)).collect();
-
-
-
-
-		// dbg!(&all_diag_d);
-		// dbg!(&all_diag_d_test);
-		// dbg!(&all_diag_d2);
-		// dbg!(&all_diag_d2_test);
 
 		all.extend(all_verti);
 		all.extend(all_diag_d);
@@ -156,13 +139,12 @@ impl IA {
 			// println!("{:#066b}", e);
 			value += evale_one_line(e, stone);
 		}
-
-		// let test: isize = eval!(state.cells, stone);
-		// let test =  eval_line!(state.cells[0]);
-		// println!("value: {:?}", value);
-        value
-    }
-
+		if stone == WHITE {
+			-value
+		} else {
+			value
+		}
+	}
 }
 
 impl IA {
