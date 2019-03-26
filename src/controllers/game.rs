@@ -97,7 +97,7 @@ impl GameViewController for GameController {
 						model.update_last_move_time();
 					}
 				}
-				None => println!("banana"),
+				None => print_all_state(&model.all_state),//println!("banana"),
 			};
 			is_human = false;
 		}
@@ -122,4 +122,12 @@ impl GameViewController for GameController {
     fn get_type(&self) -> PageType {
         PageType::Game
     }
+}
+
+fn print_all_state(all_state: &Vec<Gameboard> ) {
+
+	println!("ALL STATES: ");
+	for state in all_state {
+		printboard!(state.cells);
+	}
 }

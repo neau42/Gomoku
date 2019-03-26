@@ -118,24 +118,31 @@ impl IA {
 		// println!("\n\n______ EVAL _______");
 		// printboard!(&state.cells);
 
-		let mut all: Vec<u64> = (0..SIZE).map(|y| line_horizontal!(state.cells, 0, SIZE - 1, y as usize)).collect();
-		let all_verti: Vec<u64> = (0..SIZE).map(|x| line_vertical!(state.cells[x as usize], 0 , SIZE -1)).collect();
-		let all_diag_d: Vec<u64> = (0..SIZE).map(|x| down_diago!(state.cells, x, 0, x as usize, 0)).collect();
-		let all_diag_d2: Vec<u64> = (1..SIZE).map(|y| down_diago_orig!(state.cells, SIZE - 1, 0, SIZE - 1, y as usize, 0, SIZE - 1)).collect();
-		let all_diag_u: Vec<u64> = (0..SIZE).map(|x| up_diago_orig!(state.cells, x as usize, 0, SIZE -1, 0, 0, SIZE - 1)).collect();
-		let all_diag_u2: Vec<u64> = (1..SIZE).map(|y| up_diago_orig!(state.cells, 0, 0, SIZE -1, y as usize, 0, SIZE - 1)).collect();
-
-		all.extend(all_verti);
-		all.extend(all_diag_d);
-		all.extend(all_diag_d2);
-		all.extend(all_diag_u);
-		all.extend(all_diag_u2);
-		all.retain(|&elem| elem != 0);
-
 		let mut value: isize = 0;
+		if state.black_captures >= 10 {
+			value = 10000000;
+		} else if state.white_captures >= 10 {
+			value = -10000000;
+		}
+		else {
+			let mut all: Vec<u64> = (0..SIZE).map(|y| line_horizontal!(state.cells, 0, SIZE - 1, y as usize)).collect();
+			let all_verti: Vec<u64> = (0..SIZE).map(|x| line_vertical!(state.cells[x as usize], 0 , SIZE -1)).collect();
+			let all_diag_d: Vec<u64> = (0..SIZE).map(|x| down_diago!(state.cells, x, 0, x as usize, 0)).collect();
+			let all_diag_d2: Vec<u64> = (1..SIZE).map(|y| down_diago_orig!(state.cells, SIZE - 1, 0, SIZE - 1, y as usize, 0, SIZE - 1)).collect();
+			let all_diag_u: Vec<u64> = (0..SIZE).map(|x| up_diago_orig!(state.cells, x as usize, 0, SIZE -1, 0, 0, SIZE - 1)).collect();
+			let all_diag_u2: Vec<u64> = (1..SIZE).map(|y| up_diago_orig!(state.cells, 0, 0, SIZE -1, y as usize, 0, SIZE - 1)).collect();
 
-		for e in all {
-			value += evale_one_line(e, stone);
+			all.extend(all_verti);
+			all.extend(all_diag_d);
+			all.extend(all_diag_d2);
+			all.extend(all_diag_u);
+			all.extend(all_diag_u2);
+			all.retain(|&elem| elem != 0);
+
+
+			for e in all {
+				value += evale_one_line(e, stone);
+			}
 		}
 		if stone == WHITE {
 			-value
