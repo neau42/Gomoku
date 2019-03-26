@@ -177,17 +177,29 @@ impl Gameboard {
 			let diago_up_right = (y as usize - y_min).min(x_max - x as usize);
 			let diago_down_right = (y_max - y as usize).min(x_max - x as usize);
 			let diago_down_left = (y_max - y as usize).min(x as usize - x_min);
+			// println!("{:#066b} | y_min {} | y_max {}", self.cells[x as usize], y_min, y_max);
 			let lines: [u32; 4] = tree_lines!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max, diago_up_left, diago_down_right, diago_down_left, diago_up_right);
-
+			// println!("{:#066b}", lines[0]);
+			// println!("{:#066b}", lines[1]);
+			// println!("{:#066b}", lines[2]);
+			// println!("{:#066b}", lines[3]);
+			// println!();
 			lines.iter().any(|line| {
 				(0..6).any(|range| {
 					let tmp_line: u16 = (line >> (range * 2)) as u16;
-					self.result = match tmp_line {
-						BLACK_5_ALIGN => Some(GameResult::BlackWin),
-						WHITE_5_ALIGN => Some(GameResult::WhiteWin),
-						_ => return false,
+					return match tmp_line {
+						WHITE_5_ALIGN => {
+							self.result = Some(GameResult::WhiteWin);
+							true
+						},
+						BLACK_5_ALIGN => {
+							self.result = Some(GameResult::BlackWin);
+							true
+						},
+						_ => {
+							false
+						}
 					};
-					true
 				})
 			});
 		}

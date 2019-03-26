@@ -38,7 +38,7 @@ macro_rules! line_horizontal {
 
 macro_rules! line_vertical {
 	($line: expr, $y_min: expr, $y_max: expr) => {
-		(($line >> ($y_min * 2)) as u64) & ((1 << $y_max * 2 - 1) - 1)
+		(($line >> ($y_min * 2)) as u64) & ((1 << ($y_max * 2)) - 1)
 	};
 }
 
