@@ -39,7 +39,7 @@ impl GameController {
 						model.all_state.pop();
 						model.state = model.all_state.last().unwrap().clone();
 						model.current_stone = opposite_stone!(model.current_stone);
-						model.result = None;
+						model.state.result = None;
 					}
 				},
 				_ => {
@@ -47,7 +47,7 @@ impl GameController {
 						model.all_state.pop();
 						model.all_state.pop();
 						model.state = model.all_state.last().unwrap().clone();
-						model.result = None;
+						model.state.result = None;
 					}
 				}
 			}
@@ -105,8 +105,8 @@ impl GameViewController for GameController {
 		self.view.display_player_turn(ui, widget_ids, model);
 		self.view.display_captures(ui, widget_ids, model.state.black_captures, model.state.white_captures);
 		self.view.display_last_move_time(ui, widget_ids, &model.last_move_time[..]);
-		if model.is_finish() {
-			let result: &str = match model.result.unwrap() {
+		if model.state.is_finish() {
+			let result: &str = match model.state.result.unwrap() {
 				GameResult::BlackWin => "BLACK PLAYER WIN!",
 				GameResult::WhiteWin => "WHITE PLAYER WIN!",
 				GameResult::Equality => "EQUALITY!",

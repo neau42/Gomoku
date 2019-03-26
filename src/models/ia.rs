@@ -29,7 +29,6 @@ pub fn evale_one_line(mut line: u64, stone: u8) -> isize {
 					j = 10;
 					i += 10;
 			},
-			// 0b1010_1010_1000
 			0b0010_1010_1010 | 0b1010_1010_1000 | 0b1010_1010_1001 | 0b0110_1010_1010 => {  // ALIGN 5
 					value -= 10000000;
 					j = 10;
@@ -121,15 +120,10 @@ impl IA {
 
 		let mut all: Vec<u64> = (0..SIZE).map(|y| line_horizontal!(state.cells, 0, SIZE - 1, y as usize)).collect();
 		let all_verti: Vec<u64> = (0..SIZE).map(|x| line_vertical!(state.cells[x as usize], 0 , SIZE -1)).collect();
-		// let all_diag_d: Vec<u64> = (0..SIZE).map(|x| down_diago_orig!(state.cells, x as usize, 0, SIZE - 1, 0, 0, SIZE - 1)).collect();
 		let all_diag_d: Vec<u64> = (0..SIZE).map(|x| down_diago!(state.cells, x, 0, x as usize, 0)).collect();
 		let all_diag_d2: Vec<u64> = (1..SIZE).map(|y| down_diago_orig!(state.cells, SIZE - 1, 0, SIZE - 1, y as usize, 0, SIZE - 1)).collect();
-		// let all_diag_d2_test: Vec<u64> = (1..SIZE).map(|y| down_diago!(state.cells, 0, y, 0, y as usize)).collect();
 		let all_diag_u: Vec<u64> = (0..SIZE).map(|x| up_diago_orig!(state.cells, x as usize, 0, SIZE -1, 0, 0, SIZE - 1)).collect();
 		let all_diag_u2: Vec<u64> = (1..SIZE).map(|y| up_diago_orig!(state.cells, 0, 0, SIZE -1, y as usize, 0, SIZE - 1)).collect();
-
-		// dbg!(&all_diag_d2);
-		// dbg!(&all_diag_d2_test);
 
 		all.extend(all_verti);
 		all.extend(all_diag_d);
@@ -141,7 +135,6 @@ impl IA {
 		let mut value: isize = 0;
 
 		for e in all {
-			// println!("{:#066b}", e);
 			value += evale_one_line(e, stone);
 		}
 		if stone == WHITE {
@@ -158,7 +151,7 @@ impl IA {
 	/// 	/// s6 alpha < current < beta, alor:::: est la valeur minimax
     /// si beta <= current alors la vraie valeur minimax m vérifie : beta <= current <= m
     pub fn negascout(&self, state: &mut Gameboard, stone: u8, depth: u8, mut alpha: isize, beta: isize) -> isize {
-        if depth == 0 || self.is_victory() {
+        if depth == 0 || state.is_finish() {
             return self.eval(state, stone);
         }
         let mut best_move: Option<(usize, usize)> = None;
@@ -191,7 +184,7 @@ impl IA {
     }
 
     pub fn alphabeta(&self, state: &mut Gameboard, stone: u8, depth: u8, mut alpha: isize, beta: isize) -> isize {
-        if depth == 0 || self.is_victory() {
+        if depth == 0 || state.is_finish() {
             return self.eval(state, stone);
         }
         let mut best_move: Option<(usize, usize)> = None;
