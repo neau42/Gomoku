@@ -92,18 +92,22 @@ macro_rules! get_capture_form {
 	}
 }
 
+/// NE PAS LIRE
 macro_rules! capture_lines {
 	($cells: expr, $x: expr, $x_min: expr, $x_max: expr, $y: expr, $y_min: expr, $y_max: expr, $diago_up_left: expr, $diago_down_right: expr, $diago_down_left: expr, $diago_up_right: expr) => {
+		// {
+			// println!("{}|{}|{}", line_vertical!($cells[$x], $y_min, $y), $y_min, $y);
 		[
-			((up_diago!($cells, $diago_up_left, 0, $x, $y)) as u8, (-1, -1)),
-			(line_horizontal!($cells, $x_min, $x, $y) as u8, (-1, 0)),
-			((down_diago!($cells, $diago_down_left, 0, $x, $y)) as u8,(-1, 1)),
+			((up_diago!($cells, $diago_up_left, 0, $x, $y) >> (2 - (5 - ($diago_up_left))) * 2) as u8, (-1, -1)),
+			((line_horizontal!($cells, $x_min, $x, $y) >> (2 - (5 - ($x - $x_min))) * 2) as u8, (-1, 0)),
+			((down_diago!($cells, $diago_down_left, 0, $x, $y) >> (2 - (5 - ($diago_down_left))) * 2) as u8,(-1, 1)),
 			(down_diago!($cells, 0, $diago_up_right, $x, $y) as u8, (1, -1)),
 			(line_horizontal!($cells, $x, $x_max, $y) as u8, (1, 0)),
 			(up_diago!($cells, 0, $diago_down_right, $x, $y) as u8 , (1, 1)),
-			(line_vertical!($cells[$x], $y_min, $y) as u8, (0, -1)),
+			((line_vertical!($cells[$x], $y_min, $y) >> (2 - (5 - ($y - $y_min))) * 2) as u8, (0, -1)),
 			(line_vertical!($cells[$x], $y, $y_max) as u8, (0, 1)),
 		]
+		// }
 	};
 }
 

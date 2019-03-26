@@ -66,7 +66,6 @@ impl Gameboard {
 
 	pub fn count_capture(&mut self, capture_lines: [(u8, (isize, isize)); 8], x: usize, y: usize, stone: u8) -> u8 {
 		let capture_form: u8 = get_capture_form!(stone);
-		println!();
 		capture_lines.iter().fold(0, |nbr_capture, (line, coef)| {
 			// println!("{:#066b}", line);
 			if *line == capture_form {
