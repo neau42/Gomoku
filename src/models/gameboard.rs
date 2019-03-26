@@ -1,3 +1,4 @@
+use crate::models::game::GameResult;
 /// Size of game board.
 pub const SIZE: usize = 19;
 
@@ -8,6 +9,8 @@ pub const WHITE: u8 = 0b10;
 pub const WHITE_CAPTURE: u8 = WHITE | BLACK << 2 | BLACK << 4 | WHITE << 6;
 pub const BLACK_CAPTURE: u8 = BLACK | WHITE << 2 | WHITE << 4 | BLACK << 6;
 
+pub const BLACK_5_ALIGN: u16 = BLACK as u16 | (BLACK as u16) << 2 | (BLACK as u16) << 4 | (BLACK as u16) << 6 | (BLACK as u16) << 8;
+pub const WHITE_5_ALIGN: u16 = WHITE as u16 | (WHITE as u16) << 2 | (WHITE as u16) << 4 | (WHITE as u16) << 6 | (WHITE as u16) << 8;
 pub const BLACK_TREES: [u16; 4] = [
 	NOPE as u16 | (BLACK as u16) << 2 | (BLACK as u16) << 4 | (BLACK as u16) << 6 | (NOPE as u16) << 8 | (NOPE as u16) << 10,
 	NOPE as u16 | (BLACK as u16) << 2 | (BLACK as u16) << 4 | (NOPE as u16) << 6 | (BLACK as u16) << 8 | (NOPE as u16) << 10,
@@ -28,6 +31,7 @@ pub struct Gameboard {
     pub selected_move: Option<(usize, usize)>,
 	pub black_captures: u8,
 	pub white_captures: u8,
+	pub result: Option<GameResult>,
 }
 
 impl Gameboard {
@@ -38,13 +42,12 @@ impl Gameboard {
             selected_move: None,
 			black_captures: 0,
 			white_captures: 0,
+			result: None,
 		}
 	}
 
-	pub fn is_final(&self) -> bool {
-		self.black_captures == 5
-		|| self.white_captures == 5
-		// ou alignment 5 sans capture possible
+	pub fn is_finish(&self) -> bool {
+		self.result.is_some()
     }
 }
 impl Gameboard {
@@ -93,16 +96,17 @@ impl Gameboard {
 			return nbr_tree < 2;
 		}
 		match stone {
-			BLACK => self.black_captures += nbr_capture,
-			_ => self.white_captures += nbr_capture
+			BLACK => self.black_captures += (nbr_capture << 1),
+			_ => self.white_captures += (nbr_capture << 1),
 		}
 		true
 	}
 
 	pub fn make_move(&mut self, x: usize, y: usize, stone: u8) -> bool {
-		if get_stone!(self.cells[x], y) == NOPE {
+		if !self.is_finish() && get_stone!(self.cells[x], y) == NOPE {
 			self.cells[x] |= set_stone!(y, stone);
 			if self.try_make_move(x as isize, y as isize, stone) {
+				self.update_result(x, y);
 				self.update_possible_move(x as isize, y as isize);
 				return true;
 			}
@@ -155,6 +159,38 @@ impl Gameboard {
 					false
 				})
 		);
+	}
+	pub fn update_result(&mut self, x: usize, y: usize) {
+		if self.black_captures >= 10 {
+			self.result = Some(GameResult::BlackWin)
+		}
+		else if self.white_captures >= 10 {
+			self.result = Some(GameResult::WhiteWin)
+		}
+		else {
+			let x_min = (x as isize - 5).max(0) as usize;
+			let x_max = (x + 5).min(SIZE - 1);
+			let y_min = (y as isize  - 5).max(0) as usize;
+			let y_max = (y + 5).min(SIZE - 1);
+
+			let diago_up_left = (y as usize - y_min).min(x as usize - x_min);
+			let diago_up_right = (y as usize - y_min).min(x_max - x as usize);
+			let diago_down_right = (y_max - y as usize).min(x_max - x as usize);
+			let diago_down_left = (y_max - y as usize).min(x as usize - x_min);
+			let lines: [u32; 4] = tree_lines!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max, diago_up_left, diago_down_right, diago_down_left, diago_up_right);
+
+			lines.iter().any(|line| {
+				(0..6).any(|range| {
+					let tmp_line: u16 = (line >> (range * 2)) as u16;
+					self.result = match tmp_line {
+						BLACK_5_ALIGN => Some(GameResult::BlackWin),
+						WHITE_5_ALIGN => Some(GameResult::WhiteWin),
+						_ => return false,
+					};
+					true
+				})
+			});
+		}
 	}
 }
 

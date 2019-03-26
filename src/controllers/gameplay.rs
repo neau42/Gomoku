@@ -91,7 +91,7 @@ impl GameplayController {
                    self.page_controller = match self.page_controller.get_type() {
                        PageType::Game => {
                            let game = self.page_model.get_model().downcast_ref::<Game>().unwrap();
-                           let game = if game.is_finish() {
+                           let game = if game.state.is_finish() {
                                None
                            }
                            else {
@@ -113,7 +113,7 @@ impl GameplayController {
 					},
                     _ => { 
                         let game = self.page_model.get_model().downcast_ref::<Game>().unwrap();
-                        let game = if game.is_finish() {
+                        let game = if game.state.is_finish() {
                             None
                         }
                         else {

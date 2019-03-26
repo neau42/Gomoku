@@ -26,7 +26,7 @@ impl IA {
     /// si current <= alpha, alors la vraie valeur minimax m vérifie : m <= current <= alpha
     /// si beta <= current alors la vraie valeur minimax m vérifie : beta <= current <= m
     pub fn negascout(&self, state: &mut Gameboard, stone: u8, depth: u8, mut alpha: isize, beta: isize) -> isize {
-        if depth == 0 || state.is_final() {
+        if depth == 0 || state.is_finish() {
             return self.eval(state);
         }
         let mut best_move: Option<(usize, usize)> = None;
@@ -59,7 +59,7 @@ impl IA {
     }
 
     pub fn alphabeta(&self, state: &mut Gameboard, stone: u8, depth: u8, mut alpha: isize, beta: isize) -> isize {
-        if depth == 0 || state.is_final() {
+        if depth == 0 || state.is_finish() {
             return self.eval(state);
         }
         let mut best_move: Option<(usize, usize)> = None;
