@@ -21,38 +21,40 @@ pub fn evale_one_line(mut line: u64, stone: u8) -> isize {
 	while i < 64 {
 		match (line & 0b1111_1111_1111) as u16 {
 			0b0000_0000_0000 => {  // ALIGN NULL
-					// println!("test(+=1): {:#08b}", line & 0b11_1111);
 					j = 10;
 					i += 10;
 			},
-			0b0010_1010_1001 => {  // ALIGN 4/
-					value -= 3;
+			0b0110_1010_1000 | 0b0010_1010_1001 => {  // ALIGN 4/
+					value -= 4;
 					j = 10;
 					i += 10;
 			},
 			// 0b1010_1010_1000
 			0b0010_1010_1010 => {  // ALIGN 5
-					value -= 100;
+					value -= 1000;
 					j = 10;
 					i += 10;
 			},
+			// is_open if (is_open & 0b0011_1111_1100) != 0 => {
+
+			// }
 			0b0010_1010_1000 => {  // ALIGN 4
 					value -= 10;
 					j = 10;
 					i += 10;
 			},
-			0b0000_1010_1000 => { // ALIGN 3
+			0b0010_0010_1000 | 0b0010_1000_1000 | 0b0000_1010_1000 => { // ALIGN 3
 					value -= 3;
 					j = 10;
 					i += 10;
 			},
-			0b0010_1000_1000 => { // ALIGN 3
-					value -= 3;
+			0b0010_0010_1001 | 0b0010_1000_1001 | 0b0000_1010_1001 => { // ALIGN 3
+					value -= 2;
 					j = 10;
 					i += 10;
 			},
-			0b0010_0010_1000 => { // ALIGN 3
-					value -= 3;
+			0b0110_0010_1000 | 0b0110_1000_1000 | 0b0100_1010_1000 => { // ALIGN 3
+					value -= 2;
 					j = 10;
 					i += 10;
 			},
@@ -63,13 +65,12 @@ pub fn evale_one_line(mut line: u64, stone: u8) -> isize {
 			},
 
 			0b0001_0101_0101 => {  // ALIGN 5
-					value -= 100;
+					value += 1000;
 					j = 10;
 					i += 10;
 			},
-
-			0b0001_0101_0110 => {  // ALIGN 4/
-					value += 3;
+			0b1001_0101_0100 | 0b0001_0101_0110 => {  // ALIGN 4/
+					value += 4;
 					j = 10;
 					i += 10;
 			},
@@ -78,37 +79,41 @@ pub fn evale_one_line(mut line: u64, stone: u8) -> isize {
 					j = 10;
 					i += 10;
 			},
-			0b0000_0101_0100 => { // ALIGN 3
+			0b0001_0100_0100 | 0b0001_0001_0100 | 0b0000_0101_0100 => { // ALIGN 3
 					value += 3;
 					j = 10;
 					i += 10;
 			},
-			0b0001_0001_0100 => { // ALIGN 3
-					value += 3;
+			0b0001_0100_0110 | 0b0001_0001_0110 | 0b0000_0101_0110 => { // ALIGN 3/
+					value += 2;
 					j = 10;
 					i += 10;
 			},
-			0b0001_0100_0100 => { // ALIGN 3
-					value += 3;
-					j = 10;
-					i += 10;
-			},
-			0b0000_0101_0000 => { //ALIGN 2
+			0b1001_0100_0100 | 0b1001_0001_0100 | 0b1000_0101_0100 => { // ALIGN /3
 					value += 2;
 					j = 10;
 					i += 10;
 			},
 
+			0b0000_0101_0000 => { //ALIGN 2
+					value += 2;
+					j = 10;
+					i += 10;
+			},
 			_ => {
-					j = 1;
-					i += 1;
+					j = 2;
+					i += 2;
 			},
 		}
 		line >>= j;
 	}
-	// println!("VALUE: {}", value);
-
-	value
+	if stone == WHITE {
+		// println!("±value: {} ",-value);
+		-value
+	} else {
+		// println!("±value: {} ",value);
+		value
+	}
 }
 
 impl IA {
@@ -154,7 +159,7 @@ impl IA {
 
 		// let test: isize = eval!(state.cells, stone);
 		// let test =  eval_line!(state.cells[0]);
-		// println!("TEST: {:?}", value);
+		// println!("value: {:?}", value);
         value
     }
 
