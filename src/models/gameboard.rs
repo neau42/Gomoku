@@ -54,7 +54,7 @@ impl Gameboard {
 	pub fn count_tree(&self, tree_lines: [u32; 4], stone: u8) -> u8 {
 		let tree_forms: [u16; 4] = get_tree_forms!(stone);
 		tree_lines.iter().fold(0, |nbr_tree, line| {
-			if (0..7).any(|range| {
+			if (0..6).any(|range| {
 				let line_to_check: u32 = (line >> (range * 2));
 				tree_forms.contains(&(concat_stones!(line_to_check, 6) as u16))
 			}) {
@@ -178,16 +178,10 @@ impl Gameboard {
 			let diago_up_right = (y as usize - y_min).min(x_max - x as usize);
 			let diago_down_right = (y_max - y as usize).min(x_max - x as usize);
 			let diago_down_left = (y_max - y as usize).min(x as usize - x_min);
-			// println!("{:#066b} | y_min {} | y_max {}", self.cells[x as usize], y_min, y_max);
 			let lines: [u32; 4] = tree_lines!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max, diago_up_left, diago_down_right, diago_down_left, diago_up_right);
-			// println!("{:#066b}", lines[0]);
-			// println!("{:#066b}", lines[1]);
-			// println!("{:#066b}", lines[2]);
-			// println!("{:#066b}", lines[3]);
-			// println!();
 			lines.iter().any(|line| {
-				(0..6).any(|range| {
-					let tmp_line: u16 = (line >> (range * 2)) as u16;
+				(0..8).any(|range| {
+					let tmp_line: u16 = concat_stones!((line >> (range * 2)) as u32, 5) as u16;
 					return match tmp_line {
 						WHITE_5_ALIGN => {
 							self.result = Some(GameResult::WhiteWin);
