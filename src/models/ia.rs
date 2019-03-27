@@ -199,9 +199,16 @@ impl IA {
         alpha
     }
 
-    pub fn alphabeta(&self, state: &mut Gameboard, stone: u8, depth: u8, mut alpha: isize, beta: isize) -> isize {
-        if depth == 0 || state.is_finish() {
-            return self.eval(state, stone);
+    pub fn alphabeta(&self, state: &mut Gameboard, transposition_table: &mut HashSet<Gameboard>, stone: u8, depth: u8, mut alpha: isize, beta: isize) -> isize {
+        if depth % 2 == 0 && transposition_table.contains(state) {
+			return state.value
+		}
+		if depth == 0 || state.is_finish() {
+			state.value = self.eval(state, stone);
+			if depth % 2 == 0 {
+				transposition_table.insert(state.clone());
+			}
+            return state.value;
         }
         let mut best_move: Option<(usize, usize)> = None;
         let mut current = isize::from(std::i16::MIN);
@@ -214,7 +221,7 @@ impl IA {
             };
             let mut new_state = state.clone();
             new_state.make_move(new_move.0, new_move.1, stone);
-            let mut score = -self.alphabeta(&mut new_state, opposite_stone!(stone), depth - 1, -beta, -alpha);
+            let mut score = -self.alphabeta(&mut new_state, transposition_table, opposite_stone!(stone), depth - 1, -beta, -alpha);
             if score > current {
                 current = score;
                 best_move = Some(new_move);
