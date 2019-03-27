@@ -1,4 +1,7 @@
 use crate::models::game::GameResult;
+use std::hash::{Hash, Hasher};
+use std::cmp::Ordering;
+
 /// Size of game board.
 pub const SIZE: usize = 19;
 
@@ -24,13 +27,14 @@ pub const WHITE_TREES: [u16; 4] = [
 	NOPE as u16 | (NOPE as u16) << 2 | (WHITE as u16) << 4 | (WHITE as u16) << 6 | (WHITE as u16) << 8 | (NOPE as u16) << 10,
 	];
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Eq, Clone)]
 pub struct Gameboard {
     pub cells: [u64; SIZE],
 	pub possible_moves: [u32; SIZE],
     pub selected_move: Option<(usize, usize)>,
 	pub black_captures: u8,
 	pub white_captures: u8,
+	pub value: isize,
 	pub result: Option<GameResult>,
 }
 
@@ -42,6 +46,7 @@ impl Gameboard {
             selected_move: None,
 			black_captures: 0,
 			white_captures: 0,
+			value: 0,
 			result: None,
 		}
 	}
@@ -201,5 +206,22 @@ impl Gameboard {
 	}
 }
 
-impl Gameboard {
+impl PartialOrd for Gameboard {
+    fn partial_cmp(&self, other: &Gameboard) -> Option<Ordering> {
+        other.value.partial_cmp(&self.value)//To change
+    }
+}
+
+impl PartialEq for Gameboard {
+    fn eq(&self, other: &Gameboard) -> bool {
+        self.cells == other.cells && self.black_captures == other.black_captures && self.white_captures == other.white_captures
+    }
+}
+
+impl Hash for Gameboard {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.cells.hash(state);
+        self.black_captures.hash(state);
+        self.white_captures.hash(state);
+    }
 }

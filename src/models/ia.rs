@@ -1,4 +1,7 @@
 use crate::models::gameboard::*;
+use std::collections::HashSet;
+use std::cmp::min;
+use std::cmp::max;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct IA {
@@ -153,13 +156,19 @@ impl IA {
 }
 
 impl IA {
-	/// s6 alpha < current < beta, alors current est la valeur minimax
+	/// si alpha < current < beta, alors current est la valeur minimax
     /// si current <= alpha, alors la vraie valeur minimax m vérifie : m <= current <= alpha
-	/// 	/// s6 alpha < current < beta, alor:::: est la valeur minimax
     /// si beta <= current alors la vraie valeur minimax m vérifie : beta <= current <= m
-    pub fn negascout(&self, state: &mut Gameboard, stone: u8, depth: u8, mut alpha: isize, beta: isize) -> isize {
-        if depth == 0 || state.is_finish() {
-            return self.eval(state, stone);
+    pub fn negascout(&self, state: &mut Gameboard, transposition_table: &mut HashSet<Gameboard>, stone: u8, depth: u8, mut alpha: isize, beta: isize) -> isize {
+        if depth % 2 == 0 && transposition_table.contains(state) {
+			return state.value
+		}
+		if depth == 0 || state.is_finish() {
+			state.value = self.eval(state, stone);
+			if depth % 2 == 0 {
+				transposition_table.insert(state.clone());
+			}
+            return state.value;
         }
         let mut best_move: Option<(usize, usize)> = None;
         let mut current = isize::from(std::i16::MIN);
@@ -172,9 +181,9 @@ impl IA {
             };
             let mut new_state = state.clone();
             new_state.make_move(new_move.0, new_move.1, stone);
-            let mut score = -self.negascout(&mut new_state, opposite_stone!(stone), depth - 1, -(alpha + 1), -alpha);
+            let mut score = -self.negascout(&mut new_state, transposition_table, opposite_stone!(stone), depth - 1, -(alpha + 1), -alpha);
             if score > alpha && score < beta {
-                score = -self.negascout(&mut new_state, opposite_stone!(stone), depth - 1, -beta, -alpha);
+                score = -self.negascout(&mut new_state, transposition_table, opposite_stone!(stone), depth - 1, -beta, -alpha);
             }
             if score > current {
                 current = score;
