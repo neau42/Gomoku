@@ -160,20 +160,22 @@ impl IA {
     /// si current <= alpha, alors la vraie valeur minimax m vérifie : m <= current <= alpha
     /// si beta <= current alors la vraie valeur minimax m vérifie : beta <= current <= m
     pub fn negascout(&self, state: &mut Gameboard, transposition_table: &mut HashSet<Gameboard>, stone: u8, depth: u8, mut alpha: isize, beta: isize) -> isize {
-        if depth % 2 == 0 && transposition_table.contains(state) {
-			state.value = transposition_table.get(state).unwrap().value;			
-			return state.value
-		}
+        // if depth % 2 == 0 && transposition_table.contains(state) {
+		// 	state.value = transposition_table.get(state).unwrap().value;			
+		// 	return state.value
+		// }
 		if depth == 0 || state.is_finish() {
 			state.value = self.eval(state, stone);
-			if depth % 2 == 0 {
-				transposition_table.insert(state.clone());
-			}
+			// if depth % 2 == 0 {
+			// 	transposition_table.insert(state.clone());
+			// }
             return state.value;
         }
         let mut best_move: Option<(usize, usize)> = None;
         let mut current = (std::i64::MIN + 1) as isize;
         let mut last_move = (0, 0);
+		let mut tmp_beta = beta;
+		let mut i = 0;
         loop {
             state.next_move(last_move.0, last_move.1);
             let new_move = match state.selected_move {
@@ -182,10 +184,11 @@ impl IA {
             };
             let mut new_state = state.clone();
             new_state.make_move(new_move.0, new_move.1, stone);
-            let mut score = -self.negascout(&mut new_state, transposition_table, opposite_stone!(stone), depth - 1, -(alpha + 1), -alpha);
-            if score > alpha && score < beta {
+            let mut score = -self.negascout(&mut new_state, transposition_table, opposite_stone!(stone), depth - 1, -tmp_beta, -alpha);
+            if score > alpha && score < beta && i > 0 && depth > 1 {
                 score = -self.negascout(&mut new_state, transposition_table, opposite_stone!(stone), depth - 1, -beta, -alpha);
             }
+			i += 1;
             if score > current {
                 current = score;
                 best_move = Some(new_move);
@@ -193,11 +196,12 @@ impl IA {
                 if alpha >= beta {
                     break;
                 }
+				tmp_beta = alpha + 1;
             }
             last_move = (new_move.0 + 1, new_move.1);
         }
         state.selected_move = best_move;
-        alpha
+        current
     }
 
     pub fn alphabeta(&self, state: &mut Gameboard, transposition_table: &mut HashSet<Gameboard>, stone: u8, depth: u8, mut alpha: isize, beta: isize) -> isize {
