@@ -97,6 +97,14 @@ impl Game {
         self.last_move_time = format!("Last move time: {}s", time);
         self.timer = Instant::now();
     }
+
+    pub fn current_player_is_human(&self) -> bool {
+        let player = match self.current_stone {
+			WHITE => &self.white_player,
+			_ => &self.black_player,
+		};
+        *player == Player::Human
+    }
 }
 
 impl GameViewModel for Game {

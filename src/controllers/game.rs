@@ -72,36 +72,15 @@ impl GameViewController for GameController {
 		Box::new(controller)
 	}
 
+    fn get_type(&self) -> PageType {
+        PageType::Game
+    }
+	
 	fn show(&self, model: &mut dyn GameViewModel, ui: &mut UiCell, widget_ids: &WidgetIds) {
 		let model: &mut Game = model.get_model().downcast_mut::<Game>().unwrap();
-		
-		let mut is_human = true;
-		if let Player::Ia{ia, ..} = match model.current_stone {
-			WHITE => &model.white_player,
-			_ => &model.black_player,
-		}
-		{
-			let best_move = if model.all_state.len() == 1 {
-				let position = SIZE / 2;
-				Some((position, position))
-			}
-			else {
-				let mut transposition_table: HashSet<Gameboard> = HashSet::new();
-				ia.negascout(&mut model.state, &mut transposition_table, model.current_stone, ia.depth, (std::i64::MIN + 1) as isize, std::i64::MAX as isize);
-				// ia.alphabeta(&mut model.state, &mut transposition_table, model.current_stone, ia.depth, isize::from(std::i16::MIN), isize::from(std::i16::MAX));
-				model.state.selected_move
-			};
-			match best_move{
-				Some(best_move) => {
-					if model.state.make_move(best_move.0, best_move.1, model.current_stone) {
-						model.all_state.push(model.state.clone());
-						model.current_stone = opposite_stone!(model.current_stone);
-						model.update_last_move_time();
-					}
-				}
-				None => print_all_state(&model.all_state),//println!("banana"),
-			};
-			is_human = false;
+		let is_human = model.current_player_is_human();
+		if (!is_human) {
+			self.make_best_move(model);
 		}
 		self.view.display_grid(ui, widget_ids, &self.events[&widget_ids.grid], model, is_human);
 		self.view.display_player_turn(ui, widget_ids, model);
@@ -120,10 +99,39 @@ impl GameViewController for GameController {
 			self.view.display_button_undo(ui, widget_ids, &self.events[&widget_ids.button_undo], model);
 		}
 	}
+}
 
-    fn get_type(&self) -> PageType {
-        PageType::Game
-    }
+impl GameController {
+	fn make_best_move(&self, model: &mut Game) {
+		let player = match model.current_stone {
+			WHITE => &model.white_player,
+			_ => &model.black_player,
+		};
+
+		if let Player::Ia{ia, ..} = player {
+			let best_move: Option<(usize, usize)> = if model.all_state.len() == 1 {
+				let new_state = model.state.clone();
+				let position = SIZE / 2;
+				Some((position, position))
+			}
+			else {
+				let mut transposition_table: HashSet<Gameboard> = HashSet::new();
+				ia.negascout(&mut model.state, &mut transposition_table, model.current_stone, ia.depth, (std::i64::MIN + 1) as isize, std::i64::MAX as isize);
+				// ia.alphabeta(&mut model.state, &mut transposition_table, model.current_stone, ia.depth, isize::from(std::i16::MIN), isize::from(std::i16::MAX));
+				model.state.selected_move
+			};
+			match best_move {
+				Some(best_move) => {
+					if model.state.make_move(best_move.0, best_move.1, model.current_stone) {
+						model.all_state.push(model.state.clone());
+						model.current_stone = opposite_stone!(model.current_stone);
+						model.update_last_move_time();
+					}
+				},
+				None => print_all_state(&model.all_state),//println!("banana"),
+			};
+		}
+	}
 }
 
 fn print_all_state(all_state: &Vec<Gameboard> ) {
