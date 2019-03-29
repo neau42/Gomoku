@@ -21,6 +21,7 @@ pub enum GameEvent {
 pub struct GameController {
 	pub view: GameView,
 	events: HashMap<Id, GameEvent>,
+	pub map_board_values: HashMap<([u64; SIZE]), isize>,
 }
 
 impl GameController {
@@ -67,12 +68,13 @@ impl GameViewController for GameController {
 		let mut controller = GameController {
 			view,
 			events: HashMap::new(),
+			map_board_values: HashMap::new(),
 		};
 		controller.set_events(widget_ids);
 		Box::new(controller)
 	}
 
-	fn show(&self, model: &mut dyn GameViewModel, ui: &mut UiCell, widget_ids: &WidgetIds) {
+	fn show(&mut self, model: &mut dyn GameViewModel, ui: &mut UiCell, widget_ids: &WidgetIds) {
 		let model: &mut Game = model.get_model().downcast_mut::<Game>().unwrap();
 		
 		let mut is_human = true;
@@ -87,7 +89,7 @@ impl GameViewController for GameController {
 			}
 			else {
 				let mut transposition_table: HashSet<Gameboard> = HashSet::new();
-				ia.negascout(&mut model.state, &mut transposition_table, model.current_stone, ia.depth, (std::i64::MIN + 1) as isize, std::i64::MAX as isize);
+				ia.negascout(&mut model.state, &mut transposition_table, model.current_stone, ia.depth, (std::i64::MIN + 1) as isize, std::i64::MAX as isize,  &mut self.map_board_values);
 				// ia.alphabeta(&mut model.state, &mut transposition_table, model.current_stone, ia.depth, isize::from(std::i16::MIN), isize::from(std::i16::MAX));
 				model.state.selected_move
 			};

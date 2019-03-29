@@ -60,7 +60,7 @@ impl GameViewController for GameBuilderController {
         Box::new(controller)
     }
 
-    fn show(&self, model:  &mut dyn GameViewModel, ui: &mut UiCell, widget_ids: &WidgetIds) {
+    fn show(&mut self, model:  &mut dyn GameViewModel, ui: &mut UiCell, widget_ids: &WidgetIds) {
         let model: &mut GameBuilder = match model.get_model().downcast_mut::<GameBuilder>() {
             Some(model) => model,
             None => panic!("&GameViewModel isn't a GameBuilder!"),

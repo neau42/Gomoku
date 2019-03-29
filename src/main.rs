@@ -8,6 +8,7 @@ mod controllers;
 mod utils;
 mod widgets;
 mod traits;
+mod eval;
 
 extern crate rand;
 

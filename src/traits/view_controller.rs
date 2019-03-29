@@ -10,6 +10,6 @@ pub enum PageType {
 
 pub trait GameViewController {
     fn new(widget_ids: &WidgetIds) -> Box<Self> where Self: Sized;
-    fn show(&self, model: &mut dyn GameViewModel, ui: &mut UiCell, widget_ids: &WidgetIds);
+    fn show(&mut self, model: &mut dyn GameViewModel, ui: &mut UiCell, widget_ids: &WidgetIds);
     fn get_type(&self) -> PageType;
 }
