@@ -136,39 +136,3 @@ macro_rules! printboard {
 		}
 	};
 }
-
-
-macro_rules! up_diago_orig {
-	($len_origin_min: expr, $len_origin_max: expr, $cells: expr, $x_orig: expr, $x_min: expr, $x_max: expr, $y_orig: expr, $y_min: expr, $y_max: expr) => {
-		(($x_orig - $len_origin_min)..=($x_orig + $len_origin_max))
-		.enumerate()
-		.fold(0, |value, (index, x)| {
-			value | ((get_stone!($cells[x], $y_orig - $len_origin_min + index) as u64) << (index * 2))
-		})
-	};
-
-	($cells: expr, $x_orig: expr, $x_min: expr, $x_max: expr, $y_orig: expr, $y_min: expr, $y_max: expr) => {
-		up_diago_orig!(
-			($y_orig - $y_min).min($x_orig - $x_min),
-			($y_max - $y_orig).min($x_max - $x_orig),
-			$cells, $x_orig, $x_min, $x_max, $y_orig, $y_min, $y_max)
-	};
-}
-
-macro_rules! down_diago_orig {
-	($len_origin_min: expr, $len_origin_max: expr, $cells: expr, $x_orig: expr, $x_min: expr, $x_max: expr, $y_orig: expr, $y_min: expr, $y_max: expr) => { 
-		(($x_orig - $len_origin_min)..=($x_orig + $len_origin_max))
-			.enumerate()
-			.fold(0, |value , (index, x)| {
-				value | ((get_stone!($cells[x], $y_orig + $len_origin_min - index) as u64) << (index * 2))
-			})
-	};
-
-	($cells: expr, $x_orig: expr, $x_min: expr, $x_max: expr, $y_orig: expr, $y_min: expr, $y_max: expr) => {
-		down_diago_orig!(
-			($y_max - $y_orig).min($x_orig - $x_min),
-			($y_orig - $y_min).min($x_max - $x_orig),
-			$cells, $x_orig, $x_min, $x_max, $y_orig, $y_min, $y_max)
-	};
-}
-

@@ -24,6 +24,32 @@ pub struct GameController {
 	pub map_board_values: HashMap<([u64; SIZE]), isize>,
 }
 
+
+pub fn print_all_values(cells: &[u64; SIZE], all_values: &HashMap<(usize, usize), isize>) {
+	print!("\n\nALL VALUES:\n");
+		for x in 0..SIZE { print!("{0: <8} ", x) };
+		println!();
+
+		for y in 0..SIZE {
+			print!("{0: <8} ", y);
+			for x in 0..SIZE {
+				if all_values.contains_key(&(x,y)) {
+					print!("{0: <8} ", all_values.get(&(x,y)).unwrap());
+				} else {
+					match get_stone!(cells[x], y) {
+						WHITE => print!("W        "),
+						BLACK => print!("B        "),
+						_ =>     print!(".        ")
+					}
+				}
+			}
+			println!();
+		}
+	
+	print!("__________________\n");
+}
+
+
 impl GameController {
 	fn set_events(&mut self, widget_ids: &WidgetIds) {
 		self.events.insert(widget_ids.grid, GameEvent::Grid(|model: &mut Game, x: usize, y: usize| {
@@ -89,7 +115,9 @@ impl GameViewController for GameController {
 			}
 			else {
 				let mut transposition_table: HashSet<Gameboard> = HashSet::new();
-				ia.negascout(&mut model.state, &mut transposition_table, model.current_stone, ia.depth, (std::i64::MIN + 1) as isize, std::i64::MAX as isize,  &mut self.map_board_values);
+				let mut all_values: HashMap<(usize, usize), isize> = HashMap::new();
+				ia.negascout(&mut model.state, &mut transposition_table, model.current_stone, ia.depth, (std::i64::MIN + 1) as isize, std::i64::MAX as isize, &mut self.map_board_values, &mut all_values);
+				print_all_values(&model.state.cells, &all_values);
 				// ia.alphabeta(&mut model.state, &mut transposition_table, model.current_stone, ia.depth, isize::from(std::i16::MIN), isize::from(std::i16::MAX));
 				model.state.selected_move
 			};
@@ -101,7 +129,7 @@ impl GameViewController for GameController {
 						model.update_last_move_time();
 					}
 				}
-				None => print_all_state(&model.all_state),//println!("banana"),
+				None => (),// print_all_state(&model.all_state),//println!("banana"),
 			};
 			is_human = false;
 		}
@@ -122,16 +150,14 @@ impl GameViewController for GameController {
 			self.view.display_button_undo(ui, widget_ids, &self.events[&widget_ids.button_undo], model);
 		}
 	}
-
     fn get_type(&self) -> PageType {
         PageType::Game
     }
 }
 
-fn print_all_state(all_state: &Vec<Gameboard> ) {
-
-	println!("ALL STATES: ");
-	for state in all_state {
-		printboard!(state.cells);
-	}
-}
+// fn print_all_state(all_state: &Vec<Gameboard> ) {
+// 	println!("ALL STATES: ");
+// 	for state in all_state {
+// 		printboard!(state.cells);
+// 	}
+// }
