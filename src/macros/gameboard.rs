@@ -172,3 +172,27 @@ macro_rules! down_diago_orig {
 	};
 }
 
+macro_rules! check_winning {
+	($state: expr, $x: expr, $y: expr, $result: expr, $stone: expr) => {
+		{
+			if ($state.need_another_turn == false) {
+				let ia = IA::new(1);
+				let mut transposition_table: HashSet<Gameboard> = HashSet::new();
+				let mut tmp_state = $state.clone();
+				tmp_state.need_another_turn = true;
+				let opposite_stone = opposite_stone!($stone);
+				ia.negascout(&mut tmp_state, &mut transposition_table, opposite_stone, ia.depth, (std::i64::MIN + 1) as isize, std::i64::MAX as isize);
+				if let Some(new_move) = tmp_state.selected_move {
+					tmp_state.result = None;
+					tmp_state.make_move(new_move.0, new_move.1, opposite_stone);
+					tmp_state.update_result($x, $y, $stone);
+					if (tmp_state.result.is_none() || tmp_state.result.unwrap() != $result) {
+						return false;
+					}
+				}
+			}
+			$state.result = Some($result);
+			true
+		}
+	};
+}

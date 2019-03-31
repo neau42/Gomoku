@@ -113,10 +113,6 @@ pub fn evale_one_line(mut line: u64, stone: u8) -> isize {
 }
 
 impl IA {
-    pub fn is_victory(&self) -> bool {
-        false
-    }
-
     pub fn eval(&self, state: &Gameboard, stone: u8) -> isize {
 		// println!("\n\n______ EVAL _______");
 		// printboard!(&state.cells);
@@ -161,6 +157,7 @@ impl IA {
 		let mut possible_moves: Vec<(usize, usize)> = state.expand();
 		let mut possible_boards: Vec<Gameboard> = possible_moves.iter().map(|new_move| {
 			let mut new_state = state.clone();
+			new_state.result = None;
 			new_state.make_move(new_move.0, new_move.1, stone);
 			new_state.value = self.eval(&new_state, stone);
 			new_state

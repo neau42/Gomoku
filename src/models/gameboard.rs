@@ -1,4 +1,6 @@
 use crate::models::game::GameResult;
+use crate::models::ia::IA;
+use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
 use std::cmp::Ordering;
 
@@ -37,6 +39,7 @@ pub struct Gameboard {
 	pub white_captures: u8,
 	pub value: isize,
 	pub result: Option<GameResult>,
+    pub need_another_turn: bool,
 }
 
 impl Gameboard {
@@ -50,6 +53,7 @@ impl Gameboard {
 			white_captures: 0,
 			value: 0,
 			result: None,
+			need_another_turn: false,
 		}
 	}
 
@@ -112,7 +116,7 @@ impl Gameboard {
 		if !self.is_finish() && get_stone!(self.cells[x], y) == NOPE {
 			self.cells[x] |= set_stone!(y, stone);
 			if self.try_make_move(x as isize, y as isize, stone) {
-				self.update_result(x, y);
+				self.update_result(x, y, stone);
 				self.update_possible_move(x as isize, y as isize);
 				self.last_move = Some((x, y));
 				self.selected_move = None;
@@ -181,7 +185,7 @@ impl Gameboard {
 	// 	);
 	// }
 
-	pub fn update_result(&mut self, x: usize, y: usize) {
+	pub fn update_result(&mut self, x: usize, y: usize, stone: u8) {
 		if self.black_captures >= 10 {
 			self.result = Some(GameResult::BlackWin)
 		}
@@ -203,14 +207,8 @@ impl Gameboard {
 				(0..8).any(|range| {
 					let tmp_line: u16 = concat_stones!((line >> (range * 2)) as u32, 5) as u16;
 					return match tmp_line {
-						WHITE_5_ALIGN => {
-							self.result = Some(GameResult::WhiteWin);
-							true
-						},
-						BLACK_5_ALIGN => {
-							self.result = Some(GameResult::BlackWin);
-							true
-						},
+						WHITE_5_ALIGN => check_winning!(self, x, y, GameResult::WhiteWin, stone),
+						BLACK_5_ALIGN => check_winning!(self, x, y, GameResult::BlackWin, stone),
 						_ => {
 							false
 						}
