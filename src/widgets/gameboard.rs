@@ -129,6 +129,7 @@ struct CellIndex {
     lines: conrod::widget::id::List,
     stones: conrod::widget::id::List,
     hoshis: conrod::widget::id::List,
+    last_move: conrod::widget::id::Id,
 }
 
 impl CellIndex {
@@ -137,6 +138,7 @@ impl CellIndex {
             lines: conrod::widget::id::List::new(),
             stones: conrod::widget::id::List::new(),
             hoshis: conrod::widget::id::List::new(),
+            last_move: generator.next(),
         };
         cell_index.lines.resize(size * 3, &mut generator);
         cell_index.stones.resize(size * size, &mut generator);
@@ -278,6 +280,19 @@ fn draw_stones(board_state: &Gameboard, id: Id, state: &State, rect: Rect, ui: &
             ),
             _ => (),
         }
+    }
+    let half_w = rect.w() / 2.0;
+    let stone_size = rect.w() / (SIZE - 1) as f64;
+    if let Some((x, y)) = board_state.last_move {
+        conrod::widget::primitive::shape::rectangle::Rectangle::fill([10.0, 10.0])
+        .x_y_relative_to(
+            id,
+            (x as f64 * stone_size) - half_w,
+            ((SIZE - 1 - y) as f64 * stone_size) - half_w,
+            )
+            .color(color::RED)
+            .graphics_for(id)
+            .set(state.cell_index.last_move, ui);
     }
 }
 

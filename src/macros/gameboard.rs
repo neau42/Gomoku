@@ -136,3 +136,32 @@ macro_rules! printboard {
 		}
 	};
 }
+
+macro_rules! check_winning {
+	($state: expr, $x: expr, $y: expr, $result: expr, $stone: expr) => {
+		{
+			$state.result = Some($result);
+			if ($state.waiting_winning_move.is_none()) {
+				$state.waiting_winning_move = Some(($x, $y));
+				let ia = IA::new(1);
+				let mut transposition_table: HashSet<Gameboard> = HashSet::new();
+				let mut tmp_state = $state.clone();
+				let opposite_stone = opposite_stone!($stone);
+
+				let mut map_board_values: HashMap<([u64; SIZE]), isize> = HashMap::new();
+				let mut all_values: HashMap<(usize, usize), isize> = HashMap::new();
+				ia.negascout(&mut tmp_state, &mut transposition_table, opposite_stone, ia.depth, (std::i64::MIN + 1) as isize, std::i64::MAX as isize, &mut map_board_values, &mut all_values, opposite_stone);
+				if let Some(new_move) = tmp_state.selected_move {
+					tmp_state.result = None;
+					tmp_state.make_move(new_move.0, new_move.1, opposite_stone);
+					if (tmp_state.result.is_none() || tmp_state.result.unwrap() != $result) {
+						return false;
+					}
+				}
+			}
+			$state.result = Some($result);
+			$state.waiting_winning_move = None;
+			true
+		}
+	};
+}

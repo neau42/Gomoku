@@ -1,6 +1,10 @@
 use crate::models::game::GameResult;
+use crate::models::ia::IA;
+use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
 use std::cmp::Ordering;
+use std::collections::HashMap;
+
 
 /// Size of game board.
 pub const SIZE: usize = 19;
@@ -32,10 +36,12 @@ pub struct Gameboard {
     pub cells: [u64; SIZE],
 	pub possible_moves: [u32; SIZE],
     pub selected_move: Option<(usize, usize)>,
+    pub last_move: Option<(usize, usize)>,
 	pub black_captures: u8,
 	pub white_captures: u8,
 	pub value: isize,
 	pub result: Option<GameResult>,
+    pub waiting_winning_move: Option<(usize, usize)>,
 }
 
 impl Gameboard {
@@ -44,15 +50,17 @@ impl Gameboard {
 			cells: [0; SIZE],
 			possible_moves: [0; SIZE],
             selected_move: None,
+            last_move: None,
 			black_captures: 0,
 			white_captures: 0,
 			value: 0,
 			result: None,
+			waiting_winning_move: None,
 		}
 	}
 
 	pub fn is_finish(&self) -> bool {
-		self.result.is_some()
+		self.result.is_some() && self.waiting_winning_move.is_none()
     }
 }
 impl Gameboard {
@@ -110,8 +118,10 @@ impl Gameboard {
 		if !self.is_finish() && get_stone!(self.cells[x], y) == NOPE {
 			self.cells[x] |= set_stone!(y, stone);
 			if self.try_make_move(x as isize, y as isize, stone) {
-				self.update_result(x, y);
+				self.update_result(x, y, stone);
 				self.update_possible_move(x as isize, y as isize);
+				self.last_move = Some((x, y));
+				self.selected_move = None;
 				return true;
 			}
 			self.cells[x] &= clear_stone!(y);
@@ -140,33 +150,44 @@ impl Gameboard {
 				}
 			})
 	}
-
-	pub fn next_move(&mut self, mut starting_x: usize, mut starting_y: usize) {
-        if starting_x >= SIZE {
-            starting_x = 0;
-            starting_y = starting_y + 1;
-            if starting_y >= SIZE {
-                self.selected_move = None;
-                return;
-            }
-        }
-		// println!("TEST");
-		// dbg!(&self.possible_moves);
-        self.selected_move = None;
+	
+	pub fn expand(&self) -> Vec<(usize, usize)> {
 		(0..SIZE)
-			.filter(|y| *y >= starting_y)
-			.any(|y| (0..SIZE)
-				.filter(|x| y > starting_y || *x >= starting_x)
-				.any(|x| {
-					if self.possible_moves[x] >> y & 0b1 == 1 && get_stone!(self.cells[x], y) == NOPE {
-                        self.selected_move = Some((x, y));
-						return true;
-					}
-					false
-				})
-		);
+			.flat_map(|y| {
+				(0..SIZE)
+				.filter(move |&x| self.possible_moves[x] >> y & 0b1 == 1 && get_stone!(self.cells[x], y) == NOPE)
+				.map(move |x| (x, y))
+			})
+		.collect()
 	}
-	pub fn update_result(&mut self, x: usize, y: usize) {
+
+	// pub fn next_move(&mut self, mut starting_x: usize, mut starting_y: usize) {
+    //     if starting_x >= SIZE {
+    //         starting_x = 0;
+    //         starting_y = starting_y + 1;
+    //         if starting_y >= SIZE {
+    //             self.selected_move = None;
+    //             return;
+    //         }
+    //     }
+	// 	// println!("TEST");
+	// 	// dbg!(&self.possible_moves);
+    //     self.selected_move = None;
+	// 	(0..SIZE)
+	// 		.filter(|y| *y >= starting_y)
+	// 		.any(|y| (0..SIZE)
+	// 			.filter(|x| y > starting_y || *x >= starting_x)
+	// 			.any(|x| {
+	// 				if self.possible_moves[x] >> y & 0b1 == 1 && get_stone!(self.cells[x], y) == NOPE {
+    //                     self.selected_move = Some((x, y));
+	// 					return true;
+	// 				}
+	// 				false
+	// 			})
+	// 	);
+	// }
+
+	pub fn update_result(&mut self, x: usize, y: usize, stone: u8) {
 		if self.black_captures >= 10 {
 			self.result = Some(GameResult::BlackWin)
 		}
@@ -174,6 +195,12 @@ impl Gameboard {
 			self.result = Some(GameResult::WhiteWin)
 		}
 		else {
+			if let Some(winning_move) = self.waiting_winning_move {
+				if winning_move != (x, y) {
+					self.update_result(winning_move.0, winning_move.1, stone);
+					self.waiting_winning_move = None;
+				}
+			}
 			let x_min = (x as isize - 5).max(0) as usize;
 			let x_max = (x + 5).min(SIZE - 1);
 			let y_min = (y as isize  - 5).max(0) as usize;
@@ -188,14 +215,8 @@ impl Gameboard {
 				(0..8).any(|range| {
 					let tmp_line: u16 = concat_stones!((line >> (range * 2)) as u32, 5) as u16;
 					return match tmp_line {
-						WHITE_5_ALIGN => {
-							self.result = Some(GameResult::WhiteWin);
-							true
-						},
-						BLACK_5_ALIGN => {
-							self.result = Some(GameResult::BlackWin);
-							true
-						},
+						WHITE_5_ALIGN => check_winning!(self, x, y, GameResult::WhiteWin, stone),
+						BLACK_5_ALIGN => check_winning!(self, x, y, GameResult::BlackWin, stone),
 						_ => {
 							false
 						}
@@ -208,7 +229,7 @@ impl Gameboard {
 
 impl PartialOrd for Gameboard {
     fn partial_cmp(&self, other: &Gameboard) -> Option<Ordering> {
-        other.value.partial_cmp(&self.value)//To change
+        other.value.partial_cmp(&self.value)
     }
 }
 
