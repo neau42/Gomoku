@@ -39,7 +39,7 @@ pub struct Gameboard {
 	pub white_captures: u8,
 	pub value: isize,
 	pub result: Option<GameResult>,
-    pub need_another_turn: bool,
+    pub waiting_winning_move: Option<(usize, usize)>,
 }
 
 impl Gameboard {
@@ -53,12 +53,12 @@ impl Gameboard {
 			white_captures: 0,
 			value: 0,
 			result: None,
-			need_another_turn: false,
+			waiting_winning_move: None,
 		}
 	}
 
 	pub fn is_finish(&self) -> bool {
-		self.result.is_some()
+		self.result.is_some() && self.waiting_winning_move.is_none()
     }
 }
 impl Gameboard {
@@ -193,6 +193,12 @@ impl Gameboard {
 			self.result = Some(GameResult::WhiteWin)
 		}
 		else {
+			if let Some(winning_move) = self.waiting_winning_move {
+				if winning_move != (x, y) {
+					self.update_result(winning_move.0, winning_move.1, stone);
+					self.waiting_winning_move = None;
+				}
+			}
 			let x_min = (x as isize - 5).max(0) as usize;
 			let x_max = (x + 5).min(SIZE - 1);
 			let y_min = (y as isize  - 5).max(0) as usize;
