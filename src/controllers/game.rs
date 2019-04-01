@@ -26,20 +26,20 @@ pub struct GameController {
 
 
 pub fn print_all_values(cells: &[u64; SIZE], all_values: &HashMap<(usize, usize), isize>) {
-	print!("\n\nALL VALUES:\n");
-		for x in 0..SIZE { print!("{0: <8} ", x) };
+	print!("\n\nALL VALUES:\n ");
+		for x in 0..SIZE { print!(" {0: >9}", x)};
 		println!();
 
 		for y in 0..SIZE {
-			print!("{0: <8} ", y);
+			print!("{0: <9} ", y);
 			for x in 0..SIZE {
 				if all_values.contains_key(&(x,y)) {
-					print!("{0: <8} ", all_values.get(&(x,y)).unwrap());
+					print!("{0: <9} ", all_values.get(&(x,y)).unwrap());
 				} else {
 					match get_stone!(cells[x], y) {
-						WHITE => print!("W        "),
-						BLACK => print!("B        "),
-						_ =>     print!(".        ")
+						WHITE => print!("{}[7;49;97mW{}[0m         ", 27 as char, 27 as char),
+						BLACK => print!("{}[7;49;90mB{}[0m         ", 27 as char, 27 as char),
+						_ =>     print!(".         ")
 					}
 				}
 			}
@@ -103,6 +103,7 @@ impl GameViewController for GameController {
 	fn show(&mut self, model: &mut dyn GameViewModel, ui: &mut UiCell, widget_ids: &WidgetIds) {
 		let model: &mut Game = model.get_model().downcast_mut::<Game>().unwrap();
 		
+		let mut all_values: HashMap<(usize, usize), isize> = HashMap::new();
 		let mut is_human = true;
 		if let Player::Ia{ia, ..} = match model.current_stone {
 			WHITE => &model.white_player,
@@ -115,15 +116,19 @@ impl GameViewController for GameController {
 			}
 			else {
 				let mut transposition_table: HashSet<Gameboard> = HashSet::new();
-				let mut all_values: HashMap<(usize, usize), isize> = HashMap::new();
-				ia.negascout(&mut model.state, &mut transposition_table, model.current_stone, ia.depth, (std::i64::MIN + 1) as isize, std::i64::MAX as isize, &mut self.map_board_values, &mut all_values);
-				print_all_values(&model.state.cells, &all_values);
+				ia.negascout(&mut model.state, &mut transposition_table, model.current_stone, ia.depth, (std::i64::MIN + 1) as isize, std::i64::MAX as isize, &mut self.map_board_values, &mut all_values, model.current_stone);
 				// ia.alphabeta(&mut model.state, &mut transposition_table, model.current_stone, ia.depth, isize::from(std::i16::MIN), isize::from(std::i16::MAX));
 				model.state.selected_move
 			};
 			match best_move{
 				Some(best_move) => {
 					if model.state.make_move(best_move.0, best_move.1, model.current_stone) {
+						if model.current_stone == WHITE {
+							println!("PLAYER: WHITE");
+						} else {
+							println!("PLAYER: BLACK");
+						}
+						print_all_values(&model.all_state.last().unwrap().cells, &all_values);
 						model.all_state.push(model.state.clone());
 						model.current_stone = opposite_stone!(model.current_stone);
 						model.update_last_move_time();

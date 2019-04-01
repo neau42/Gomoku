@@ -94,7 +94,7 @@ impl Game {
         let elapsed = self.timer.elapsed();
         let time =
             (elapsed.as_secs() as f64) + (f64::from(elapsed.subsec_nanos()) / 1_000_000_000.0);
-        self.last_move_time = format!("Last move time: {}s", time);
+        self.last_move_time = format!("Last move time: {:.3}s", time);
         self.timer = Instant::now();
     }
 }
