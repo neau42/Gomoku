@@ -197,6 +197,7 @@ impl Gameboard {
 		else {
 			if let Some(winning_move) = self.waiting_winning_move {
 				if winning_move != (x, y) {
+					self.result = None;
 					self.update_result(winning_move.0, winning_move.1, stone);
 					self.waiting_winning_move = None;
 				}
