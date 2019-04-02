@@ -46,13 +46,13 @@ pub fn negascout(&self, state: &mut Gameboard, transposition_table: &mut HashSet
 			// if depth % 2 == 0 {
 			// 	transposition_table.insert(state.clone());
 			// }
-            return state.value;
+			return state.value;
         }
         let mut best_move: Option<(usize, usize)> = None;
         let mut current = (std::i64::MIN + 1) as isize;
 		let mut tmp_beta = beta;
 		let mut i = 0;
-		let mut possible_states: Vec<Gameboard> = self.expand(state, stone, depth, map_board_values, player_stone);
+		let possible_states: Vec<Gameboard> = self.expand(state, stone, depth, map_board_values, player_stone);
 
         for mut new_state in possible_states {
             let mut score = -self.negascout(&mut new_state, transposition_table, opposite_stone!(stone), depth - 1, -tmp_beta, -alpha, map_board_values, all_values, player_stone);

@@ -5,8 +5,8 @@ use std::collections::HashMap;
 pub fn dbg_line(mut line : u16) {
 	for _ in 0..6 {
 		match ((line & 0b11_00_00_00_00_00) >> 10) as u8 {
-			WHITE => (print!("w")),
-			BLACK => (print!("b")),
+			WHITE => (print!("x")),
+			BLACK => (print!("o")),
 			NOPE => (print!("-")),
 			_ => (),
 		}
@@ -33,10 +33,15 @@ pub fn dbg_line(mut line : u16) {
 				},
 				// ....o.
 				// ....x.
-				0b00_00_00_00_01_00 |
-				0b00_00_00_00_10_00 => {
-					// println!(": [00] 1 open");
+				0b00_00_00_00_01_00 => {
+					// println!(": [00.0] 1 black open");
 					j = 10;
+					value -= 1;
+				}
+				0b00_00_00_00_10_00 => {
+					// println!(": [00.1] 1 white open");
+					j = 10;
+					value += 1;
 				}
 				// ...ox.
 				// ...xo.
@@ -46,13 +51,13 @@ pub fn dbg_line(mut line : u16) {
 					j = 10;
 				}
 				// _xxxxx
-				align5_black if (align5_black & 0b11_11_11_11_11 == 0b10_10_10_10_10) => {
+				align5_white if (align5_white & 0b11_11_11_11_11 == 0b10_10_10_10_10) => {
 					// println!(": [02]RETURN 10000000 align5 white");
 					value += 10000000;
 					j = 10;
 				},
 				// _ooooo
-				align5_white if (align5_white & 0b11_11_11_11_11 == 0b01_01_01_01_01) => {
+				align5_black if (align5_black & 0b11_11_11_11_11 == 0b01_01_01_01_01) => {
 					// dbg_line((line & 0b1111_1111_1111) as u16);
 					// println!(": [03]RETURN - 10000000 align5 black");
 					value -= 10000000;
@@ -115,8 +120,8 @@ pub fn dbg_line(mut line : u16) {
 				0b01_01_00_01_01_00 |
 				0b01_01_01_00_01_00 => {
 				// dbg_line((line & 0b1111_1111_1111) as u16);
-				// println!(": [08]value -= 1000 align4 close black");
-					value -= 1000;
+				// println!(": [08]value -= 10000 align4 close black");
+					value -= 10000;
 						j = 10;
 				},
 				//ox.xxxo
@@ -126,7 +131,7 @@ pub fn dbg_line(mut line : u16) {
 				//x.xxx.
 				//xx.xx.
 				//xxx.x.
-				// 0b01_10_00_10_10_10 |
+				0b01_10_00_10_10_10 |
 				0b01_10_10_00_10_10 |
 				0b01_10_10_10_00_10 |
 				0b01_10_10_10_10_00 |
@@ -136,43 +141,52 @@ pub fn dbg_line(mut line : u16) {
 				0b10_10_00_10_10_00 |
 				0b10_10_10_00_10_00 => {
 				// dbg_line((line & 0b1111_1111_1111) as u16);
-				// println!(": [09]value += 1000 align4 close white");
-					value += 1000;
+				// println!(": [09]value += 10000 align4 close white");
+					value += 10000;
 						j = 10;
 				},
 				//_..oo.
-				align2black if align2black & 0b00_11_11_11_11_11 == 0b00_00_00_01_01_00 => {
+				align2black_open if align2black_open & 0b00_11_11_11_11_11 == 0b00_00_00_01_01_00 => {
 					// dbg_line((line & 0b1111_1111_1111) as u16);
 					// println!(": [10]value -= 100 align2 open black");
 					value -= 100;
 						j = 8;
 				},
-				//...xxo
-				//oxx...
-				align2black if align2black & 0b00_11_11_11_11_11 == 0b00_00_00_01_01_10
-							|| align2black & 0b11_11_11_11_11_11 == 0b10_01_01_00_00_00 => {
-					// dbg_line((line & 0b1111_1111_1111) as u16);
-					// println!(": [10]value -= 100 align2 close black");
-					value -= 10;
-						j = 8;
-				},
-				//_.o.o.
-				align2black if align2black & 0b00_11_11_11_11_11 == 0b00_00_01_00_01_00 => {
-					// println!(": [11]value -= 10 align2 hole black");
-					value -= 10;
-					j = 8;
-				},
 				//_..xx.
-				align2white if align2white & 0b00_11_11_11_11_11 == 0b00_00_00_10_10_00 => {
+				align2white_open if align2white_open & 0b00_11_11_11_11_11 == 0b00_00_00_10_10_00 => {
 					// dbg_line((line & 0b1111_1111_1111) as u16);
-					// println!(": [12]Value += 100 align2 open white");
+					// println!(": [11]Value += 100 align2 open white");
 					value += 100;
 					j = 8;
 				},
-				//_.x.x.
-				align2white if align2white & 0b00_11_11_11_11_11 == 0b00_00_10_00_10_00 => {
+				//...xxo
+				//oxx...
+				align2black_close if align2black_close & 0b00_11_11_11_11_11 == 0b00_00_00_01_01_10
+							|| align2black_close & 0b11_11_11_11_11_11 == 0b10_01_01_00_00_00 => {
 					// dbg_line((line & 0b1111_1111_1111) as u16);
-					// println!(": [13]Value += 10 align2 hole white");
+					// println!(": [12]value -= 100 align2 close black");
+					value -= 50;
+						j = 8;
+				},
+				//...oox
+				//xoo...
+				align2white_close if align2white_close & 0b00_11_11_11_11_11 == 0b00_00_00_10_10_01
+							|| align2white_close & 0b11_11_11_11_11_11 == 0b01_10_10_00_00_00 => {
+					// dbg_line((line & 0b1111_1111_1111) as u16);
+					// println!(": [13]value += 10 align2 close white");
+					value += 50;
+						j = 8;
+				},
+				//_.o.o.
+				align2black_hole if align2black_hole & 0b00_11_11_11_11_11 == 0b00_00_01_00_01_00 => {
+					// println!(": [14]value -= 10 align2 hole black");
+					value -= 10;
+					j = 8;
+				},
+				//_.x.x.
+				align2white_hole if align2white_hole & 0b00_11_11_11_11_11 == 0b00_00_10_00_10_00 => {
+					// dbg_line((line & 0b1111_1111_1111) as u16);
+					// println!(": [15]Value += 10 align2 hole white");
 					value += 10;
 					j = 8;
 				},
@@ -187,7 +201,7 @@ pub fn dbg_line(mut line : u16) {
 				// 0b00_01_01_00_01_00 |
 				// 0b00_01_00_01_01_00  => {
 					// dbg_line((line & 0b1111_1111_1111) as u16);
-					// println!(": [14]value -= 1500 align3 open black");
+					// println!(": [16]value -= 1000 align3 open black");
 					value -= 1000;
 						j = 8;
 				},
@@ -202,7 +216,7 @@ pub fn dbg_line(mut line : u16) {
 				// 0b00_10_10_00_10_00 |
 				// 0b00_10_00_10_10_00 => {
 					// dbg_line((line & 0b1111_1111_1111) as u16);
-					// println!(": [15]Value += 1500 align3 open white");
+					// println!(": [17]Value += 1000 align3 open white");
 						value += 1000;
 						j = 8;
 				}
@@ -252,20 +266,22 @@ fn get_all_diag2(cells: &[u64; 19]) -> Vec<u64> {
 			map_board_values.insert(state.cells, value);
 			value
 		};
-		score += (state.white_captures * state.white_captures * 10) as isize - (state.black_captures  * state.black_captures * 10) as isize;
+		score += (state.white_captures * state.white_captures * 100) as isize - (state.black_captures * state.black_captures * 100) as isize;
 		if player_stone == BLACK {
 			score = -score;
 		}
-		// println!("EVAL: {} ", score);
-		// printboard!(state.cells);
 		score *= depth as isize + 1;
 		if actual_stone == player_stone {
 			// println!("actual_stone == player_stone: score: {}\n\n------------------\n\n", score);
+			// println!("\nEVAL: {} (depth: {})", score, depth);
+			// printboard!(state.cells);
+			// println!("\n---------------------\n\n");
+
 			score// + (depth as isize * 10000) //- (state.white_captures * state.white_captures * 10) as isize + (state.black_captures  * state.black_captures * 10) as isize
-			// println!("BOARDVALUE: ({}){} (WHITE)\n---------------\n", score, score + (depth as isize * 10000) + (state.white_captures * state.white_captures * 10) as isize - (state.black_captures  * state.black_captures * 10) as isize);
 		} else {
-			// println!("actual_stone == !player_stone : score: {}\n\n------------------\n\n", -score);
+			// println!("\nEVAL: {} (depth: {})", -score, depth);
+			// printboard!(state.cells);
+			// println!("\n---------------------\n\n");
 			-score// + (depth as isize * 10000) //+ (state.white_captures * state.white_captures * 10) as isize - (state.black_captures  * state.black_captures * 10) as isize
-			// println!("BOARDVALUE: ({}){} (BLACK)\n---------------\n", score, -score - (depth as isize * 10000) - (state.white_captures * state.white_captures * 10) as isize + (state.black_captures  * state.black_captures * 10) as isize);
 			}
 	}

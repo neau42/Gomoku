@@ -21,7 +21,7 @@ pub enum GameEvent {
 pub struct GameController {
 	pub view: GameView,
 	events: HashMap<Id, GameEvent>,
-	pub map_board_values: HashMap<([u64; SIZE]), isize>,
+	pub map_board_values: HashMap<[u64; SIZE], isize>,
 }
 
 
@@ -157,7 +157,7 @@ impl GameController {
 						// } else {
 						// 	println!("PLAYER: BLACK");
 						// }
-						// print_all_values(&model.all_state.last().unwrap().cells, &all_values);
+						print_all_values(&model.all_state.last().unwrap().cells, &all_values);
 						model.all_state.push(model.state.clone());
 						model.current_stone = opposite_stone!(model.current_stone);
 						model.update_last_move_time();
