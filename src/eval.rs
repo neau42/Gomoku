@@ -16,11 +16,6 @@ pub fn dbg_line(mut line : u16) {
 }
 
 	pub fn evale_one_line(l: u64) -> isize {
-		// if map_lines_values.contains_key(&l) {
-		// 	// println!("({:#066b}) value: {}, map len: {}",&l, *map_lines_values.get(&l).unwrap(), map_lines_values.len());
-		// 	return *map_lines_values.get(&l).unwrap();
-		// }
-
 		let mut value = 0;
 		let mut j: isize;
 		let mut line = l;
@@ -36,12 +31,12 @@ pub fn dbg_line(mut line : u16) {
 				0b00_00_00_00_01_00 => {
 					// println!(": [00.0] 1 black open");
 					j = 10;
-					value -= 1;
+					// value -= 1;
 				}
 				0b00_00_00_00_10_00 => {
 					// println!(": [00.1] 1 white open");
 					j = 10;
-					value += 1;
+					// value += 1;
 				}
 				// ...ox.
 				// ...xo.
@@ -111,6 +106,8 @@ pub fn dbg_line(mut line : u16) {
 				//o.ooo.
 				//oo.oo.
 				//ooo.o.
+				// .ooo.o
+
 				0b10_01_00_01_01_01 |
 				0b10_01_01_00_01_01 |
 				0b10_01_01_01_00_01 |
@@ -118,19 +115,22 @@ pub fn dbg_line(mut line : u16) {
 				0b00_01_01_01_01_10 |
 				0b01_00_01_01_01_00 |
 				0b01_01_00_01_01_00 |
-				0b01_01_01_00_01_00 => {
+				0b01_01_01_00_01_00 | 
+				0b00_01_01_01_00_01 => {
 				// dbg_line((line & 0b1111_1111_1111) as u16);
 				// println!(": [08]value -= 10000 align4 close black");
 					value -= 10000;
 						j = 10;
 				},
-				//ox.xxxo
+				//ox.xxx
 				//oxx.xx
 				//oxxx.x
 				//oxxxx.
 				//x.xxx.
 				//xx.xx.
 				//xxx.x.
+
+				// .xxx.x
 				0b01_10_00_10_10_10 |
 				0b01_10_10_00_10_10 |
 				0b01_10_10_10_00_10 |
@@ -139,7 +139,8 @@ pub fn dbg_line(mut line : u16) {
 
 				0b10_00_10_10_10_00 |
 				0b10_10_00_10_10_00 |
-				0b10_10_10_00_10_00 => {
+				0b10_10_10_00_10_00 |
+				0b00_10_10_10_00_10 => {
 				// dbg_line((line & 0b1111_1111_1111) as u16);
 				// println!(": [09]value += 10000 align4 close white");
 					value += 10000;
@@ -159,24 +160,24 @@ pub fn dbg_line(mut line : u16) {
 					value += 100;
 					j = 8;
 				},
-				//...xxo
-				//oxx...
-				align2black_close if align2black_close & 0b00_11_11_11_11_11 == 0b00_00_00_01_01_10
-							|| align2black_close & 0b11_11_11_11_11_11 == 0b10_01_01_00_00_00 => {
-					// dbg_line((line & 0b1111_1111_1111) as u16);
-					// println!(": [12]value -= 100 align2 close black");
-					value -= 50;
-						j = 8;
-				},
-				//...oox
-				//xoo...
-				align2white_close if align2white_close & 0b00_11_11_11_11_11 == 0b00_00_00_10_10_01
-							|| align2white_close & 0b11_11_11_11_11_11 == 0b01_10_10_00_00_00 => {
-					// dbg_line((line & 0b1111_1111_1111) as u16);
-					// println!(": [13]value += 10 align2 close white");
-					value += 50;
-						j = 8;
-				},
+				// //...xxo
+				// //oxx...
+				// align2black_close if align2black_close & 0b00_11_11_11_11_11 == 0b00_00_00_01_01_10
+				// 			|| align2black_close & 0b11_11_11_11_11_11 == 0b10_01_01_00_00_00 => {
+				// 	// dbg_line((line & 0b1111_1111_1111) as u16);
+				// 	// println!(": [12]value -= 100 align2 close black");
+				// 	value -= 50;
+				// 		j = 8;
+				// },
+				// //...oox
+				// //xoo...
+				// align2white_close if align2white_close & 0b00_11_11_11_11_11 == 0b00_00_00_10_10_01
+				// 			|| align2white_close & 0b11_11_11_11_11_11 == 0b01_10_10_00_00_00 => {
+				// 	// dbg_line((line & 0b1111_1111_1111) as u16);
+				// 	// println!(": [13]value += 10 align2 close white");
+				// 	value += 50;
+				// 		j = 8;
+				// },
 				//_.o.o.
 				align2black_hole if align2black_hole & 0b00_11_11_11_11_11 == 0b00_00_01_00_01_00 => {
 					// println!(": [14]value -= 10 align2 hole black");
@@ -191,32 +192,34 @@ pub fn dbg_line(mut line : u16) {
 					j = 8;
 				},
 				// _.ooo.
+				align3black if (align3black & 0b00_11_11_11_11_11) == 0b00_00_01_01_01_00 => {
+
+					// dbg_line((line & 0b1111_1111_1111) as u16);
+					// println!(": [16]value -= 10000 align3 open black");
+					value -= 10000;
+						j = 8;
+
+				},
 				// _oo.o.
 				// _o.oo.
-				align3black if (align3black & 0b00_11_11_11_11_11) == 0b00_00_01_01_01_00  
-							|| (align3black & 0b00_11_11_11_11_11) == 0b00_01_01_00_01_00
+				align3black if (align3black & 0b00_11_11_11_11_11) == 0b00_01_01_00_01_00
 							|| (align3black & 0b00_11_11_11_11_11) == 0b00_01_00_01_01_00 => {
-				// 0b00_01_01_01_00_00 |
-				// 0b00_00_01_01_01_00 |
-				// 0b00_01_01_00_01_00 |
-				// 0b00_01_00_01_01_00  => {
-					// dbg_line((line & 0b1111_1111_1111) as u16);
-					// println!(": [16]value -= 1000 align3 open black");
-					value -= 1000;
+					// println!(": [17]value -= 10000 align3 open black");
+					value -= 10000;
 						j = 8;
 				},
 				// _.xxx.
+				align3white if (align3white & 0b00_11_11_11_11_11) == 0b00_00_10_10_10_00 => {
+					// println!(": [18]Value += 1000 align3 open white");
+						value += 1000;
+						j = 8;
+				}
 				// _xx.x.
 				// _x.xx.
-				align3white if (align3white & 0b00_11_11_11_11_11) == 0b00_00_10_10_10_00  
-							|| (align3white & 0b00_11_11_11_11_11) == 0b00_10_10_00_10_00
+				align3white if (align3white & 0b00_11_11_11_11_11) == 0b00_10_10_00_10_00
 							|| (align3white & 0b00_11_11_11_11_11) == 0b00_10_00_10_10_00 => {
-				// 0b00_10_10_10_00_00 |
-				// 0b00_00_10_10_10_00 |
-				// 0b00_10_10_00_10_00 |
-				// 0b00_10_00_10_10_00 => {
 					// dbg_line((line & 0b1111_1111_1111) as u16);
-					// println!(": [17]Value += 1000 align3 open white");
+					// println!(": [19]Value += 1000 align3 open white");
 						value += 1000;
 						j = 8;
 				}
@@ -230,14 +233,14 @@ pub fn dbg_line(mut line : u16) {
 	}
 // }
 
-fn get_all_diag1(cells: &[u64; 19]) -> Vec<u64> {
+fn get_all_diag1(cells: &[u64; SIZE]) -> Vec<u64> {
 	let mut vec: Vec<u64> = (4..SIZE).map(|x| down_diago!(cells, x, 0, x, 0)).collect();
 	let vec2: Vec<u64> = (1..SIZE-4).map(|x| down_diago!(cells, 0, SIZE - 1 -x, x, SIZE - 1)).collect();
 	vec.extend(vec2);
 	vec
 }
 
-fn get_all_diag2(cells: &[u64; 19]) -> Vec<u64> {
+fn get_all_diag2(cells: &[u64; SIZE]) -> Vec<u64> {
 	let mut vec: Vec<u64> = (0..SIZE-4).map(|x| up_diago!(cells, 0, SIZE - 1 - x, x, 0)).collect();
 	let vec2: Vec<u64> = (1..SIZE-4).map(|y| up_diago!(cells, 0, SIZE -1, 0, y)).collect();
 	vec.extend(vec2);
