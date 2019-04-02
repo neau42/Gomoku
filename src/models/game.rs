@@ -61,8 +61,8 @@ pub struct Game {
     timer: Instant,
 }
 
-/// Creates a new game board.
 impl Game {
+    /// Creates a new game board.
     pub fn new(black_player: Player, white_player: Player, game_mode: &str) -> Game {
         let start_state = Gameboard::new();
         Game {
@@ -78,6 +78,7 @@ impl Game {
         }
     }
 
+    /// Creates a new game with an already existing Game. 
     pub fn new_with_game(mut game: Game, black_player: Player, white_player: Player, game_mode: &str) -> Game {
         game.black_player = black_player;
         game.white_player = white_player;
@@ -86,10 +87,12 @@ impl Game {
         game
     }
 
+    /// Call for return to the home menu.
     pub fn change_window(&mut self) {
         self.change_window = true;
     }
 
+    /// Register the time since the last call or Since the creation of the Class.
     pub fn update_last_move_time(&mut self) {
         let elapsed = self.timer.elapsed();
         let time =
@@ -98,6 +101,7 @@ impl Game {
         self.timer = Instant::now();
     }
 
+    /// Check if the current player is human or not.
     pub fn current_player_is_human(&self) -> bool {
         let player = match self.current_stone {
 			WHITE => &self.white_player,

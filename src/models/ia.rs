@@ -24,10 +24,10 @@ impl IA {
 			let mut new_state = state.clone();
 			new_state.result = None;
 			new_state.make_move(new_move.0, new_move.1, stone);
-			new_state.value = eval(&new_state, stone, depth, map_board_values, player_stone);
+			new_state.value = eval(&new_state, opposite_stone!(stone), depth - 1, map_board_values, player_stone);
 			new_state
 		}).collect();
-		possible_boards.sort_by(|board, other| other.value.cmp(&board.value));
+		possible_boards.sort_by(|board, other| board.value.cmp(&other.value));
 		possible_boards
 
         
@@ -42,7 +42,7 @@ pub fn negascout(&self, state: &mut Gameboard, transposition_table: &mut HashSet
 		// }
 
 		if depth == 0 || state.is_finish() {
-			state.value = eval(state, stone, depth, map_board_values, player_stone);
+			// state.value = eval(state, stone, depth, map_board_values, player_stone);
 			// if depth % 2 == 0 {
 			// 	transposition_table.insert(state.clone());
 			// }
