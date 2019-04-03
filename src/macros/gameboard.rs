@@ -150,7 +150,7 @@ macro_rules! check_winning {
 
 				let mut map_board_values: HashMap<([u64; SIZE]), isize> = HashMap::new();
 				let mut all_values: HashMap<(usize, usize), isize> = HashMap::new();
-				ia.negascout(&mut tmp_state, &mut transposition_table, opposite_stone, ia.depth, (std::i64::MIN + 1) as isize, std::i64::MAX as isize, &mut map_board_values, &mut all_values, opposite_stone);
+				ia.negascout(&mut tmp_state, opposite_stone, ia.depth, (std::i64::MIN + 1) as isize, std::i64::MAX as isize, &mut map_board_values, &mut all_values, opposite_stone);
 				if let Some(new_move) = tmp_state.selected_move {
 					tmp_state.result = None;
 					tmp_state.make_move(new_move.0, new_move.1, opposite_stone);

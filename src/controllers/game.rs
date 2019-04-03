@@ -144,8 +144,8 @@ impl GameController {
 				Some((position, position))
 			}
 			else {
-				let mut transposition_table: HashSet<Gameboard> = HashSet::new();
-				ia.negascout(&mut model.state, &mut transposition_table, model.current_stone, ia.depth, (std::i64::MIN + 1) as isize, std::i64::MAX as isize, &mut self.map_board_values, &mut all_values, model.current_stone);
+				// let mut transposition_table: HashSet<Gameboard> = HashSet::new();
+				ia.negascout(&mut model.state, model.current_stone, ia.depth, (std::i64::MIN + 1) as isize, std::i64::MAX as isize, &mut self.map_board_values, &mut all_values, model.current_stone);
 				// ia.alphabeta(&mut model.state, &mut transposition_table, model.current_stone, ia.depth, isize::from(std::i16::MIN), isize::from(std::i16::MAX));
 				model.state.selected_move
 			};

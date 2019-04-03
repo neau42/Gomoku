@@ -79,7 +79,7 @@ pub fn dbg_line(mut line : u16) {
 				0b00_00_01_01_01_10 | 
 				0b00_01_00_01_01_10 | 
 				0b10_01_00_01_01_00 | 
-				0b00_10_01_01_01_00 => {
+				0b10_01_01_01_00_00 => {
 					// dbg_line((line & 0b1111_1111_1111) as u16);
 					// println!(": [06]value -= 100 align3 close black");
 					value -= 100;
@@ -165,7 +165,7 @@ pub fn dbg_line(mut line : u16) {
 				// align2black_close if align2black_close & 0b00_11_11_11_11_11 == 0b00_00_00_01_01_10
 				// 			|| align2black_close & 0b11_11_11_11_11_11 == 0b10_01_01_00_00_00 => {
 				// 	// dbg_line((line & 0b1111_1111_1111) as u16);
-				// 	// println!(": [12]value -= 100 align2 close black");
+					 // // println!(": [12]value -= 100 align2 close black");
 				// 	value -= 50;
 				// 		j = 8;
 				// },
@@ -174,7 +174,7 @@ pub fn dbg_line(mut line : u16) {
 				// align2white_close if align2white_close & 0b00_11_11_11_11_11 == 0b00_00_00_10_10_01
 				// 			|| align2white_close & 0b11_11_11_11_11_11 == 0b01_10_10_00_00_00 => {
 				// 	// dbg_line((line & 0b1111_1111_1111) as u16);
-				// 	// println!(": [13]value += 10 align2 close white");
+					// // println!(": [13]value += 10 align2 close white");
 				// 	value += 50;
 				// 		j = 8;
 				// },
@@ -240,6 +240,26 @@ fn get_all_diag1(cells: &[u64; SIZE]) -> Vec<u64> {
 	vec
 }
 
+pub fn print_possible_move(possible: &[u32; SIZE]) {
+
+	print!("POSSIBLE MOVE:\n");
+	for x in 0..SIZE { print!("{0: <2} ", x) };
+	print!("\n");
+	for y in 0..SIZE {
+		print!("{0: <2} ", y);
+		for x in 0..SIZE {
+			if possible[x] >> y & 0b1 == 1 {
+				print!("x  ");
+			}
+			else {
+				print!(".  ");
+			}
+		}
+		print!("\n");
+	}
+
+}
+
 fn get_all_diag2(cells: &[u64; SIZE]) -> Vec<u64> {
 	let mut vec: Vec<u64> = (0..SIZE-4).map(|x| up_diago!(cells, 0, SIZE - 1 - x, x, 0)).collect();
 	let vec2: Vec<u64> = (1..SIZE-4).map(|y| up_diago!(cells, 0, SIZE -1, 0, y)).collect();
@@ -274,16 +294,16 @@ fn get_all_diag2(cells: &[u64; SIZE]) -> Vec<u64> {
 			score = -score;
 		}
 		score *= depth as isize + 1;
+		// printboard!(state.cells);
+		// print_possible_move(&state.possible_moves);
 		if actual_stone == player_stone {
 			// println!("actual_stone == player_stone: score: {}\n\n------------------\n\n", score);
 			// println!("\nEVAL: {} (depth: {})", score, depth);
-			// printboard!(state.cells);
 			// println!("\n---------------------\n\n");
 
 			score// + (depth as isize * 10000) //- (state.white_captures * state.white_captures * 10) as isize + (state.black_captures  * state.black_captures * 10) as isize
 		} else {
 			// println!("\nEVAL: {} (depth: {})", -score, depth);
-			// printboard!(state.cells);
 			// println!("\n---------------------\n\n");
 			-score// + (depth as isize * 10000) //+ (state.white_captures * state.white_captures * 10) as isize - (state.black_captures  * state.black_captures * 10) as isize
 			}
