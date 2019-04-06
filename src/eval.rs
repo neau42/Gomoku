@@ -289,7 +289,7 @@ fn get_all_diag2(cells: &[u64; SIZE]) -> Vec<u64> {
 			map_board_values.insert(state.cells, value);
 			value
 		};
-		score += (state.white_captures * state.white_captures * 100) as isize - (state.black_captures * state.black_captures * 100) as isize;
+		score += (state.white_captures as isize * state.white_captures as isize * 100) - (state.black_captures as isize * state.black_captures as isize * 100);
 		if player_stone == BLACK {
 			score = -score;
 		}
