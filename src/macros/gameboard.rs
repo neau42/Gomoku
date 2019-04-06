@@ -144,7 +144,6 @@ macro_rules! check_winning {
 			if ($state.waiting_winning_move.is_none()) {
 				$state.waiting_winning_move = Some(($x, $y));
 				let ia = IA::new(1);
-				let mut transposition_table: HashSet<Gameboard> = HashSet::new();
 				let mut tmp_state = $state.clone();
 				let opposite_stone = opposite_stone!($stone);
 

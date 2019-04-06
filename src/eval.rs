@@ -204,14 +204,14 @@ pub fn dbg_line(mut line : u16) {
 				// _o.oo.
 				align3black if (align3black & 0b00_11_11_11_11_11) == 0b00_01_01_00_01_00
 							|| (align3black & 0b00_11_11_11_11_11) == 0b00_01_00_01_01_00 => {
-					// println!(": [17]value -= 10000 align3 open black");
-					value -= 10000;
+					// println!(": [17]value -= 1000 align3 open black");
+					value -= 1000;
 						j = 8;
 				},
 				// _.xxx.
 				align3white if (align3white & 0b00_11_11_11_11_11) == 0b00_00_10_10_10_00 => {
-					// println!(": [18]Value += 1000 align3 open white");
-						value += 1000;
+					// println!(": [18]Value += 10000 align3 open white");
+						value += 10000;
 						j = 8;
 				}
 				// _xx.x.
@@ -228,10 +228,8 @@ pub fn dbg_line(mut line : u16) {
 			}
 			line>>=j;
 		}
-		// map_lines_values.insert(l, value);
 		value
 	}
-// }
 
 fn get_all_diag1(cells: &[u64; SIZE]) -> Vec<u64> {
 	let mut vec: Vec<u64> = (4..SIZE).map(|x| down_diago!(cells, x, 0, x, 0)).collect();
@@ -270,11 +268,11 @@ fn get_all_diag2(cells: &[u64; SIZE]) -> Vec<u64> {
     pub fn eval(state: &Gameboard, actual_stone: u8, depth: u8, map_board_values: &mut HashMap<[u64; SIZE], isize>, player_stone: u8) -> isize {
 
 		let mut score = if state.black_captures >= 10 {
-				-10000000
+			-10000000
 		} else if state.white_captures >= 10 {
-				10000000
+			10000000
 		} else if map_board_values.contains_key(&state.cells) {
-				*map_board_values.get(&state.cells).unwrap()
+			*map_board_values.get(&state.cells).unwrap()
 		} else {
 			let mut all: Vec<u64> = (0..SIZE).map(|y| line_horizontal!(state.cells, 0, SIZE - 1, y as usize)).collect();
 			let all_verti: Vec<u64> = (0..SIZE).map(|x| line_vertical!(state.cells[x as usize], 0 , SIZE -1)).collect();
@@ -294,17 +292,17 @@ fn get_all_diag2(cells: &[u64; SIZE]) -> Vec<u64> {
 			score = -score;
 		}
 		score *= depth as isize + 1;
+		// println!("map_board_values.len() : {}", map_board_values.len());
 		// printboard!(state.cells);
 		// print_possible_move(&state.possible_moves);
 		if actual_stone == player_stone {
 			// println!("actual_stone == player_stone: score: {}\n\n------------------\n\n", score);
 			// println!("\nEVAL: {} (depth: {})", score, depth);
 			// println!("\n---------------------\n\n");
-
-			score// + (depth as isize * 10000) //- (state.white_captures * state.white_captures * 10) as isize + (state.black_captures  * state.black_captures * 10) as isize
+			score
 		} else {
 			// println!("\nEVAL: {} (depth: {})", -score, depth);
 			// println!("\n---------------------\n\n");
-			-score// + (depth as isize * 10000) //+ (state.white_captures * state.white_captures * 10) as isize - (state.black_captures  * state.black_captures * 10) as isize
-			}
+			-score
+		}
 	}

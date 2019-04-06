@@ -31,8 +31,6 @@ impl IA {
 		}).collect();
 		possible_boards.sort_by(|board, other| board.value.cmp(&other.value));
 		possible_boards
-
-        
 	}
 	/// si alpha < current < beta, alors current est la valeur minimax
     /// si current <= alpha, alors la vraie valeur minimax m vérifie : m <= current <= alpha

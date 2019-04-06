@@ -60,7 +60,7 @@ impl Gameboard {
 	}
 
 	pub fn is_finish(&self) -> bool {
-		self.result.is_some() && self.waiting_winning_move.is_none()
+		self.result.is_some()// && !align5_capturable(self) //&& self.waiting_winning_move.is_none()
     }
 }
 impl Gameboard {
@@ -90,6 +90,24 @@ impl Gameboard {
 		})
 	}
 
+	// pub fn ennemy_around(&self, x_orig: isize, y_orig: isize, stone: u8) -> bool {
+	// 	let x_min = (x_orig - 1).max(0);
+	// 	let y_min = (y_orig - 1).max(0);
+	// 	let x_max = (x_orig + 1).min((SIZE - 1) as isize);
+	// 	let y_max = (y_orig + 1).min((SIZE - 1) as isize);
+	// 	let opposite_stone = opposite_stone!(stone) as u64;
+	// 	let opposit_line = opposite_stone << 8 | opposite_stone << 6 | opposite_stone << 4 | opposite_stone << 2 | opposite_stone;
+	// 	// println!("ennemy_around? : x: {}, y: {}, y_min: {}, y_max: {}, x_min: {}", x_orig, y_orig, y_min, y_max, x_min);
+	// 	for x in x_min..=x_max {
+	// 	// println!("opposit_line :                           {:#08b} (x: {})", opposit_line, x);
+	// 	// println!("self.cells[x_min as usize] >> ({} * 2):   {:#08b} (& 0b111111)", y_min ,self.cells[x as usize] >> (y_min * 2) & 0b11_11_11);
+	// 		if (self.cells[x as usize] >> (y_min * 2) & opposit_line) != 0 {
+	// 			return true
+	// 		}
+	// 	}
+	// 	false
+	// }
+
 	pub fn try_make_move(&mut self, x: isize, y: isize, stone: u8) -> bool {
 		let x_min = (x - 5).max(0) as usize;
 		let x_max = (x + 5).min(SIZE as isize - 1) as usize;
@@ -100,17 +118,20 @@ impl Gameboard {
 		let diago_down_right = (y_max - y as usize).min(x_max - x as usize);
 		let diago_down_left = (y_max - y as usize).min(x as usize - x_min);
 
-		let capture_lines: [(u8, (isize, isize)); 8] = capture_lines!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max, diago_up_left, diago_down_right, diago_down_left, diago_up_right);
-		let nbr_capture = self.count_capture(capture_lines, x as usize, y as usize, stone);
-		if nbr_capture == 0 {
-			let tree_lines: [u32; 4] = tree_lines!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max, diago_up_left, diago_down_right, diago_down_left, diago_up_right);
-			let nbr_tree = self.count_tree(tree_lines, stone);
-			return nbr_tree < 2;
-		}
-		match stone {
-			BLACK => self.black_captures += (nbr_capture << 1),
-			_ => self.white_captures += (nbr_capture << 1),
-		}
+		// let nbr_capture = 
+		// if self.ennemy_around(x, y, stone) {
+			let capture_lines: [(u8, (isize, isize)); 8] = capture_lines!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max, diago_up_left, diago_down_right, diago_down_left, diago_up_right);
+			let nbr_capture = self.count_capture(capture_lines, x as usize, y as usize, stone);
+	// }
+			if nbr_capture == 0 {
+				let tree_lines: [u32; 4] = tree_lines!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max, diago_up_left, diago_down_right, diago_down_left, diago_up_right);
+				let nbr_tree = self.count_tree(tree_lines, stone);
+				return nbr_tree < 2;
+			}
+			match stone {
+				BLACK => self.black_captures += (nbr_capture * 2),
+				_ => self.white_captures += (nbr_capture * 2),
+			}
 		true
 	}
 
@@ -120,6 +141,8 @@ impl Gameboard {
 			if self.try_make_move(x as isize, y as isize, stone) {
 				self.update_result(x, y, stone);
 				self.update_possible_move(x as isize, y as isize);
+				// self.update_capturable_stone(x as isize, y as isize);
+
 				self.last_move = Some((x, y));
 				self.selected_move = None;
 				return true;
