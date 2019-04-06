@@ -6,15 +6,17 @@ use std::collections::HashMap;
 // use std::process::exit;
 use crate::eval::*;
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct IA {
     pub depth: u8,
+    pub counter: usize,
 }
 
 impl IA {
     pub fn new(depth: u8) -> IA {
         IA {
             depth,
+            counter: 0,
         }
     }
 
@@ -35,12 +37,11 @@ impl IA {
 	/// si alpha < current < beta, alors current est la valeur minimax
     /// si current <= alpha, alors la vraie valeur minimax m vérifie : m <= current <= alpha
     /// si beta <= current alors la vraie valeur minimax m vérifie : beta <= current <= m
-pub fn negascout(&self, state: &mut Gameboard, stone: u8, depth: u8, mut alpha: isize, beta: isize, map_board_values: &mut HashMap<[u64; SIZE], isize>, all_values: &mut HashMap<(usize, usize), isize>, player_stone: u8) -> isize {
+pub fn negascout(&mut self, state: &mut Gameboard, stone: u8, depth: u8, mut alpha: isize, beta: isize, map_board_values: &mut HashMap<[u64; SIZE], isize>, all_values: &mut HashMap<(usize, usize), isize>, player_stone: u8) -> isize {
         // if depth % 2 == 0 && transposition_table.contains(state) {
 		// 	state.value = transposition_table.get(state).unwrap().value;			
 		// 	return state.value
 		// }
-
 		if depth == 0 || state.is_finish() {
 			// state.value = eval(state, stone, depth, map_board_values, player_stone);
 			// if depth % 2 == 0 {
@@ -53,10 +54,11 @@ pub fn negascout(&self, state: &mut Gameboard, stone: u8, depth: u8, mut alpha: 
 		let mut tmp_beta = beta;
 		let mut i = 0;
 		let possible_states: Vec<Gameboard> = self.expand(state, stone, depth, map_board_values, player_stone);
-
         for mut new_state in possible_states {
+            self.counter += 1;
             let mut score = -self.negascout(&mut new_state, opposite_stone!(stone), depth - 1, -tmp_beta, -alpha, map_board_values, all_values, player_stone);
             if score > alpha && score < beta && i > 0 && depth > 1 {
+                self.counter += 1;
                 score = -self.negascout(&mut new_state, opposite_stone!(stone), depth - 1, -beta, -alpha, map_board_values, all_values, player_stone);
             }
 			i += 1;

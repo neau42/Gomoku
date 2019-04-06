@@ -137,13 +137,14 @@ impl GameController {
 			_ => &model.black_player,
 		};
 
-		if let Player::Ia{ia, ..} = player {
+		if let Player::Ia{mut ia, ..} = player {
 			let best_move: Option<(usize, usize)> = if model.all_state.len() == 1 {
 				let new_state = model.state.clone();
 				let position = SIZE / 2;
 				Some((position, position))
 			}
 			else {
+				ia.counter = 0;
 				// let mut transposition_table: HashSet<Gameboard> = HashSet::new();
 				ia.negascout(&mut model.state, model.current_stone, ia.depth, (std::i64::MIN + 1) as isize, std::i64::MAX as isize, &mut self.map_board_values, &mut all_values, model.current_stone);
 				// ia.alphabeta(&mut model.state, &mut transposition_table, model.current_stone, ia.depth, isize::from(std::i16::MIN), isize::from(std::i16::MAX));

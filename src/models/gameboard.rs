@@ -216,8 +216,16 @@ impl Gameboard {
 				(0..8).any(|range| {
 					let tmp_line: u16 = concat_stones!((line >> (range * 2)) as u32, 5) as u16;
 					return match tmp_line {
-						WHITE_5_ALIGN => check_winning!(self, x, y, GameResult::WhiteWin, stone),
-						BLACK_5_ALIGN => check_winning!(self, x, y, GameResult::BlackWin, stone),
+						WHITE_5_ALIGN => {
+							self.result = Some(GameResult::WhiteWin);
+							return true;
+							// check_winning!(self, x, y, GameResult::WhiteWin, stone)
+						},
+						BLACK_5_ALIGN => {
+							self.result = Some(GameResult::BlackWin);
+							return true;
+							// check_winning!(self, x, y, GameResult::BlackWin, stone)
+						},
 						_ => {
 							false
 						}
