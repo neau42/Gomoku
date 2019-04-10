@@ -308,7 +308,7 @@ fn draw_stones(board_state: &Gameboard, id: Id, state: &State, rect: Rect, ui: &
             (x as f64 * stone_size) - half_w,
             ((SIZE - 1 - y) as f64 * stone_size) - half_w,
             )
-            .color(color::RED)
+            .color(color::LIGHT_BROWN)
             .graphics_for(id)
             .set(state.cell_index.last_move, ui);
     }
