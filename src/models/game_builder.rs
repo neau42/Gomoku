@@ -126,10 +126,10 @@ impl GameBuilder {
             _ => ia_new(self.second_ia_depth),
         };
         if self.game.is_some() {
-            Game::new_with_game(self.game.clone().unwrap(), black_player, white_player, self.game_modes[self.mode_index])
+            Game::new_with_game(self.game.clone().unwrap(), black_player, white_player, self.game_modes[self.mode_index], self.display_weight)
         }
         else {
-            Game::new(black_player, white_player, self.game_modes[self.mode_index])
+            Game::new(black_player, white_player, self.game_modes[self.mode_index], self.display_weight)
         }
     }
 }
