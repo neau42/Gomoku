@@ -291,7 +291,7 @@ fn draw_stones(board_state: &Gameboard, id: Id, state: &State, rect: Rect, ui: &
 		}
 		if show_all_value && all_values.contains_key(&(i%SIZE, i/SIZE)) {
 			display_value( [i % SIZE, i / SIZE],
-					color::ORANGE,
+					color::LIGHT_BROWN,
 					id,
 					rect,
 					ui,
@@ -314,7 +314,8 @@ fn draw_stones(board_state: &Gameboard, id: Id, state: &State, rect: Rect, ui: &
     }
 }
 
-fn display_value (ind: [usize; 2],
+/// display values eval on board
+fn display_value(ind: [usize; 2],
     color: Color,
     id: Id,
     rect: Rect,
@@ -327,7 +328,7 @@ fn display_value (ind: [usize; 2],
         rect.w() / 2.0 - ind[1] as f64 * stone_size,
     ];
 
-conrod::widget::primitive::text::Text::new(value.to_string().as_str())
+	conrod::widget::primitive::text::Text::new(value.to_string().as_str())
         .x_y_relative_to(id, pos[0], pos[1])
         .color(color)
         .graphics_for(id)

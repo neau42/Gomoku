@@ -136,7 +136,7 @@ impl GameController {
 
 		if let Player::Ia{mut ia, ..} = player {
 			let best_move: Option<(usize, usize)> = if model.all_state.len() == 1 {
-				let new_state = model.state.clone();
+				// let new_state = model.state.clone();
 				let position = SIZE / 2;
 				Some((position, position))
 			}
