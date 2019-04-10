@@ -336,7 +336,7 @@ fn display_value(ind: [usize; 2],
         .x_y_relative_to(id, pos[0], pos[1])
         .color(color)
         .graphics_for(id)
-		.font_size(12)
+		.font_size(14)
         .set(cell_id, ui);
 
 }

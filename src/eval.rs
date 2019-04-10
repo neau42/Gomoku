@@ -1,6 +1,54 @@
 use crate::models::gameboard::*;
 use std::collections::HashMap;
 
+const BLACK_WHITE: u16 =			0b00_00_00_01_10_00;
+const WHITE_BLACK: u16 =			0b00_00_00_10_01_00;
+const EMPTY: u16 =					0b00_00_00_00_00_00;
+const ONE_BLACK: u16 =				0b00_00_00_00_01_00;
+const ONE_WHITE: u16 =				0b00_00_00_00_10_00;
+const FOUR_BLACK: u16 =				0b00_01_01_01_01_00;
+const FOUR_WHITE: u16 =				0b00_10_10_10_10_00;
+
+const THREE_BLACK_CLOSE1: u16 =		0b00_00_01_01_01_10;
+const THREE_BLACK_CLOSE2: u16 =		0b10_01_00_01_01_00;
+const THREE_BLACK_CLOSE3: u16 =		0b10_01_01_01_00_00;
+
+const THREE_WHITE_CLOSE1: u16 =		0b00_00_10_10_10_01;
+const THREE_WHITE_CLOSE2: u16 =		0b01_10_00_10_10_00;
+const THREE_WHITE_CLOSE3: u16 =		0b01_10_10_10_00_00;
+
+const FOUR_BLACK_CLOSE1: u16 =		0b10_01_00_01_01_01;
+const FOUR_BLACK_CLOSE2: u16 =		0b10_01_01_01_00_01;
+const FOUR_BLACK_CLOSE3: u16 =		0b10_01_01_01_01_00;
+const FOUR_BLACK_CLOSE4: u16 =		0b00_01_01_01_01_10;
+const FOUR_BLACK_CLOSE5: u16 =		0b01_00_01_01_01_00;
+const FOUR_BLACK_CLOSE6: u16 =		0b01_01_00_01_01_00;
+const FOUR_BLACK_CLOSE7: u16 =		0b00_01_01_01_00_01;
+
+const FOUR_WHITE_CLOSE1: u16 =		0b01_10_00_10_10_10;
+const FOUR_WHITE_CLOSE2: u16 =		0b01_10_10_10_00_10;
+const FOUR_WHITE_CLOSE3: u16 =		0b01_10_10_10_10_00;
+const FOUR_WHITE_CLOSE4: u16 =		0b00_10_10_10_10_01;
+const FOUR_WHITE_CLOSE5: u16 =		0b10_00_10_10_10_00;
+const FOUR_WHITE_CLOSE6: u16 =		0b10_10_00_10_10_00;
+const FOUR_WHITE_CLOSE7: u16 =		0b00_10_10_10_00_10;
+// const FOUR_WHITE_CLOSE8: u16 =		0b10_10_10_00_10_00;
+
+const TWO_BLACK_OPEN: u16 =			0b00_00_00_01_01_00;
+const TWO_WHITE_OPEN: u16 =			0b00_00_00_10_10_00;
+
+const TWO_BLACK_OPEN_HOLE: u16 =	0b00_00_01_00_01_00;
+const TWO_WHITE_OPEN_HOLE: u16 =	0b00_00_10_00_10_00;
+
+const THREE_BLACK_OPEN: u16 =		0b00_00_01_01_01_00;
+const THREE_WHITE_OPEN: u16 =		0b00_00_10_10_10_00;
+
+const THREE_BLACK_OPEN_HOLE1: u16 =	0b00_01_00_01_01_00;
+const THREE_BLACK_OPEN_HOLE2: u16 =	0b00_01_01_00_01_00;
+
+const THREE_WHITE_OPEN_HOLE1: u16 =	0b00_10_00_10_10_00;
+const THREE_WHITE_OPEN_HOLE2: u16 =	0b00_10_10_00_10_00;
+
 
 pub fn dbg_line(mut line : u16) {
 	for _ in 0..6 {
@@ -23,50 +71,51 @@ pub fn dbg_line(mut line : u16) {
 			// dbg_line((line & 0b1111_1111_1111) as u16);
 			match (line & 0b11_11_11_11_11_11) as u16 {
 				// ......
-				0b00_00_00_00_00_00  => {
+				EMPTY  => {
 						j = 10;
 				},
 				// ....o.
 				// ....x.
-				0b00_00_00_00_01_00 => {
+				ONE_BLACK => {
 					// println!(": [00.0] 1 black open");
 					j = 10;
 					// value -= 1;
 				}
-				0b00_00_00_00_10_00 => {
+				ONE_WHITE => {
 					// println!(": [00.1] 1 white open");
 					j = 10;
 					// value += 1;
 				}
 				// ...ox.
 				// ...xo.
-				0b00_00_00_01_10_00 |
-				0b00_00_00_10_01_00 => {
+				BLACK_WHITE |
+				WHITE_BLACK
+				 => {
 					// println!(": [01] ...xo.||...ox.");
 					j = 10;
 				}
 				// _xxxxx
-				align5_white if (align5_white & 0b11_11_11_11_11 == 0b10_10_10_10_10) => {
+				align5_white if (align5_white & 0b11_11_11_11_11 == WHITE_5_ALIGN) => {
 					// println!(": [02]RETURN 10000000 align5 white");
 					value += 10000000;
 					j = 10;
 				},
 				// _ooooo
-				align5_black if (align5_black & 0b11_11_11_11_11 == 0b01_01_01_01_01) => {
+				align5_black if (align5_black & 0b11_11_11_11_11 == BLACK_5_ALIGN) => {
 					// dbg_line((line & 0b1111_1111_1111) as u16);
 					// println!(": [03]RETURN - 10000000 align5 black");
 					value -= 10000000;
 					j = 10;
 				},
 				// .oooo.
-				0b00_01_01_01_01_00 => {
+				FOUR_BLACK => {
 					// dbg_line((line & 0b1111_1111_1111) as u16);
 					// println!(": [04]value -= 100000 align4 open black");
 					value -= 100000;
 						j = 10;
 				},
 				// .xxxx.
-				0b00_10_10_10_10_00 => {
+				FOUR_WHITE => {
 					// dbg_line((line & 0b1111_1111_1111) as u16);
 					// println!(": [05]value += 100000 align4 open white");
 					value += 100000;
@@ -76,10 +125,9 @@ pub fn dbg_line(mut line : u16) {
 				// .o.oox
 				// xo.oo.
 				// xooo..
-				0b00_00_01_01_01_10 | 
-				0b00_01_00_01_01_10 | 
-				0b10_01_00_01_01_00 | 
-				0b10_01_01_01_00_00 => {
+				THREE_BLACK_CLOSE1 |
+				THREE_BLACK_CLOSE2 |
+				THREE_BLACK_CLOSE3 => {
 					// dbg_line((line & 0b1111_1111_1111) as u16);
 					// println!(": [06]value -= 100 align3 close black");
 					value -= 100;
@@ -89,10 +137,9 @@ pub fn dbg_line(mut line : u16) {
 				// .x.xxo
 				// ox.xx.
 				// oxxx..
-				0b00_00_10_10_10_01 |
-				0b00_10_00_10_10_01 |
-				0b01_10_00_10_10_00 |
-				0b01_10_10_10_00_00  => {
+				THREE_WHITE_CLOSE1 |
+				THREE_WHITE_CLOSE2 |
+				THREE_WHITE_CLOSE3 => {
 					// dbg_line((line & 0b1111_1111_1111) as u16);
 					// println!(": [07]Value += 100 align3 close white");
 						value += 100;
@@ -108,15 +155,14 @@ pub fn dbg_line(mut line : u16) {
 				//ooo.o.
 				// .ooo.o
 
-				0b10_01_00_01_01_01 |
-				0b10_01_01_00_01_01 |
-				0b10_01_01_01_00_01 |
-				0b10_01_01_01_01_00 |
-				0b00_01_01_01_01_10 |
-				0b01_00_01_01_01_00 |
-				0b01_01_00_01_01_00 |
-				0b01_01_01_00_01_00 | 
-				0b00_01_01_01_00_01 => {
+				FOUR_BLACK_CLOSE1 |
+				FOUR_BLACK_CLOSE2 |
+				FOUR_BLACK_CLOSE3 |
+				FOUR_BLACK_CLOSE4 |
+				FOUR_BLACK_CLOSE5 |
+				FOUR_BLACK_CLOSE6 |
+				FOUR_BLACK_CLOSE7
+				 => {
 				// dbg_line((line & 0b1111_1111_1111) as u16);
 				// println!(": [08]value -= 10000 align4 close black");
 					value -= 10000;
@@ -129,32 +175,28 @@ pub fn dbg_line(mut line : u16) {
 				//x.xxx.
 				//xx.xx.
 				//xxx.x.
-
 				// .xxx.x
-				0b01_10_00_10_10_10 |
-				0b01_10_10_00_10_10 |
-				0b01_10_10_10_00_10 |
-				0b01_10_10_10_10_00 |
-				0b00_10_10_10_10_01 |
-
-				0b10_00_10_10_10_00 |
-				0b10_10_00_10_10_00 |
-				0b10_10_10_00_10_00 |
-				0b00_10_10_10_00_10 => {
+				FOUR_WHITE_CLOSE1 |
+				FOUR_WHITE_CLOSE2 |
+				FOUR_WHITE_CLOSE3 |
+				FOUR_WHITE_CLOSE4 |
+				FOUR_WHITE_CLOSE5 |
+				FOUR_WHITE_CLOSE6 |
+				FOUR_WHITE_CLOSE7 => {
 				// dbg_line((line & 0b1111_1111_1111) as u16);
 				// println!(": [09]value += 10000 align4 close white");
 					value += 10000;
 						j = 10;
 				},
 				//_..oo.
-				align2black_open if align2black_open & 0b00_11_11_11_11_11 == 0b00_00_00_01_01_00 => {
+				align2black_open if align2black_open & 0b00_11_11_11_11_11 == TWO_BLACK_OPEN => {
 					// dbg_line((line & 0b1111_1111_1111) as u16);
 					// println!(": [10]value -= 100 align2 open black");
 					value -= 100;
 						j = 8;
 				},
 				//_..xx.
-				align2white_open if align2white_open & 0b00_11_11_11_11_11 == 0b00_00_00_10_10_00 => {
+				align2white_open if align2white_open & 0b00_11_11_11_11_11 == TWO_WHITE_OPEN => {
 					// dbg_line((line & 0b1111_1111_1111) as u16);
 					// println!(": [11]Value += 100 align2 open white");
 					value += 100;
@@ -179,20 +221,20 @@ pub fn dbg_line(mut line : u16) {
 				// 		j = 8;
 				// },
 				//_.o.o.
-				align2black_hole if align2black_hole & 0b00_11_11_11_11_11 == 0b00_00_01_00_01_00 => {
+				align2black_hole if align2black_hole & 0b00_11_11_11_11_11 == TWO_BLACK_OPEN_HOLE => {
 					// println!(": [14]value -= 10 align2 hole black");
 					value -= 10;
 					j = 8;
 				},
 				//_.x.x.
-				align2white_hole if align2white_hole & 0b00_11_11_11_11_11 == 0b00_00_10_00_10_00 => {
+				align2white_hole if align2white_hole & 0b00_11_11_11_11_11 == TWO_WHITE_OPEN_HOLE => {
 					// dbg_line((line & 0b1111_1111_1111) as u16);
 					// println!(": [15]Value += 10 align2 hole white");
 					value += 10;
 					j = 8;
 				},
 				// _.ooo.
-				align3black if (align3black & 0b00_11_11_11_11_11) == 0b00_00_01_01_01_00 => {
+				align3black if (align3black & 0b00_11_11_11_11_11) == THREE_BLACK_OPEN => {
 
 					// dbg_line((line & 0b1111_1111_1111) as u16);
 					// println!(": [16]value -= 10000 align3 open black");
@@ -202,22 +244,22 @@ pub fn dbg_line(mut line : u16) {
 				},
 				// _oo.o.
 				// _o.oo.
-				align3black if (align3black & 0b00_11_11_11_11_11) == 0b00_01_01_00_01_00
-							|| (align3black & 0b00_11_11_11_11_11) == 0b00_01_00_01_01_00 => {
+				align3black if (align3black & 0b00_11_11_11_11_11) == THREE_BLACK_OPEN_HOLE1
+							|| (align3black & 0b00_11_11_11_11_11) == THREE_BLACK_OPEN_HOLE2 => {
 					// println!(": [17]value -= 1000 align3 open black");
 					value -= 1000;
 						j = 8;
 				},
 				// _.xxx.
-				align3white if (align3white & 0b00_11_11_11_11_11) == 0b00_00_10_10_10_00 => {
+				align3white if (align3white & 0b00_11_11_11_11_11) == THREE_WHITE_OPEN => {
 					// println!(": [18]Value += 10000 align3 open white");
 						value += 10000;
 						j = 8;
 				}
 				// _xx.x.
 				// _x.xx.
-				align3white if (align3white & 0b00_11_11_11_11_11) == 0b00_10_10_00_10_00
-							|| (align3white & 0b00_11_11_11_11_11) == 0b00_10_00_10_10_00 => {
+				align3white if (align3white & 0b00_11_11_11_11_11) == THREE_WHITE_OPEN_HOLE1
+							|| (align3white & 0b00_11_11_11_11_11) == THREE_WHITE_OPEN_HOLE2 => {
 					// dbg_line((line & 0b1111_1111_1111) as u16);
 					// println!(": [19]Value += 1000 align3 open white");
 						value += 1000;
