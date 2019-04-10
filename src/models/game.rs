@@ -4,6 +4,7 @@ use crate::models::ia::*;
 use crate::traits::view_model::*;
 use std::any::Any;
 use std::time::Instant;
+use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Player {
@@ -59,6 +60,8 @@ pub struct Game {
     pub change_window: bool,
     pub game_mode: GameMode,
     timer: Instant,
+    pub show_all_values: bool,
+	pub all_values: HashMap<(usize, usize), isize>,
 }
 
 impl Game {
@@ -75,6 +78,8 @@ impl Game {
             change_window: false,
             game_mode: GameMode::new(game_mode),
             timer: Instant::now(),
+			show_all_values: true,
+			all_values: HashMap::new(),
         }
     }
 

@@ -10,7 +10,6 @@ use crate::models::game::*;
 use conrod::UiCell;
 use conrod::widget::id::Id;
 use std::collections::HashMap;
-use std::collections::HashSet;
 
 pub enum GameEvent {
 	Grid(fn(&mut Game, usize, usize)),
@@ -59,7 +58,6 @@ impl GameController {
 				model.update_last_move_time();
 			}
         }));
-
 		self.events.insert(widget_ids.button_undo, GameEvent::ButtonUndo(|model: &mut Game| {
 			match model.game_mode {
 				GameMode::PlayerVsPlayer => {
@@ -131,7 +129,6 @@ impl GameViewController for GameController {
 
 impl GameController {
 	fn make_best_move(&mut self, model: &mut Game) {
-		let mut all_values: HashMap<(usize, usize), isize> = HashMap::new();
 		let player = match model.current_stone {
 			WHITE => &model.white_player,
 			_ => &model.black_player,
@@ -145,7 +142,8 @@ impl GameController {
 			}
 			else {
 				ia.counter = 0;
-				ia.negascout(&mut model.state, model.current_stone, ia.depth, (std::i64::MIN + 1) as isize, std::i64::MAX as isize, &mut self.map_board_values, &mut all_values, model.current_stone);
+				model.all_values.clear();
+				ia.negascout(&mut model.state, model.current_stone, ia.depth, (std::i64::MIN + 1) as isize, std::i64::MAX as isize, &mut self.map_board_values, &mut model.all_values, model.current_stone);
 				// ia.alphabeta(&mut model.state, &mut transposition_table, model.current_stone, ia.depth, isize::from(std::i16::MIN), isize::from(std::i16::MAX));
 				model.state.selected_move
 			};
@@ -157,7 +155,7 @@ impl GameController {
 						// } else {
 						// 	println!("PLAYER: BLACK");
 						// }
-						print_all_values(&model.all_state.last().unwrap().cells, &all_values);
+						print_all_values(&model.all_state.last().unwrap().cells, &model.all_values);
 						model.all_state.push(model.state.clone());
 						model.current_stone = opposite_stone!(model.current_stone);
 						model.update_last_move_time();

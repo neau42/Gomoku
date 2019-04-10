@@ -4,6 +4,7 @@ use conrod::position::rect::Rect;
 use conrod::widget::id::Id;
 use conrod::UiCell;
 use conrod::{self, color, widget, Colorable, Positionable, Widget};
+use std::collections::HashMap;
 
 /// BOARD
 #[derive(WidgetCommon_)]
@@ -13,10 +14,12 @@ pub struct Board<'a> {
     board_state: &'a Gameboard,
     is_human: bool,
     color: Color,
+	show_all_values: bool,
+	all_values: &'a HashMap<(usize, usize), isize>,
 }
 
 impl<'a> Board<'a> {
-    pub fn new(board_state: &'a Gameboard, stone: u8, is_human: bool) -> Self {
+    pub fn new(board_state: &'a Gameboard, stone: u8, all_values: &'a HashMap<(usize, usize), isize>, show_all_values: bool, is_human: bool) -> Self {
         let color = match stone {
             BLACK => color::BLACK,
             _ => color::WHITE,
@@ -26,6 +29,8 @@ impl<'a> Board<'a> {
             board_state,
             is_human,
             color,
+			show_all_values,
+			all_values,
         }
     }
 }
@@ -129,7 +134,9 @@ struct CellIndex {
     lines: conrod::widget::id::List,
     stones: conrod::widget::id::List,
     hoshis: conrod::widget::id::List,
+	values: conrod::widget::id::List,
     last_move: conrod::widget::id::Id,
+
 }
 
 impl CellIndex {
@@ -138,11 +145,14 @@ impl CellIndex {
             lines: conrod::widget::id::List::new(),
             stones: conrod::widget::id::List::new(),
             hoshis: conrod::widget::id::List::new(),
+            values: conrod::widget::id::List::new(),
             last_move: generator.next(),
         };
         cell_index.lines.resize(size * 3, &mut generator);
         cell_index.stones.resize(size * size, &mut generator);
         cell_index.hoshis.resize(9, &mut generator);
+        cell_index.values.resize(size * size, &mut generator);
+
         cell_index
     }
 }
@@ -174,8 +184,7 @@ impl<'a> Widget for Board<'a> {
 
         draw_lines(size, id, &state, rect, ui);
         draw_hoshi(size, id, &state, rect, ui);
-        draw_stones(self.board_state, id, &state, rect, ui);
-
+        draw_stones(self.board_state, id, &state, rect, ui, &self.all_values, self.show_all_values);
         let (interaction, is_click, x, y) = get_mouse_event(rect, self.board_state, id, ui);
         if !self.is_human {
             return InfoClick { is_click: 0, x, y };
@@ -259,27 +268,36 @@ fn draw_hoshi(size: usize, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
 }
 
 /// draw all stones presents on board
-fn draw_stones(board_state: &Gameboard, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
+fn draw_stones(board_state: &Gameboard, id: Id, state: &State, rect: Rect, ui: &mut UiCell, all_values: &HashMap<(usize, usize), isize>, show_all_value: bool) {
     for i in 0..SIZE * SIZE {
-        match get_stone!(board_state.cells[i % SIZE], i / SIZE) {
-            WHITE => draw_one_stone(
-                [i % SIZE, i / SIZE],
-                color::WHITE,
-                id,
-                rect,
-                ui,
-                state.cell_index.stones[i],
-            ),
-            BLACK => draw_one_stone(
-                [i % SIZE, i / SIZE],
-                color::BLACK,
-                id,
-                rect,
-                ui,
-                state.cell_index.stones[i],
-            ),
-            _ => (),
-        }
+		match get_stone!(board_state.cells[i % SIZE], i / SIZE) {
+			WHITE => draw_one_stone(
+				[i % SIZE, i / SIZE],
+				color::WHITE,
+				id,
+				rect,
+				ui,
+				state.cell_index.stones[i],
+			),
+			BLACK => draw_one_stone(
+				[i % SIZE, i / SIZE],
+				color::BLACK,
+				id,
+				rect,
+				ui,
+				state.cell_index.stones[i],
+			),
+			_ => (),
+		}
+		if show_all_value && all_values.contains_key(&(i%SIZE, i/SIZE)) {
+			display_value( [i % SIZE, i / SIZE],
+					color::ORANGE,
+					id,
+					rect,
+					ui,
+					state.cell_index.values[i], *all_values.get(&(i%SIZE, i/SIZE)).unwrap()
+			);
+		}
     }
     let half_w = rect.w() / 2.0;
     let stone_size = rect.w() / (SIZE - 1) as f64;
@@ -294,6 +312,28 @@ fn draw_stones(board_state: &Gameboard, id: Id, state: &State, rect: Rect, ui: &
             .graphics_for(id)
             .set(state.cell_index.last_move, ui);
     }
+}
+
+fn display_value (ind: [usize; 2],
+    color: Color,
+    id: Id,
+    rect: Rect,
+    ui: &mut UiCell,
+    cell_id: Id, value: isize) {
+
+	let stone_size = (rect.x.end - rect.x.start) / (SIZE - 1) as f64;
+    let pos = [
+        ind[0] as f64 * stone_size - rect.w() / 2.0,
+        rect.w() / 2.0 - ind[1] as f64 * stone_size,
+    ];
+
+conrod::widget::primitive::text::Text::new(value.to_string().as_str())
+        .x_y_relative_to(id, pos[0], pos[1])
+        .color(color)
+        .graphics_for(id)
+		.font_size(12)
+        .set(cell_id, ui);
+
 }
 
 /// draw one stone on board in [ind[0]][ind[1]]
