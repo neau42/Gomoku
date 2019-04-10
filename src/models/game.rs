@@ -61,7 +61,7 @@ pub struct Game {
     pub game_mode: GameMode,
     timer: Instant,
     pub show_all_values: bool,
-	pub all_values: HashMap<(usize, usize), isize>,
+	pub all_values: Vec<(usize, usize, isize)>,
 }
 
 impl Game {
@@ -79,7 +79,7 @@ impl Game {
             game_mode: GameMode::new(game_mode),
             timer: Instant::now(),
 			show_all_values: display_weight,
-			all_values: HashMap::new(),
+			all_values: Vec::new(),
         }
     }
 

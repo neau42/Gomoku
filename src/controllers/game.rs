@@ -23,32 +23,6 @@ pub struct GameController {
 	pub map_board_values: HashMap<[u64; SIZE], isize>,
 }
 
-
-pub fn print_all_values(cells: &[u64; SIZE], all_values: &HashMap<(usize, usize), isize>) {
-	print!("\n\nALL VALUES:\n ");
-		for x in 0..SIZE { print!(" {0: >9}", x)};
-		println!();
-
-		for y in 0..SIZE {
-			print!("{0: <9} ", y);
-			for x in 0..SIZE {
-				if all_values.contains_key(&(x,y)) {
-					print!("{0: <9} ", all_values.get(&(x,y)).unwrap());
-				} else {
-					match get_stone!(cells[x], y) {
-						WHITE => print!("{}[7;49;97mW{}[0m         ", 27 as char, 27 as char),
-						BLACK => print!("{}[7;49;90mB{}[0m         ", 27 as char, 27 as char),
-						_ =>     print!(".         ")
-					}
-				}
-			}
-			println!();
-		}
-	
-	print!("__________________\n");
-}
-
-
 impl GameController {
 	fn set_events(&mut self, widget_ids: &WidgetIds) {
 		self.events.insert(widget_ids.grid, GameEvent::Grid(|model: &mut Game, x: usize, y: usize| {
@@ -155,7 +129,6 @@ impl GameController {
 						// } else {
 						// 	println!("PLAYER: BLACK");
 						// }
-						print_all_values(&model.all_state.last().unwrap().cells, &model.all_values);
 						model.all_state.push(model.state.clone());
 						model.current_stone = opposite_stone!(model.current_stone);
 						model.update_last_move_time();

@@ -35,7 +35,7 @@ impl IA {
 	/// si alpha < current < beta, alors current est la valeur minimax
     /// si current <= alpha, alors la vraie valeur minimax m vérifie : m <= current <= alpha
     /// si beta <= current alors la vraie valeur minimax m vérifie : beta <= current <= m
-pub fn negascout(&mut self, state: &mut Gameboard, stone: u8, depth: u8, mut alpha: isize, beta: isize, map_board_values: &mut HashMap<[u64; SIZE], isize>, all_values: &mut HashMap<(usize, usize), isize>, player_stone: u8) -> isize {
+pub fn negascout(&mut self, state: &mut Gameboard, stone: u8, depth: u8, mut alpha: isize, beta: isize, map_board_values: &mut HashMap<[u64; SIZE], isize>, all_values: &mut Vec<(usize, usize, isize)>, player_stone: u8) -> isize {
         // if depth % 2 == 0 && transposition_table.contains(state) {
 		// 	state.value = transposition_table.get(state).unwrap().value;			
 		// 	return state.value
@@ -61,7 +61,7 @@ pub fn negascout(&mut self, state: &mut Gameboard, stone: u8, depth: u8, mut alp
             }
 			i += 1;
 			if depth == self.depth {
-				all_values.insert((new_state.last_move.unwrap().0, new_state.last_move.unwrap().1), score);
+				all_values.push((new_state.last_move.unwrap().0, new_state.last_move.unwrap().1, score));
 			}
             if score > current {
                 current = score;

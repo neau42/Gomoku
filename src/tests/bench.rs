@@ -14,7 +14,7 @@ mod tests {
                 let mut gameboard = Gameboard::new();
                 let depth = $value as u8;
                 let mut ia = IA::new(depth);
-    			let mut all_values: HashMap<(usize, usize), isize> = HashMap::new();
+    			let mut all_values: Vec<(usize, usize, isize)> = Vec::new();
     			let mut map_board: HashMap<[u64; SIZE], isize> = HashMap::new();
                 let stone = WHITE;
                 let timer = Instant::now();

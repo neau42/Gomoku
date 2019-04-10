@@ -15,11 +15,11 @@ pub struct Board<'a> {
     is_human: bool,
     color: Color,
 	show_all_values: bool,
-	all_values: &'a HashMap<(usize, usize), isize>,
+	all_values: &'a Vec<(usize, usize, isize)>,
 }
 
 impl<'a> Board<'a> {
-    pub fn new(board_state: &'a Gameboard, stone: u8, all_values: &'a HashMap<(usize, usize), isize>, show_all_values: bool, is_human: bool) -> Self {
+    pub fn new(board_state: &'a Gameboard, stone: u8, all_values: &'a Vec<(usize, usize, isize)>, show_all_values: bool, is_human: bool) -> Self {
         let color = match stone {
             BLACK => color::BLACK,
             _ => color::WHITE,
@@ -268,7 +268,7 @@ fn draw_hoshi(size: usize, id: Id, state: &State, rect: Rect, ui: &mut UiCell) {
 }
 
 /// draw all stones presents on board
-fn draw_stones(board_state: &Gameboard, id: Id, state: &State, rect: Rect, ui: &mut UiCell, all_values: &HashMap<(usize, usize), isize>, show_all_value: bool) {
+fn draw_stones(board_state: &Gameboard, id: Id, state: &State, rect: Rect, ui: &mut UiCell, all_values: &Vec<(usize, usize, isize)>, show_all_value: bool) {
     for i in 0..SIZE * SIZE {
 		match get_stone!(board_state.cells[i % SIZE], i / SIZE) {
 			WHITE => draw_one_stone(
@@ -289,16 +289,21 @@ fn draw_stones(board_state: &Gameboard, id: Id, state: &State, rect: Rect, ui: &
 			),
 			_ => (),
 		}
-		if show_all_value && all_values.contains_key(&(i%SIZE, i/SIZE)) {
-			display_value( [i % SIZE, i / SIZE],
+	}
+
+	if show_all_value {
+		let mut i = 0;
+		for elem in all_values {
+			display_value( [elem.0, elem.1],
 					color::LIGHT_BROWN,
 					id,
 					rect,
 					ui,
-					state.cell_index.values[i], *all_values.get(&(i%SIZE, i/SIZE)).unwrap()
+					state.cell_index.values[i], elem.2
 			);
+		i+=1;
 		}
-    }
+	}
     let half_w = rect.w() / 2.0;
     let stone_size = rect.w() / (SIZE - 1) as f64;
     if let Some((x, y)) = board_state.last_move {
