@@ -5,9 +5,19 @@ use std::hash::{Hash, Hasher};
 use std::cmp::Ordering;
 use std::collections::HashMap;
 
-
 /// Size of game board.
+#[cfg(feature = "size13")]
+pub const SIZE: usize = 13;
+
+#[cfg(feature = "size15")]
+pub const SIZE: usize = 15;
+
+#[cfg(feature = "size17")]
+pub const SIZE: usize = 17;
+
+#[cfg(not(any(feature = "size13", feature = "size15", feature = "size17")))]
 pub const SIZE: usize = 19;
+
 
 pub const NOPE: u8 = 0b00;
 pub const BLACK: u8 = 0b01;
@@ -89,24 +99,6 @@ impl Gameboard {
 			nbr_capture
 		})
 	}
-
-	// pub fn ennemy_around(&self, x_orig: isize, y_orig: isize, stone: u8) -> bool {
-	// 	let x_min = (x_orig - 1).max(0);
-	// 	let y_min = (y_orig - 1).max(0);
-	// 	let x_max = (x_orig + 1).min((SIZE - 1) as isize);
-	// 	let y_max = (y_orig + 1).min((SIZE - 1) as isize);
-	// 	let opposite_stone = opposite_stone!(stone) as u64;
-	// 	let opposit_line = opposite_stone << 8 | opposite_stone << 6 | opposite_stone << 4 | opposite_stone << 2 | opposite_stone;
-	// 	// println!("ennemy_around? : x: {}, y: {}, y_min: {}, y_max: {}, x_min: {}", x_orig, y_orig, y_min, y_max, x_min);
-	// 	for x in x_min..=x_max {
-	// 	// println!("opposit_line :                           {:#08b} (x: {})", opposit_line, x);
-	// 	// println!("self.cells[x_min as usize] >> ({} * 2):   {:#08b} (& 0b111111)", y_min ,self.cells[x as usize] >> (y_min * 2) & 0b11_11_11);
-	// 		if (self.cells[x as usize] >> (y_min * 2) & opposit_line) != 0 {
-	// 			return true
-	// 		}
-	// 	}
-	// 	false
-	// }
 
 	pub fn try_make_move(&mut self, x: isize, y: isize, stone: u8) -> bool {
 		let x_min = (x - 5).max(0) as usize;

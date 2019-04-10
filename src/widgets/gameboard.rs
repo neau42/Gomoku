@@ -4,7 +4,6 @@ use conrod::position::rect::Rect;
 use conrod::widget::id::Id;
 use conrod::UiCell;
 use conrod::{self, color, widget, Colorable, Positionable, Widget};
-use std::collections::HashMap;
 
 /// BOARD
 #[derive(WidgetCommon_)]

@@ -19,3 +19,10 @@ path = "src/main.rs"
 
 # [profile.release]
 # lto = true
+
+[features]
+size13 = []
+size15 = []
+size17 = []
+
+default = []
