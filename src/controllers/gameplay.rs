@@ -83,7 +83,6 @@ impl GameplayController {
         'render: loop {
             for event in events.next(&mut self.events_loop) {
                 if let Some(event) = convert_event(event.clone(), &display) {
-                    // println!("event ");
                     self.ui.handle_event(event);
                     events.needs_update();
                 }

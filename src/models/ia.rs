@@ -1,9 +1,5 @@
 use crate::models::gameboard::*;
-use std::collections::HashSet;
 use std::collections::HashMap;
-// use std::cmp::min;
-// use std::cmp::max;
-// use std::process::exit;
 use crate::eval::*;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -21,7 +17,7 @@ impl IA {
     }
 
 	pub fn expand(&self, state: &Gameboard, stone: u8, depth: u8, map_board_values: &mut HashMap<[u64; SIZE], isize>, player_stone: u8) -> Vec<Gameboard> {
-		let mut possible_moves: Vec<(usize, usize)> = state.expand();
+		let possible_moves: Vec<(usize, usize)> = state.expand();
 		let mut possible_boards: Vec<Gameboard> = possible_moves.iter().map(|new_move| {
 			let mut new_state = state.clone();
 			new_state.result = None;

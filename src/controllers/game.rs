@@ -79,7 +79,7 @@ impl GameViewController for GameController {
 	fn show(&mut self, model: &mut dyn GameViewModel, ui: &mut UiCell, widget_ids: &WidgetIds) {
 		let model: &mut Game = model.get_model().downcast_mut::<Game>().unwrap();
 		let is_human = model.current_player_is_human();
-		if (!is_human) {
+		if !is_human {
 			self.make_best_move(model);
 		}
 		self.view.display_grid(ui, widget_ids, &self.events[&widget_ids.grid], model, is_human);

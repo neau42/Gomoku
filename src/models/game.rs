@@ -4,7 +4,6 @@ use crate::models::ia::*;
 use crate::traits::view_model::*;
 use std::any::Any;
 use std::time::Instant;
-use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Player {

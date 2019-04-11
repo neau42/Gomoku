@@ -73,7 +73,7 @@ impl Iterator for InfoClick {
 }
 
 /// get board idx from mouse position
-pub fn get_cell(x: f64, y: f64, rect: Rect, model: &Gameboard) -> Option<(usize, usize)> {
+pub fn get_cell(x: f64, y: f64, rect: Rect) -> Option<(usize, usize)> {
     let size_px = rect.w();
     let map_size = SIZE;
     let semi_cell_size = size_px / map_size as f64 / 2.0;
@@ -95,7 +95,6 @@ pub fn get_cell(x: f64, y: f64, rect: Rect, model: &Gameboard) -> Option<(usize,
 
 fn get_mouse_event(
     rect: Rect,
-    board_state: &Gameboard,
     button_id: conrod::widget::Id,
     ui: &UiCell,
 ) -> (Interaction, u16, usize, usize) {
@@ -117,7 +116,7 @@ fn get_mouse_event(
     let is_click = (input.clicks().left().count() + input.taps().count()) as u16;
     match interaction {
         Interaction::Idle => (interaction, 0, 0, 0),
-        _ => match get_cell(x_mouse, y_mouse, rect, board_state) {
+        _ => match get_cell(x_mouse, y_mouse, rect) {
             Some((x, y)) => (interaction, is_click, x, y),
             None => (Interaction::Idle, 0, 0, 0),
         },
@@ -184,7 +183,7 @@ impl<'a> Widget for Board<'a> {
         draw_lines(size, id, &state, rect, ui);
         draw_hoshi(size, id, &state, rect, ui);
         draw_stones(self.board_state, id, &state, rect, ui, &self.all_values, self.show_all_values);
-        let (interaction, is_click, x, y) = get_mouse_event(rect, self.board_state, id, ui);
+        let (interaction, is_click, x, y) = get_mouse_event(rect, id, ui);
         if !self.is_human {
             return InfoClick { is_click: 0, x, y };
         }

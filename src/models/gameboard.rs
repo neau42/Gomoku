@@ -1,9 +1,7 @@
 use crate::models::game::GameResult;
-use crate::models::ia::IA;
-use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
 use std::cmp::Ordering;
-use std::collections::HashMap;
+use crate::eval::*;
 
 /// Size of game board.
 #[cfg(feature = "size13")]
@@ -26,8 +24,6 @@ pub const WHITE: u8 = 0b10;
 pub const WHITE_CAPTURE: u8 = WHITE | BLACK << 2 | BLACK << 4 | WHITE << 6;
 pub const BLACK_CAPTURE: u8 = BLACK | WHITE << 2 | WHITE << 4 | BLACK << 6;
 
-pub const BLACK_5_ALIGN: u16 = BLACK as u16 | (BLACK as u16) << 2 | (BLACK as u16) << 4 | (BLACK as u16) << 6 | (BLACK as u16) << 8;
-pub const WHITE_5_ALIGN: u16 = WHITE as u16 | (WHITE as u16) << 2 | (WHITE as u16) << 4 | (WHITE as u16) << 6 | (WHITE as u16) << 8;
 pub const BLACK_TREES: [u16; 4] = [
 	NOPE as u16 | (BLACK as u16) << 2 | (BLACK as u16) << 4 | (BLACK as u16) << 6 | (NOPE as u16) << 8 | (NOPE as u16) << 10,
 	NOPE as u16 | (BLACK as u16) << 2 | (BLACK as u16) << 4 | (NOPE as u16) << 6 | (BLACK as u16) << 8 | (NOPE as u16) << 10,
@@ -78,7 +74,7 @@ impl Gameboard {
 		let tree_forms: [u16; 4] = get_tree_forms!(stone);
 		tree_lines.iter().fold(0, |nbr_tree, line| {
 			if (0..6).any(|range| {
-				let line_to_check: u32 = (line >> (range * 2));
+				let line_to_check: u32 = line >> (range * 2);
 				tree_forms.contains(&(concat_stones!(line_to_check, 6) as u16))
 			}) {
 				return nbr_tree + 1;
@@ -121,8 +117,8 @@ impl Gameboard {
 				return nbr_tree < 2;
 			}
 			match stone {
-				BLACK => self.black_captures += (nbr_capture * 2),
-				_ => self.white_captures += (nbr_capture * 2),
+				BLACK => self.black_captures += nbr_capture * 2,
+				_ => self.white_captures += nbr_capture * 2,
 			}
 		true
 	}
@@ -144,9 +140,9 @@ impl Gameboard {
         false
     }
 
-	pub fn unmake_move(&mut self, x: usize, y: usize) {
-        self.cells[x] &= clear_stone!(y);
-    }
+	// pub fn unmake_move(&mut self, x: usize, y: usize) {
+    //     self.cells[x] &= clear_stone!(y);
+    // }
 	
 	pub fn update_possible_move(&mut self, x: isize, y: isize) {
 		let min_x = (x - 1).max(0) as usize;
