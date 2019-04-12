@@ -20,7 +20,6 @@ impl IA {
 		let possible_moves: Vec<(usize, usize)> = state.expand();
 		let mut possible_boards: Vec<Gameboard> = possible_moves.iter().map(|new_move| {
 			let mut new_state = state.clone();
-			new_state.result = None;
 			new_state.make_move(new_move.0, new_move.1, stone);
 			new_state.value = eval(&new_state, opposite_stone!(stone), depth - 1, map_board_values, player_stone);
 			new_state

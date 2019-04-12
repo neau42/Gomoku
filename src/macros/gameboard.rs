@@ -142,6 +142,7 @@ macro_rules! check_winning {
 		{
 			$state.result = Some($result);
 			if ($state.waiting_winning_move.is_none()) {
+				println!("askip");
 				$state.waiting_winning_move = Some(($x, $y));
 				let mut ia = IA::new(1);
 				let mut tmp_state = $state.clone();
@@ -150,11 +151,20 @@ macro_rules! check_winning {
 				let mut all_values: Vec<(usize, usize, isize)> = Vec::new();
 				ia.negascout(&mut tmp_state, opposite_stone, ia.depth, (std::i64::MIN + 1) as isize, std::i64::MAX as isize, &mut map_board_values, &mut all_values, opposite_stone);
 				if let Some(new_move) = tmp_state.selected_move {
-					tmp_state.result = None;
 					tmp_state.make_move(new_move.0, new_move.1, opposite_stone);
-					if (tmp_state.result.is_none() || tmp_state.result.unwrap() != $result) {
+					println!("{:?} | {:?}", &tmp_state.result, &$state.result);
+					if ($state.possible_moves[14] >> 9 & 0b1 == 1) {
+						println!("ct possible");
+					}
+					else {
+						println!("bisarre");
+					}
+					if (tmp_state.result != $state.result) {
 						return false;
 					}
+				}
+				else {
+					println!("gmmmmmm");
 				}
 			}
 			$state.waiting_winning_move = None;

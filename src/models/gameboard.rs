@@ -92,6 +92,8 @@ impl Gameboard {
 			if *line == capture_form {
 				self.cells[(x as isize + 1 * coef.0) as usize] &= clear_stone!((y as isize + 1 * coef.1) as usize);
 				self.cells[(x as isize + 2 * coef.0) as usize] &= clear_stone!((y as isize + 2 * coef.1) as usize);
+				self.possible_moves[(x as isize + 1 * coef.0) as usize] |= set_move!((y as isize + 1 * coef.1) as usize)
+				self.possible_moves[(x as isize + 2 * coef.0) as usize] |= set_move!((y as isize + 2 * coef.1) as usize)
 				return nbr_capture + 1;
 			}
 			nbr_capture
@@ -126,7 +128,7 @@ impl Gameboard {
 	}
 
 	pub fn make_move(&mut self, x: usize, y: usize, stone: u8) -> bool {
-		let tmp_waiting = self.waiting_winning_move.clone();
+		let tmp_state = self.clone();
 		if !self.is_finish() && get_stone!(self.cells[x], y) == NOPE {
 			self.cells[x] |= set_stone!(y, stone);
 			if self.try_make_move(x as isize, y as isize, stone) && self.update_result(x, y, stone) {
@@ -137,8 +139,7 @@ impl Gameboard {
 				self.selected_move = None;
 				return true;
 			}
-			self.cells[x] &= clear_stone!(y);
-			self.waiting_winning_move = tmp_waiting;
+			*self = tmp_state;
         }
         false
     }
@@ -215,8 +216,13 @@ impl Gameboard {
 					self.result = None;
 					self.update_result(winning_move.0, winning_move.1, stone);
 					if (self.result == tmp_result) {
+						println!("je passe ");
 						return false;
 					}
+					else {
+						println!("{:?} || {:?}", tmp_result, self.result);
+					}
+					self.waiting_winning_move = None;
 				}
 			}
 			let x_min = (x as isize - 5).max(0) as usize;
@@ -234,6 +240,7 @@ impl Gameboard {
 					let tmp_line: u16 = concat_stones!((line >> (range * 2)) as u32, 5) as u16;
 					return match tmp_line {
 						WHITE_5_ALIGN => {
+							println!("plop");
 							// self.result = Some(GameResult::WhiteWin);
 							// return true;
 							check_winning!(self, x, y, GameResult::WhiteWin, stone)
