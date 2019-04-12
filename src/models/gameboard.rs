@@ -92,8 +92,8 @@ impl Gameboard {
 			if *line == capture_form {
 				self.cells[(x as isize + 1 * coef.0) as usize] &= clear_stone!((y as isize + 1 * coef.1) as usize);
 				self.cells[(x as isize + 2 * coef.0) as usize] &= clear_stone!((y as isize + 2 * coef.1) as usize);
-				self.possible_moves[(x as isize + 1 * coef.0) as usize] |= set_move!((y as isize + 1 * coef.1) as usize)
-				self.possible_moves[(x as isize + 2 * coef.0) as usize] |= set_move!((y as isize + 2 * coef.1) as usize)
+				self.possible_moves[(x as isize + 1 * coef.0) as usize] |= set_move!((y as isize + 1 * coef.1) as usize);
+				self.possible_moves[(x as isize + 2 * coef.0) as usize] |= set_move!((y as isize + 2 * coef.1) as usize);
 				return nbr_capture + 1;
 			}
 			nbr_capture
