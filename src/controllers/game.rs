@@ -39,7 +39,6 @@ impl GameController {
 						model.all_state.pop();
 						model.state = model.all_state.last().unwrap().clone();
 						model.current_stone = opposite_stone!(model.current_stone);
-						model.state.result = None;
 					}
 				},
 				_ => {
@@ -47,7 +46,6 @@ impl GameController {
 						model.all_state.pop();
 						model.all_state.pop();
 						model.state = model.all_state.last().unwrap().clone();
-						model.state.result = None;
 					}
 				}
 			}

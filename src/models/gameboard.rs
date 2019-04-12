@@ -2,6 +2,8 @@ use crate::models::game::GameResult;
 use std::hash::{Hash, Hasher};
 use std::cmp::Ordering;
 use crate::eval::*;
+use crate::models::ia::IA;
+use std::collections::HashMap;
 
 /// Size of game board.
 #[cfg(feature = "size13")]
@@ -66,7 +68,7 @@ impl Gameboard {
 	}
 
 	pub fn is_finish(&self) -> bool {
-		self.result.is_some()// && !align5_capturable(self) //&& self.waiting_winning_move.is_none()
+		self.result.is_some() && self.waiting_winning_move.is_none()
     }
 }
 impl Gameboard {
@@ -124,10 +126,10 @@ impl Gameboard {
 	}
 
 	pub fn make_move(&mut self, x: usize, y: usize, stone: u8) -> bool {
+		let tmp_waiting = self.waiting_winning_move.clone();
 		if !self.is_finish() && get_stone!(self.cells[x], y) == NOPE {
 			self.cells[x] |= set_stone!(y, stone);
-			if self.try_make_move(x as isize, y as isize, stone) {
-				self.update_result(x, y, stone);
+			if self.try_make_move(x as isize, y as isize, stone) && self.update_result(x, y, stone) {
 				self.update_possible_move(x as isize, y as isize);
 				// self.update_capturable_stone(x as isize, y as isize);
 
@@ -136,6 +138,7 @@ impl Gameboard {
 				return true;
 			}
 			self.cells[x] &= clear_stone!(y);
+			self.waiting_winning_move = tmp_waiting;
         }
         false
     }
@@ -198,19 +201,22 @@ impl Gameboard {
 	// 	);
 	// }
 
-	pub fn update_result(&mut self, x: usize, y: usize, stone: u8) {
+	pub fn update_result(&mut self, x: usize, y: usize, stone: u8) -> bool {
 		if self.black_captures >= 10 {
-			self.result = Some(GameResult::BlackWin)
+			self.result = Some(GameResult::BlackWin);
 		}
 		else if self.white_captures >= 10 {
-			self.result = Some(GameResult::WhiteWin)
+			self.result = Some(GameResult::WhiteWin);
 		}
 		else {
 			if let Some(winning_move) = self.waiting_winning_move {
 				if winning_move != (x, y) {
+					let mut tmp_result = self.result.clone();
 					self.result = None;
 					self.update_result(winning_move.0, winning_move.1, stone);
-					self.waiting_winning_move = None;
+					if (self.result == tmp_result) {
+						return false;
+					}
 				}
 			}
 			let x_min = (x as isize - 5).max(0) as usize;
@@ -228,14 +234,14 @@ impl Gameboard {
 					let tmp_line: u16 = concat_stones!((line >> (range * 2)) as u32, 5) as u16;
 					return match tmp_line {
 						WHITE_5_ALIGN => {
-							self.result = Some(GameResult::WhiteWin);
-							return true;
-							// check_winning!(self, x, y, GameResult::WhiteWin, stone)
+							// self.result = Some(GameResult::WhiteWin);
+							// return true;
+							check_winning!(self, x, y, GameResult::WhiteWin, stone)
 						},
 						BLACK_5_ALIGN => {
-							self.result = Some(GameResult::BlackWin);
-							return true;
-							// check_winning!(self, x, y, GameResult::BlackWin, stone)
+							// self.result = Some(GameResult::BlackWin);
+							// return true;
+							check_winning!(self, x, y, GameResult::BlackWin, stone)
 						},
 						_ => {
 							false
@@ -244,6 +250,7 @@ impl Gameboard {
 				})
 			});
 		}
+		true
 	}
 }
 
