@@ -331,12 +331,22 @@ fn display_value(ind: [usize; 2],
         rect.w() / 2.0 - ind[1] as f64 * stone_size,
     ];
 
-	conrod::widget::primitive::text::Text::new(value.to_string().as_str())
-        .x_y_relative_to(id, pos[0], pos[1])
-        .color(color)
-        .graphics_for(id)
-		.font_size(14)
-        .set(cell_id, ui);
+	if ind[0] % 2 == 0 {
+		conrod::widget::primitive::text::Text::new(value.to_string().as_str())
+			.x_y_relative_to(id, pos[0], pos[1]- 6.0)
+			.color(color)
+			.graphics_for(id)
+			.font_size(14)
+			.set(cell_id, ui);
+	} else {
+		conrod::widget::primitive::text::Text::new(value.to_string().as_str())
+			.x_y_relative_to(id, pos[0], pos[1] + 4.0)
+			.color(color)
+			.graphics_for(id)
+			.font_size(14)
+			.set(cell_id, ui);
+
+	}
 
 }
 

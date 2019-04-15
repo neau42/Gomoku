@@ -101,7 +101,16 @@ impl Gameboard {
 	}
 
 	pub fn try_make_move(&mut self, x: isize, y: isize, stone: u8) -> bool {
-		let x_min = (x - 5).max(0) as usize;
+		// let x_min = (x - 3).max(0) as usize;
+		// let x_max = (x + 3).min(SIZE as isize - 1) as usize;
+		// let y_min = (y - 3).max(0) as usize;
+		// let y_max = (y + 3).min(SIZE as isize - 1) as usize;
+		// let diago_up_left = (y as usize - y_min).min(x as usize - x_min);
+		// let diago_up_right = (y as usize - y_min).min(x_max - x as usize);
+		// let diago_down_right = (y_max - y as usize).min(x_max - x as usize);
+		// let diago_down_left = (y_max - y as usize).min(x as usize - x_min);
+
+	let x_min = (x - 5).max(0) as usize;
 		let x_max = (x + 5).min(SIZE as isize - 1) as usize;
 		let y_min = (y - 5).max(0) as usize;
 		let y_max = (y + 5).min(SIZE as isize - 1) as usize;
@@ -114,7 +123,6 @@ impl Gameboard {
 		// if self.ennemy_around(x, y, stone) {
 			let capture_lines: [(u8, (isize, isize)); 8] = capture_lines!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max, diago_up_left, diago_down_right, diago_down_left, diago_up_right);
 			let nbr_capture = self.count_capture(capture_lines, x as usize, y as usize, stone);
-	// }
 			if nbr_capture == 0 {
 				let tree_lines: [u32; 4] = tree_lines!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max, diago_up_left, diago_down_right, diago_down_left, diago_up_right);
 				let nbr_tree = self.count_tree(tree_lines, stone);
@@ -204,9 +212,11 @@ impl Gameboard {
 
 	pub fn update_result(&mut self, x: usize, y: usize, stone: u8) -> bool {
 		if self.black_captures >= 10 {
+			self.waiting_winning_move = None;
 			self.result = Some(GameResult::BlackWin);
 		}
 		else if self.white_captures >= 10 {
+			self.waiting_winning_move = None;
 			self.result = Some(GameResult::WhiteWin);
 		}
 		else {

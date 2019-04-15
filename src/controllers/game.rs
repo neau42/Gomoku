@@ -76,26 +76,27 @@ impl GameViewController for GameController {
 	
 	fn show(&mut self, model: &mut dyn GameViewModel, ui: &mut UiCell, widget_ids: &WidgetIds) {
 		let model: &mut Game = model.get_model().downcast_mut::<Game>().unwrap();
-		let is_human = model.current_player_is_human();
-		if !is_human {
-			self.make_best_move(model);
-		}
-		self.view.display_grid(ui, widget_ids, &self.events[&widget_ids.grid], model, is_human);
-		self.view.display_player_turn(ui, widget_ids, model);
-		self.view.display_captures(ui, widget_ids, model.state.black_captures, model.state.white_captures);
-		self.view.display_last_move_time(ui, widget_ids, &model.last_move_time[..]);
-		if model.state.is_finish() {
-			let result: &str = match model.state.result.unwrap() {
-				GameResult::BlackWin => "BLACK PLAYER WIN!",
-				GameResult::WhiteWin => "WHITE PLAYER WIN!",
-				GameResult::Equality => "EQUALITY!",
-			};
-			self.view.display_result(ui, widget_ids, result);
-		}
-		self.view.display_button_quit(ui, widget_ids, &self.events[&widget_ids.button_quit], model);
-		if model.game_mode != GameMode::IaVsIa {
-			self.view.display_button_undo(ui, widget_ids, &self.events[&widget_ids.button_undo], model);
-		}
+        let is_human = model.current_player_is_human();
+
+        self.view.display_grid(ui, widget_ids, &self.events[&widget_ids.grid], model, is_human);
+        self.view.display_player_turn(ui, widget_ids, model);
+        self.view.display_captures(ui, widget_ids, model.state.black_captures, model.state.white_captures);
+        self.view.display_last_move_time(ui, widget_ids, &model.last_move_time[..]);
+        if model.state.is_finish() {
+            let result: &str = match model.state.result.unwrap() {
+                GameResult::BlackWin => "BLACK PLAYER WIN!",
+                GameResult::WhiteWin => "WHITE PLAYER WIN!",
+                GameResult::Equality => "EQUALITY!",
+            };
+            self.view.display_result(ui, widget_ids, result);
+        }
+        else if !is_human {
+            self.make_best_move(model);
+        }
+        self.view.display_button_quit(ui, widget_ids, &self.events[&widget_ids.button_quit], model);
+        if model.game_mode != GameMode::IaVsIa {
+            self.view.display_button_undo(ui, widget_ids, &self.events[&widget_ids.button_undo], model);
+        }
 	}
 }
 
@@ -132,7 +133,7 @@ impl GameController {
 						model.update_last_move_time();
 					}
 				}
-				None => (),// print_all_state(&model.all_state),//println!("banana"),
+				None => model.state.result = Some(GameResult::Equality),//(),// print_all_state(&model.all_state),//println!("banana"),
 			};
 		}
 	}
