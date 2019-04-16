@@ -109,12 +109,10 @@ impl GameController {
 
 		if let Player::Ia{mut ia, ..} = player {
 			let best_move: Option<(usize, usize)> = if model.all_state.len() == 1 {
-				// let new_state = model.state.clone();
 				let position = SIZE / 2;
 				Some((position, position))
 			}
 			else {
-				ia.counter = 0;
 				model.all_values.clear();
 				ia.negascout(&mut model.state, model.current_stone, ia.depth, (std::i64::MIN + 1) as isize, std::i64::MAX as isize, &mut self.map_board_values, &mut model.all_values, model.current_stone);
 				// ia.alphabeta(&mut model.state, &mut transposition_table, model.current_stone, ia.depth, isize::from(std::i16::MIN), isize::from(std::i16::MAX));
@@ -123,25 +121,13 @@ impl GameController {
 			match best_move {
 				Some(best_move) => {
 					if model.state.make_move(best_move.0, best_move.1, model.current_stone) {
-						// if model.current_stone == WHITE {
-						// 	println!("PLAYER: WHITE");
-						// } else {
-						// 	println!("PLAYER: BLACK");
-						// }
 						model.all_state.push(model.state.clone());
 						model.current_stone = opposite_stone!(model.current_stone);
 						model.update_last_move_time();
 					}
 				}
-				None => model.state.result = Some(GameResult::Equality),//(),// print_all_state(&model.all_state),//println!("banana"),
+				None => model.state.result = Some(GameResult::Equality),
 			};
 		}
 	}
 }
-
-// fn print_all_state(all_state: &Vec<Gameboard> ) {
-// 	println!("ALL STATES: ");
-// 	for state in all_state {
-// 		printboard!(state.cells);
-// 	}
-// }

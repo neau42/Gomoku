@@ -75,24 +75,26 @@ impl Gameboard {
 	pub fn count_tree(&self, tree_lines: [u32; 4], stone: u8) -> u8 {
 		let tree_forms: [u16; 4] = get_tree_forms!(stone);
 		tree_lines.iter().fold(0, |nbr_tree, line| {
-			if (0..6).any(|range| {
+			let is_tree: bool = (0..6).any(|range| {
 				let line_to_check: u32 = line >> (range * 2);
 				tree_forms.contains(&(concat_stones!(line_to_check, 6) as u16))
-			}) {
-				return nbr_tree + 1;
+			});
+			if is_tree {
+				nbr_tree + 1
 			}
-			nbr_tree
+			else {
+				nbr_tree
+			}
 		})
 	}
 
 	pub fn count_capture(&mut self, capture_lines: [(u8, (isize, isize)); 8], x: usize, y: usize, stone: u8) -> u8 {
 		let capture_form: u8 = get_capture_form!(stone);
 		capture_lines.iter().fold(0, |nbr_capture, (line, coef)| {
-			// println!("{:#066b}", line);
 			if *line == capture_form {
-				self.cells[(x as isize + 1 * coef.0) as usize] &= clear_stone!((y as isize + 1 * coef.1) as usize);
+				self.cells[(x as isize + coef.0) as usize] &= clear_stone!((y as isize + coef.1) as usize);
 				self.cells[(x as isize + 2 * coef.0) as usize] &= clear_stone!((y as isize + 2 * coef.1) as usize);
-				self.possible_moves[(x as isize + 1 * coef.0) as usize] |= set_move!((y as isize + 1 * coef.1) as usize);
+				self.possible_moves[(x as isize + coef.0) as usize] |= set_move!((y as isize + coef.1) as usize);
 				self.possible_moves[(x as isize + 2 * coef.0) as usize] |= set_move!((y as isize + 2 * coef.1) as usize);
 				return nbr_capture + 1;
 			}
@@ -101,16 +103,7 @@ impl Gameboard {
 	}
 
 	pub fn try_make_move(&mut self, x: isize, y: isize, stone: u8) -> bool {
-		// let x_min = (x - 3).max(0) as usize;
-		// let x_max = (x + 3).min(SIZE as isize - 1) as usize;
-		// let y_min = (y - 3).max(0) as usize;
-		// let y_max = (y + 3).min(SIZE as isize - 1) as usize;
-		// let diago_up_left = (y as usize - y_min).min(x as usize - x_min);
-		// let diago_up_right = (y as usize - y_min).min(x_max - x as usize);
-		// let diago_down_right = (y_max - y as usize).min(x_max - x as usize);
-		// let diago_down_left = (y_max - y as usize).min(x as usize - x_min);
-
-	let x_min = (x - 5).max(0) as usize;
+		let x_min = (x - 5).max(0) as usize;
 		let x_max = (x + 5).min(SIZE as isize - 1) as usize;
 		let y_min = (y - 5).max(0) as usize;
 		let y_max = (y + 5).min(SIZE as isize - 1) as usize;
@@ -119,19 +112,17 @@ impl Gameboard {
 		let diago_down_right = (y_max - y as usize).min(x_max - x as usize);
 		let diago_down_left = (y_max - y as usize).min(x as usize - x_min);
 
-		// let nbr_capture = 
-		// if self.ennemy_around(x, y, stone) {
-			let capture_lines: [(u8, (isize, isize)); 8] = capture_lines!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max, diago_up_left, diago_down_right, diago_down_left, diago_up_right);
-			let nbr_capture = self.count_capture(capture_lines, x as usize, y as usize, stone);
-			if nbr_capture == 0 {
-				let tree_lines: [u32; 4] = tree_lines!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max, diago_up_left, diago_down_right, diago_down_left, diago_up_right);
-				let nbr_tree = self.count_tree(tree_lines, stone);
-				return nbr_tree < 2;
-			}
-			match stone {
-				BLACK => self.black_captures += nbr_capture * 2,
-				_ => self.white_captures += nbr_capture * 2,
-			}
+		let capture_lines: [(u8, (isize, isize)); 8] = capture_lines!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max, diago_up_left, diago_down_right, diago_down_left, diago_up_right);
+		let nbr_capture = self.count_capture(capture_lines, x as usize, y as usize, stone);
+		if nbr_capture == 0 {
+			let tree_lines: [u32; 4] = tree_lines!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max, diago_up_left, diago_down_right, diago_down_left, diago_up_right);
+			let nbr_tree = self.count_tree(tree_lines, stone);
+			return nbr_tree < 2;
+		}
+		match stone {
+			BLACK => self.black_captures += nbr_capture * 2,
+			_ => self.white_captures += nbr_capture * 2,
+		}
 		true
 	}
 
@@ -141,8 +132,6 @@ impl Gameboard {
 			self.cells[x] |= set_stone!(y, stone);
 			if self.try_make_move(x as isize, y as isize, stone) && self.update_result(x, y, stone) {
 				self.update_possible_move(x as isize, y as isize);
-				// self.update_capturable_stone(x as isize, y as isize);
-
 				self.last_move = Some((x, y));
 				self.selected_move = None;
 				return true;
@@ -151,10 +140,6 @@ impl Gameboard {
         }
         false
     }
-
-	// pub fn unmake_move(&mut self, x: usize, y: usize) {
-    //     self.cells[x] &= clear_stone!(y);
-    // }
 	
 	pub fn update_possible_move(&mut self, x: isize, y: isize) {
 		let min_x = (x - 1).max(0) as usize;
@@ -184,32 +169,6 @@ impl Gameboard {
 		.collect()
 	}
 
-	// pub fn next_move(&mut self, mut starting_x: usize, mut starting_y: usize) {
-    //     if starting_x >= SIZE {
-    //         starting_x = 0;
-    //         starting_y = starting_y + 1;
-    //         if starting_y >= SIZE {
-    //             self.selected_move = None;
-    //             return;
-    //         }
-    //     }
-	// 	// println!("TEST");
-	// 	// dbg!(&self.possible_moves);
-    //     self.selected_move = None;
-	// 	(0..SIZE)
-	// 		.filter(|y| *y >= starting_y)
-	// 		.any(|y| (0..SIZE)
-	// 			.filter(|x| y > starting_y || *x >= starting_x)
-	// 			.any(|x| {
-	// 				if self.possible_moves[x] >> y & 0b1 == 1 && get_stone!(self.cells[x], y) == NOPE {
-    //                     self.selected_move = Some((x, y));
-	// 					return true;
-	// 				}
-	// 				false
-	// 			})
-	// 	);
-	// }
-
 	pub fn update_result(&mut self, x: usize, y: usize, stone: u8) -> bool {
 		if self.black_captures >= 10 {
 			self.waiting_winning_move = None;
@@ -222,15 +181,11 @@ impl Gameboard {
 		else {
 			if let Some(winning_move) = self.waiting_winning_move {
 				if winning_move != (x, y) {
-					let mut tmp_result = self.result.clone();
+					let tmp_result = self.result;
 					self.result = None;
 					self.update_result(winning_move.0, winning_move.1, stone);
-					if (self.result == tmp_result) {
-						println!("je passe ");
+					if self.result == tmp_result {
 						return false;
-					}
-					else {
-						println!("{:?} || {:?}", tmp_result, self.result);
 					}
 					self.waiting_winning_move = None;
 				}
@@ -248,22 +203,17 @@ impl Gameboard {
 			lines.iter().any(|line| {
 				(0..8).any(|range| {
 					let tmp_line: u16 = concat_stones!((line >> (range * 2)) as u32, 5) as u16;
-					return match tmp_line {
+					match tmp_line {
 						WHITE_5_ALIGN => {
-							println!("plop");
-							// self.result = Some(GameResult::WhiteWin);
-							// return true;
 							check_winning!(self, x, y, GameResult::WhiteWin, stone)
 						},
 						BLACK_5_ALIGN => {
-							// self.result = Some(GameResult::BlackWin);
-							// return true;
 							check_winning!(self, x, y, GameResult::BlackWin, stone)
 						},
 						_ => {
 							false
 						}
-					};
+					}
 				})
 			});
 		}

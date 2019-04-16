@@ -1,5 +1,3 @@
-
-
 use crate::WidgetIds;
 use crate::models::game_builder::*;
 use crate::views::game_builder::GameBuilderView;

@@ -4,30 +4,6 @@ use crate::models::ia::*;
 use crate::traits::view_model::*;
 use std::any::Any;
 
-
-// pub fn generate_game_info(min_depth: usize, game: Option<Game>) -> (usize, f32, f32) {
-//     if game.is_none() {
-//         (0, 0.0, 0.0)
-//     }
-//     else {
-//         let mode_index = *game.game_mode.get_index();
-//         let get_depth = |player: Player| -> f32 {
-//             if let Player::Ia{ia, ..} = player {
-//                 f32::from(ia.depth)
-//             }
-//         };
-//         let first_ia_depth = match mode_index {
-//             0 => min_depth,
-//             1 => get_depth(*game.black_player),
-//             _ => get_depth(*game.white_player),
-//         };
-//         let second_ia_depth = match mode_index {
-//             3 => get_depth(*game.black_player),
-//             _ => min_depth,
-//         };
-//         (mode_index, first_ia_depth, second_ia_depth)
-//     }
-// }
 pub struct GameBuilder {
     pub mode_index: usize,
     pub game_modes: [&'static str; 4],
