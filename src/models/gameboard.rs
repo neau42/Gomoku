@@ -181,9 +181,10 @@ impl Gameboard {
 		else {
 			if let Some(winning_move) = self.waiting_winning_move {
 				if winning_move != (x, y) {
-					let tmp_result = self.result;
+					let tmp_result = self.result.clone();
 					self.result = None;
 					self.update_result(winning_move.0, winning_move.1, stone);
+					// println!(" {} {} {:?} | {:?} ", x, y, tmp_result, self.result);
 					if self.result == tmp_result {
 						return false;
 					}

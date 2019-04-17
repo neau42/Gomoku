@@ -16,24 +16,24 @@ impl IA {
 
 	pub fn expand(self, state: &Gameboard, stone: u8, depth: u8, map_board_values: &mut HashMap<[u64; SIZE], isize>, player_stone: u8) -> Vec<Gameboard> {
 		let possible_moves: Vec<(usize, usize)> = state.expand();
-        let mut possible_boards: Vec<Gameboard> = possible_moves.iter().map(|new_move| {
-			let mut new_state = state.clone();
-            new_state.make_move(new_move.0, new_move.1, stone);
-            new_state.value = eval(&new_state, opposite_stone!(stone), depth - 1, map_board_values, player_stone);
-            new_state 
-		}).collect();
-
-        // let mut possible_boards: Vec<Gameboard> = possible_moves.iter().filter_map(|new_move| {
+        // let mut possible_boards: Vec<Gameboard> = possible_moves.iter().map(|new_move| {
 		// 	let mut new_state = state.clone();
-        //     if (new_state.make_move(new_move.0, new_move.1, stone)) {
-        //         new_state.result = None;
-        //         new_state.value = eval(&new_state, opposite_stone!(stone), depth - 1, map_board_values, player_stone);
-		// 		Some(new_state)
-		// 	}
-		// 	else {
-		// 		None
-		// 	}
+        //     new_state.make_move(new_move.0, new_move.1, stone);
+        //     new_state.value = eval(&new_state, opposite_stone!(stone), depth - 1, map_board_values, player_stone);
+        //     new_state 
 		// }).collect();
+
+        let mut possible_boards: Vec<Gameboard> = possible_moves.iter().filter_map(|new_move| {
+			let mut new_state = state.clone();
+                // new_state.result = None;
+            if (new_state.make_move(new_move.0, new_move.1, stone)) {
+                new_state.value = eval(&new_state, opposite_stone!(stone), depth - 1, map_board_values, player_stone);
+				Some(new_state)
+			}
+			else {
+				None
+			}
+		}).collect();
 		possible_boards.sort_by(|board, other| board.value.cmp(&other.value));
 		possible_boards
 	}
@@ -48,6 +48,9 @@ pub fn negascout(&mut self, state: &mut Gameboard, stone: u8, depth: u8, mut alp
         let mut current = (std::i64::MIN + 1) as isize;
 		let mut tmp_beta = beta;
 		let possible_states: Vec<Gameboard> = self.expand(state, stone, depth, map_board_values, player_stone);
+        // if (self.depth == depth) {
+        //     println!("nbr {}", possible_states.len());
+        // }
         for (i, mut new_state) in possible_states.into_iter().enumerate() {
             let mut score = -self.negascout(&mut new_state, opposite_stone!(stone), depth - 1, -tmp_beta, -alpha, map_board_values, all_values, player_stone);
             if score > alpha && score < beta && i > 0 && depth > 1 {
