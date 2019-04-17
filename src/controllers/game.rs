@@ -120,6 +120,7 @@ impl GameController {
 			};
 			match best_move {
 				Some(best_move) => {
+					println!("{} | {}", best_move.0, best_move.1);
 					if model.state.make_move(best_move.0, best_move.1, model.current_stone) {
 						model.all_state.push(model.state.clone());
 						model.current_stone = opposite_stone!(model.current_stone);

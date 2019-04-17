@@ -63,45 +63,53 @@ fn add_pattern_in_map(map_patterns: &mut HashMap<u16, u8>, pattern: u16, mut val
 	value
 }
 
-pub fn evale_one_line(l: u64, map_patterns: &mut HashMap<u16, u8>) -> isize {
+pub fn evale_one_line(l: u64, map_patterns: &mut HashMap<u16, u8>, stone: u8) -> isize {
 	let mut value = 0;
 	let mut j: isize;
 	let mut line = l;
+
+	let black_coef = match stone {
+		WHITE => 10,
+		_ => 1,
+	};
+
+	let white_coef = match stone {
+		BLACK => 10,
+		_ => 1,
+	};
 	while line != 0 {
 		match (line & 0b11_11_11_11_11_11) as u16 {
 			EMPTY | ONE_BLACK | ONE_WHITE | BLACK_WHITE | WHITE_BLACK => {
 				j = 10;
 			},
 			align5_white if (align5_white & 0b11_11_11_11_11 == WHITE_5_ALIGN) => {
-				value += add_pattern_in_map(map_patterns, WHITE_5_ALIGN, 10_000_000);
+				value += add_pattern_in_map(map_patterns, WHITE_5_ALIGN, 10_000_000) * white_coef;
 				j = 10;
 			},
 			align5_black if (align5_black & 0b11_11_11_11_11 == BLACK_5_ALIGN) => {
-				value += add_pattern_in_map(map_patterns, BLACK_5_ALIGN, -10_000_000);
+				value += add_pattern_in_map(map_patterns, BLACK_5_ALIGN, -10_000_000) * black_coef;
 				j = 10;
 			},
 			FOUR_BLACK => {
-				value += add_pattern_in_map(map_patterns, FOUR_BLACK, -100_000);
+				value += add_pattern_in_map(map_patterns, FOUR_BLACK, -100_000) * black_coef;
 				// value -= 100_000;
 				j = 10;
 			},
 			FOUR_WHITE => {
-				value += add_pattern_in_map(map_patterns, FOUR_WHITE, 100_000);
+				value += add_pattern_in_map(map_patterns, FOUR_WHITE, 100_000) * white_coef;
 				// value += 100_000;
 				j = 10;
 			},
 			THREE_BLACK_CLOSE1 |
 			THREE_BLACK_CLOSE2 |
 			THREE_BLACK_CLOSE3 => {
-				// value += add_pattern_in_map(map_patterns, THREE_BLACK_CLOSE1, -100);
-				value -= 100;
+				value -= 100 * black_coef;
 				j = 10;
 			},
 			THREE_WHITE_CLOSE1 |
 			THREE_WHITE_CLOSE2 |
 			THREE_WHITE_CLOSE3 => {
-				// value += add_pattern_in_map(map_patterns, THREE_WHITE_CLOSE1, 100);
-				value += 100;
+				value += 100 * white_coef;
 				j = 10;
 			},
 			FOUR_BLACK_CLOSE1 |
@@ -112,7 +120,7 @@ pub fn evale_one_line(l: u64, map_patterns: &mut HashMap<u16, u8>) -> isize {
 			FOUR_BLACK_CLOSE6 |
 			FOUR_BLACK_CLOSE7
 				=> {
-				value += add_pattern_in_map(map_patterns, FOUR_BLACK_CLOSE1, -10_000);
+				value += add_pattern_in_map(map_patterns, FOUR_BLACK_CLOSE1, -10_000) * black_coef;
 				// value -= 10_000;
 				j = 8;
 			},
@@ -123,45 +131,45 @@ pub fn evale_one_line(l: u64, map_patterns: &mut HashMap<u16, u8>) -> isize {
 			FOUR_WHITE_CLOSE5 |
 			FOUR_WHITE_CLOSE6 |
 			FOUR_WHITE_CLOSE7 => {
-				value += add_pattern_in_map(map_patterns, FOUR_WHITE_CLOSE1, 10_000);
+				value += add_pattern_in_map(map_patterns, FOUR_WHITE_CLOSE1, 10_000)  * white_coef;
 				// value += 10_000;
 				j = 8;
 			},
 			align2black_open if align2black_open & 0b00_11_11_11_11_11 == TWO_BLACK_OPEN => {
-				value -= 100;
+				value -= 100 * black_coef;
 					j = 8;
 			},
 			align2white_open if align2white_open & 0b00_11_11_11_11_11 == TWO_WHITE_OPEN => {
-				value += 100;
+				value += 100 * white_coef;
 				j = 8;
 			},
 			align2black_hole if align2black_hole & 0b00_11_11_11_11_11 == TWO_BLACK_OPEN_HOLE => {
-				value -= 10;
+				value -= 10 * black_coef;
 				j = 8;
 			},
 			align2white_hole if align2white_hole & 0b00_11_11_11_11_11 == TWO_WHITE_OPEN_HOLE => {
-				value += 10;
+				value += 10 * white_coef;
 				j = 8;
 			},
 			align3black if (align3black & 0b00_11_11_11_11_11) == THREE_BLACK_OPEN => {
-				value += add_pattern_in_map(map_patterns, THREE_BLACK_OPEN, -10_000);
+				value += add_pattern_in_map(map_patterns, THREE_BLACK_OPEN, -10_000) * black_coef;
 				// value -= 10_000;
 				j = 8;
 			},
 			align3black if (align3black & 0b00_11_11_11_11_11) == THREE_BLACK_OPEN_HOLE1
 						|| (align3black & 0b00_11_11_11_11_11) == THREE_BLACK_OPEN_HOLE2 => {
-				value += add_pattern_in_map(map_patterns, THREE_BLACK_OPEN_HOLE1, -1000);
+				value += add_pattern_in_map(map_patterns, THREE_BLACK_OPEN_HOLE1, -1000) * black_coef;
 				// value -= 1000;
 				j = 8;
 			},
 			align3white if (align3white & 0b00_11_11_11_11_11) == THREE_WHITE_OPEN => {
-				value += add_pattern_in_map(map_patterns, THREE_WHITE_OPEN, 10_000);
+				value += add_pattern_in_map(map_patterns, THREE_WHITE_OPEN, 10_000) * white_coef;
 				// value += 10000;
 				j = 8;
-			}
+			},
 			align3white if (align3white & 0b00_11_11_11_11_11) == THREE_WHITE_OPEN_HOLE1
 						|| (align3white & 0b00_11_11_11_11_11) == THREE_WHITE_OPEN_HOLE2 => {
-				value += add_pattern_in_map(map_patterns, THREE_WHITE_OPEN_HOLE1, 1000);
+				value += add_pattern_in_map(map_patterns, THREE_WHITE_OPEN_HOLE1, 1000) * white_coef;
 				// value += 1000;
 				j = 8;
 			}
@@ -204,12 +212,13 @@ pub fn eval(state: &Gameboard, actual_stone: u8, depth: u8, map_board_values: &m
 		all.extend(all_diag_1);
 		all.extend(all_diag_2);
 		all.retain(|&elem| elem != 0);
-		let value = all.iter().map(|&e| evale_one_line(e, &mut map_patterns)).sum();
+		let value = all.iter().map(|&e| evale_one_line(e, &mut map_patterns, actual_stone)).sum();
 		map_board_values.insert(state.cells, value);
 		// dbg!(map_patterns);
 		value
 	};
-	score += (state.white_captures as isize * state.white_captures as isize * 100) - (state.black_captures as isize * state.black_captures as isize * 100);
+	// score += (state.white_captures as isize * state.white_captures as isize * 100) - (state.black_captures as isize * state.black_captures as isize * 100);
+	score += (10_isize.pow((state.white_captures as u32 / 2) + 1)) - (10_isize.pow((state.black_captures as u32 / 2) + 1));
 	if player_stone == BLACK {
 		score = -score;
 	}
