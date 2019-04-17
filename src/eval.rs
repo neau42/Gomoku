@@ -53,8 +53,10 @@ pub const WHITE_5_ALIGN: u16 =		0b00_10_10_10_10_10;
 
 fn add_pattern_in_map(map_patterns: &mut HashMap<u16, u8>, pattern: u16, mut value: isize) -> isize {
 	if map_patterns.contains_key(&pattern) {
+		if *map_patterns.get(&pattern).unwrap() == 1 {
+			value *= 2;
+		}
 		map_patterns.insert(pattern, map_patterns.get(&pattern).unwrap() + 1);
-		value *= 2;
 	} else {
 		map_patterns.insert(pattern, 1);
 	}
