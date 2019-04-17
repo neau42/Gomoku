@@ -130,8 +130,8 @@ impl Gameboard {
 		let tmp_state = self.clone();
 		if !self.is_finish() && get_stone!(self.cells[x], y) == NOPE {
 			self.cells[x] |= set_stone!(y, stone);
+			self.update_possible_move(x as isize, y as isize);
 			if self.try_make_move(x as isize, y as isize, stone) && self.update_result(x, y, stone) {
-				self.update_possible_move(x as isize, y as isize);
 				self.last_move = Some((x, y));
 				self.selected_move = None;
 				return true;
@@ -184,7 +184,7 @@ impl Gameboard {
 					let tmp_result = self.result.clone();
 					self.result = None;
 					self.update_result(winning_move.0, winning_move.1, stone);
-					// println!(" {} {} {:?} | {:?} ", x, y, tmp_result, self.result);
+					println!(" {} {} {:?} | {:?} ", x, y, tmp_result, self.result);
 					if self.result == tmp_result {
 						return false;
 					}
