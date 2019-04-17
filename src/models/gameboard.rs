@@ -39,6 +39,44 @@ pub const WHITE_TREES: [u16; 4] = [
 	NOPE as u16 | (NOPE as u16) << 2 | (WHITE as u16) << 4 | (WHITE as u16) << 6 | (WHITE as u16) << 8 | (NOPE as u16) << 10,
 	];
 
+
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum Priority {
+    BlackWin,
+    BlackWin1,
+    BlackWin2,
+    BlackPossibleWin1,
+	BlackPossibleWin2,
+	WhiteWin,
+    WhiteWin1,
+    WhiteWin2,
+    WhitePossibleWin1,
+	Other,
+}
+
+impl Priority {
+	pub fn update(&mut self, new_priority: Priority, stone: u8) {
+
+	}
+
+	pub fn get_priority_value(&self) -> isize {
+		let value: isize = match (self) {
+			Priority::BlackWin => -10_000_00,
+			Priority::BlackWin1 => -500_000,
+			Priority::BlackWin2 => -100_000,
+			Priority::BlackPossibleWin1 =>  -10_000,
+			Priority::BlackPossibleWin2 => -5_000,
+			Priority::BlackPossibleWin2Capturable => -2_000,
+			Priority::WhiteWin => 10_000_00,
+			Priority::WhiteWin1 => 500_000,
+			Priority::WhiteWin2 => 100_000,
+			Priority::WhitePossibleWin1 => 10_000,
+			Priority::WhitePossibleWin1 => 5_000,
+			Priority::WhitePossibleWin2Capturable => 2_000,
+			_ => 10,
+		}
+	}
+}
 #[derive(Debug, Eq, Clone)]
 pub struct Gameboard {
     pub cells: [u64; SIZE],
@@ -48,6 +86,7 @@ pub struct Gameboard {
 	pub black_captures: u8,
 	pub white_captures: u8,
 	pub value: isize,
+	pub priority: Priority,
 	pub result: Option<GameResult>,
     pub waiting_winning_move: Option<(usize, usize)>,
 }
@@ -62,6 +101,7 @@ impl Gameboard {
 			black_captures: 0,
 			white_captures: 0,
 			value: 0,
+			priority: Priority::Other,
 			result: None,
 			waiting_winning_move: None,
 		}
