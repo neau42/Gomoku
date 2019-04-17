@@ -51,6 +51,13 @@ const THREE_WHITE_OPEN_HOLE2: u16 =	0b00_10_10_00_10_00;
 pub const BLACK_5_ALIGN: u16 =		0b00_01_01_01_01_01;
 pub const WHITE_5_ALIGN: u16 =		0b00_10_10_10_10_10;
 
+const	WIN_BLACK0: u16 = 1;
+const	WIN_BLACK1: u16 = 2;
+const	WIN_BLACK2: u16 = 3;
+const	WIN_WHITE0: u16 = 4;
+const	WIN_WHITE1: u16 = 5;
+const	WIN_WHITE2: u16 = 6;
+
 fn add_pattern_in_map(map_patterns: &mut HashMap<u16, u8>, pattern: u16, mut value: isize) -> isize {
 	if map_patterns.contains_key(&pattern) {
 		if *map_patterns.get(&pattern).unwrap() == 1 {
@@ -83,20 +90,20 @@ pub fn evale_one_line(l: u64, map_patterns: &mut HashMap<u16, u8>, stone: u8) ->
 				j = 10;
 			},
 			align5_white if (align5_white & 0b11_11_11_11_11 == WHITE_5_ALIGN) => {
-				value += add_pattern_in_map(map_patterns, WHITE_5_ALIGN, 10_000_000) * white_coef;
+				value += add_pattern_in_map(map_patterns, WIN_WHITE0, 10_000_000) * white_coef;
 				j = 10;
 			},
 			align5_black if (align5_black & 0b11_11_11_11_11 == BLACK_5_ALIGN) => {
-				value += add_pattern_in_map(map_patterns, BLACK_5_ALIGN, -10_000_000) * black_coef;
+				value += add_pattern_in_map(map_patterns, WIN_BLACK0, -10_000_000) * black_coef;
 				j = 10;
 			},
 			FOUR_BLACK => {
-				value += add_pattern_in_map(map_patterns, FOUR_BLACK, -100_000) * black_coef;
+				value += add_pattern_in_map(map_patterns, WIN_BLACK1, -100_000) * black_coef;
 				// value -= 100_000;
 				j = 10;
 			},
 			FOUR_WHITE => {
-				value += add_pattern_in_map(map_patterns, FOUR_WHITE, 100_000) * white_coef;
+				value += add_pattern_in_map(map_patterns, WIN_WHITE1, 100_000) * white_coef;
 				// value += 100_000;
 				j = 10;
 			},
@@ -112,29 +119,29 @@ pub fn evale_one_line(l: u64, map_patterns: &mut HashMap<u16, u8>, stone: u8) ->
 				value += 100 * white_coef;
 				j = 10;
 			},
-			FOUR_BLACK_CLOSE1 |
-			FOUR_BLACK_CLOSE2 |
-			FOUR_BLACK_CLOSE3 |
-			FOUR_BLACK_CLOSE4 |
-			FOUR_BLACK_CLOSE5 |
-			FOUR_BLACK_CLOSE6 |
-			FOUR_BLACK_CLOSE7
-				=> {
-				value += add_pattern_in_map(map_patterns, FOUR_BLACK_CLOSE1, -10_000) * black_coef;
-				// value -= 10_000;
-				j = 8;
-			},
-			FOUR_WHITE_CLOSE1 |
-			FOUR_WHITE_CLOSE2 |
-			FOUR_WHITE_CLOSE3 |
-			FOUR_WHITE_CLOSE4 |
-			FOUR_WHITE_CLOSE5 |
-			FOUR_WHITE_CLOSE6 |
-			FOUR_WHITE_CLOSE7 => {
-				value += add_pattern_in_map(map_patterns, FOUR_WHITE_CLOSE1, 10_000)  * white_coef;
-				// value += 10_000;
-				j = 8;
-			},
+			// FOUR_BLACK_CLOSE1 |
+			// FOUR_BLACK_CLOSE2 |
+			// FOUR_BLACK_CLOSE3 |
+			// FOUR_BLACK_CLOSE4 |
+			// FOUR_BLACK_CLOSE5 |
+			// FOUR_BLACK_CLOSE6 |
+			// FOUR_BLACK_CLOSE7
+			// 	=> {
+			// 	value += add_pattern_in_map(map_patterns, FOUR_BLACK_CLOSE1, -10_000) * black_coef;
+			// 	// value -= 10_000;
+			// 	j = 8;
+			// },
+			// FOUR_WHITE_CLOSE1 |
+			// FOUR_WHITE_CLOSE2 |
+			// FOUR_WHITE_CLOSE3 |
+			// FOUR_WHITE_CLOSE4 |
+			// FOUR_WHITE_CLOSE5 |
+			// FOUR_WHITE_CLOSE6 |
+			// FOUR_WHITE_CLOSE7 => {
+			// 	value += add_pattern_in_map(map_patterns, FOUR_WHITE_CLOSE1, 10_000)  * white_coef;
+			// 	// value += 10_000;
+			// 	j = 8;
+			// },
 			align2black_open if align2black_open & 0b00_11_11_11_11_11 == TWO_BLACK_OPEN => {
 				value -= 100 * black_coef;
 					j = 8;
@@ -152,24 +159,24 @@ pub fn evale_one_line(l: u64, map_patterns: &mut HashMap<u16, u8>, stone: u8) ->
 				j = 8;
 			},
 			align3black if (align3black & 0b00_11_11_11_11_11) == THREE_BLACK_OPEN => {
-				value += add_pattern_in_map(map_patterns, THREE_BLACK_OPEN, -10_000) * black_coef;
+				value += add_pattern_in_map(map_patterns, WIN_BLACK2, -10_000) * black_coef;
 				// value -= 10_000;
 				j = 8;
 			},
 			align3black if (align3black & 0b00_11_11_11_11_11) == THREE_BLACK_OPEN_HOLE1
 						|| (align3black & 0b00_11_11_11_11_11) == THREE_BLACK_OPEN_HOLE2 => {
-				value += add_pattern_in_map(map_patterns, THREE_BLACK_OPEN_HOLE1, -1000) * black_coef;
+				value += add_pattern_in_map(map_patterns, WIN_BLACK2, -1000) * black_coef;
 				// value -= 1000;
 				j = 8;
 			},
 			align3white if (align3white & 0b00_11_11_11_11_11) == THREE_WHITE_OPEN => {
-				value += add_pattern_in_map(map_patterns, THREE_WHITE_OPEN, 10_000) * white_coef;
+				value += add_pattern_in_map(map_patterns, WIN_WHITE2, 10_000) * white_coef;
 				// value += 10000;
 				j = 8;
 			},
 			align3white if (align3white & 0b00_11_11_11_11_11) == THREE_WHITE_OPEN_HOLE1
 						|| (align3white & 0b00_11_11_11_11_11) == THREE_WHITE_OPEN_HOLE2 => {
-				value += add_pattern_in_map(map_patterns, THREE_WHITE_OPEN_HOLE1, 1000) * white_coef;
+				value += add_pattern_in_map(map_patterns, WIN_WHITE2, 1000) * white_coef;
 				// value += 1000;
 				j = 8;
 			}
