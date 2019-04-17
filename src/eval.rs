@@ -159,10 +159,11 @@ fn get_all_diag1(cells: &[u64; SIZE]) -> Vec<u64> {
 
 fn get_all_diag2(cells: &[u64; SIZE]) -> Vec<u64> {
 	let mut vec: Vec<u64> = (0..SIZE-4).map(|x| up_diago!(cells, 0, SIZE - 1 - x, x, 0)).collect();
-	let vec2: Vec<u64> = (1..SIZE-4).map(|y| up_diago!(cells, 0, SIZE -1, 0, y)).collect();
+	let vec2: Vec<u64> = (1..SIZE-4).map(|y| up_diago!(cells, 0, SIZE -1 - y, 0, y)).collect();
 	vec.extend(vec2);
 	vec
 }
+
 pub fn eval(state: &Gameboard, actual_stone: u8, depth: u8, map_board_values: &mut HashMap<[u64; SIZE], isize>, player_stone: u8) -> isize {
 	let mut score = if state.black_captures >= 10 {
 		-10_000_000
