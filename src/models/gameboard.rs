@@ -226,8 +226,8 @@ impl Gameboard {
 				if winning_move != (x, y) {
 					let tmp_result = self.result.clone();
 					self.result = None;
-					self.update_result(winning_move.0, winning_move.1, stone);
-					println!(" {} {} {:?} | {:?} ", x, y, tmp_result, self.result);
+					self.update_result(winning_move.0, winning_move.1, opposite_stone!(stone));
+					println!(" {} {} {:?} | {:?} {} {}", x, y, tmp_result, self.result, winning_move.0, winning_move.1);
 					if self.result == tmp_result {
 						return false;
 					}
@@ -244,19 +244,20 @@ impl Gameboard {
 			let diago_down_right = (y_max - y as usize).min(x_max - x as usize);
 			let diago_down_left = (y_max - y as usize).min(x as usize - x_min);
 			let lines: [u32; 4] = tree_lines!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max, diago_up_left, diago_down_right, diago_down_left, diago_up_right);
+			let (win_align, win_result) =  if (stone == WHITE) {
+				(WHITE_5_ALIGN, GameResult::WhiteWin)
+			}
+			else {
+				(BLACK_5_ALIGN, GameResult::BlackWin)
+			};
 			lines.iter().any(|line| {
 				(0..8).any(|range| {
 					let tmp_line: u16 = concat_stones!((line >> (range * 2)) as u32, 5) as u16;
-					match tmp_line {
-						WHITE_5_ALIGN => {
-							check_winning!(self, x, y, GameResult::WhiteWin, stone)
-						},
-						BLACK_5_ALIGN => {
-							check_winning!(self, x, y, GameResult::BlackWin, stone)
-						},
-						_ => {
-							false
-						}
+					if win_align == tmp_line {
+						check_winning!(self, x, y, win_result, stone)
+					}
+					else {
+						false
 					}
 				})
 			});
