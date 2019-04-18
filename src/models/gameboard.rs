@@ -227,7 +227,7 @@ impl Gameboard {
 					let tmp_result = self.result.clone();
 					self.result = None;
 					self.update_result(winning_move.0, winning_move.1, opposite_stone!(stone));
-					println!(" {} {} {:?} | {:?} {} {}", x, y, tmp_result, self.result, winning_move.0, winning_move.1);
+					// println!(" {} {} {:?} | {:?} {} {}", x, y, tmp_result, self.result, winning_move.0, winning_move.1);
 					if self.result == tmp_result {
 						return false;
 					}

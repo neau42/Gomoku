@@ -191,25 +191,28 @@ pub fn get_priority_value(index: usize) -> isize {
 }
 
 fn priority_value(arr_priority: &mut[u16; 13], new_priority: &mut Priority) -> isize {
-		if arr_priority[Priority::get_index_of(&Priority::BlackPossibleWin1)] > 1 {
-			arr_priority[Priority::get_index_of(&Priority::BlackWin1)] += 1;
-		}
-		else if arr_priority[Priority::get_index_of(&Priority::BlackPossibleWin1)]
-		+ arr_priority[Priority::get_index_of(&Priority::BlackPossibleWin2)]
-		+ arr_priority[Priority::get_index_of(&Priority::BlackPossibleWin2Capturable)] > 1 {
-			arr_priority[Priority::get_index_of(&Priority::BlackWin2)] += 1;
-		}
-		if arr_priority[Priority::get_index_of(&Priority::WhitePossibleWin1)] > 1 {
-			arr_priority[Priority::get_index_of(&Priority::WhiteWin1)] += 1;
-		}
-		else if arr_priority[Priority::get_index_of(&Priority::WhitePossibleWin1)]
-		+ arr_priority[Priority::get_index_of(&Priority::WhitePossibleWin2)]
-		+ arr_priority[Priority::get_index_of(&Priority::WhitePossibleWin2Capturable)] > 1 {
-			arr_priority[Priority::get_index_of(&Priority::WhiteWin2)] += 1;
-		}
+		// if arr_priority[Priority::get_index_of(&Priority::BlackPossibleWin1)] > 1 {
+		// 	arr_priority[Priority::get_index_of(&Priority::BlackWin1)] += 1;
+		// }
+		// else if arr_priority[Priority::get_index_of(&Priority::BlackPossibleWin1)]
+		// + arr_priority[Priority::get_index_of(&Priority::BlackPossibleWin2)]
+		// + arr_priority[Priority::get_index_of(&Priority::BlackPossibleWin2Capturable)] > 1 {
+		// 	arr_priority[Priority::get_index_of(&Priority::BlackWin2)] += 1;
+		// }
+		// if arr_priority[Priority::get_index_of(&Priority::WhitePossibleWin1)] > 1 {
+		// 	arr_priority[Priority::get_index_of(&Priority::WhiteWin1)] += 1;
+		// }
+		// else if arr_priority[Priority::get_index_of(&Priority::WhitePossibleWin1)]
+		// + arr_priority[Priority::get_index_of(&Priority::WhitePossibleWin2)]
+		// + arr_priority[Priority::get_index_of(&Priority::WhitePossibleWin2Capturable)] > 1 {
+		// 	arr_priority[Priority::get_index_of(&Priority::WhiteWin2)] += 1;
+		// }
 
-		get_priority_value((0..6).position(|index| arr_priority[index] > 0).unwrap_or(42)) +
-		get_priority_value((6..12).position(|index| arr_priority[index] > 0).unwrap_or(42))
+		// get_priority_value((0..6).position(|index| arr_priority[index] > 0).unwrap_or(42)) +
+		// get_priority_value((6..12).position(|index| arr_priority[index] > 0).unwrap_or(42))
+		(0..13).fold(0, |summ, index| {
+			summ + get_priority_value(index) * arr_priority[index] as isize
+		})
 }
 
 pub fn eval(state: &mut Gameboard, actual_stone: u8, depth: u8, map_board_values: &mut HashMap<[u64; SIZE], isize>, player_stone: u8) {
