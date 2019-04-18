@@ -40,7 +40,7 @@ pub const WHITE_TREES: [u16; 4] = [
 	];
 
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub enum Priority {
     BlackWin,
     BlackWin1,
