@@ -73,33 +73,21 @@ pub fn evale_one_line(mut line: u64, new_priority: &mut Priority, stone: u8) -> 
 				j = 10;
 			},
 			align5_white if (align5_white & 0b11_11_11_11_11 == WHITE_5_ALIGN) => {
-				value += check_pattern(new_priority, WhiteWin, stone);
+				value += check_pattern(new_priority, Priority::WhiteWin, stone);
 				j = 10;
 			},
 			align5_black if (align5_black & 0b11_11_11_11_11 == BLACK_5_ALIGN) => {
-				value += check_pattern(new_priority, BlackWin, stone);
+				value += check_pattern(new_priority, Priority::BlackWin, stone);
 				j = 10;
 			},
 			FOUR_BLACK => {
-				value += check_pattern(new_priority, BlackWin1, stone);
+				value += check_pattern(new_priority, Priority::BlackWin1, stone);
 				j = 10;
 			},
 			FOUR_WHITE => {
-				value += check_pattern(new_priority, WhiteWin1, stone);
+				value += check_pattern(new_priority, Priority::WhiteWin1, stone);
 				j = 10;
 			},
-			// THREE_BLACK_CLOSE1 |
-			// THREE_BLACK_CLOSE2 |
-			// THREE_BLACK_CLOSE3 => {
-			// 	value -= 100 * black_coef;
-			// 	j = 10;
-			// },
-			// THREE_WHITE_CLOSE1 |
-			// THREE_WHITE_CLOSE2 |
-			// THREE_WHITE_CLOSE3 => {
-			// 	value += 100 * white_coef;
-			// 	j = 10;
-			// },
 			FOUR_BLACK_CLOSE1 |
 			FOUR_BLACK_CLOSE2 |
 			FOUR_BLACK_CLOSE3 |
@@ -107,7 +95,7 @@ pub fn evale_one_line(mut line: u64, new_priority: &mut Priority, stone: u8) -> 
 			FOUR_BLACK_CLOSE5 |
 			FOUR_BLACK_CLOSE6 |
 			FOUR_BLACK_CLOSE7 => {
-				value += check_pattern(new_priority, BlackPossibleWin1, stone);
+				value += check_pattern(new_priority, Priority::BlackPossibleWin1, stone);
 				j = 8;
 			},
 			FOUR_WHITE_CLOSE1 |
@@ -117,7 +105,7 @@ pub fn evale_one_line(mut line: u64, new_priority: &mut Priority, stone: u8) -> 
 			FOUR_WHITE_CLOSE5 |
 			FOUR_WHITE_CLOSE6 |
 			FOUR_WHITE_CLOSE7 => {
-				value += check_pattern(new_priority, WhitePossibleWin1, stone);
+				value += check_pattern(new_priority, Priority::WhitePossibleWin1, stone);
 				j = 8;
 			},
 			align2black_open if align2black_open & 0b00_11_11_11_11_11 == TWO_BLACK_OPEN => {
@@ -137,21 +125,21 @@ pub fn evale_one_line(mut line: u64, new_priority: &mut Priority, stone: u8) -> 
 				j = 8;
 			},
 			align3black if (align3black & 0b00_11_11_11_11_11) == THREE_BLACK_OPEN => {// 10_000 
-				value += check_pattern(new_priority, BlackPossibleWin2, stone);
+				value += check_pattern(new_priority, Priority::BlackPossibleWin2, stone);
 				j = 8;
 			},
 			align3black if (align3black & 0b00_11_11_11_11_11) == THREE_BLACK_OPEN_HOLE1
 						|| (align3black & 0b00_11_11_11_11_11) == THREE_BLACK_OPEN_HOLE2 => {
-				value += check_pattern(new_priority, BlackPossibleWin2Capturable, stone);
+				value += check_pattern(new_priority, Priority::BlackPossibleWin2Capturable, stone);
 				j = 8;
 			},
 			align3white if (align3white & 0b00_11_11_11_11_11) == THREE_WHITE_OPEN => {
-				value += check_pattern(new_priority, WhitePossibleWin2, stone);
+				value += check_pattern(new_priority, Priority::WhitePossibleWin2, stone);
 				j = 8;
 			},
 			align3white if (align3white & 0b00_11_11_11_11_11) == THREE_WHITE_OPEN_HOLE1
 						|| (align3white & 0b00_11_11_11_11_11) == THREE_WHITE_OPEN_HOLE2 => {
-				value += check_pattern(new_priority, WhitePossibleWin2Capturable, stone);
+				value += check_pattern(new_priority, Priority::WhitePossibleWin2Capturable, stone);
 				j = 8;
 			}
 			_ => j = 2,
@@ -195,7 +183,7 @@ pub fn eval(state: &mut Gameboard, actual_stone: u8, depth: u8, map_board_values
 		all.retain(|&elem| elem != 0);
 		let value = all.iter().map(|&e| evale_one_line(e, &mut new_priority, actual_stone)).sum();
 		map_board_values.insert(state.cells, value);
-		state.update(new_priority);
+		state.priority.update(new_priority, actual_stone);
 		// dbg!(map_patterns);
 		value
 	};

@@ -47,10 +47,13 @@ pub enum Priority {
     BlackWin2,
     BlackPossibleWin1,
 	BlackPossibleWin2,
+	BlackPossibleWin2Capturable,
 	WhiteWin,
     WhiteWin1,
     WhiteWin2,
     WhitePossibleWin1,
+    WhitePossibleWin2,
+	WhitePossibleWin2Capturable,
 	Other,
 }
 
@@ -60,7 +63,7 @@ impl Priority {
 	}
 
 	pub fn get_priority_value(&self) -> isize {
-		let value: isize = match (self) {
+		match (self) {
 			Priority::BlackWin => -10_000_00,
 			Priority::BlackWin1 => -500_000,
 			Priority::BlackWin2 => -100_000,
@@ -71,12 +74,13 @@ impl Priority {
 			Priority::WhiteWin1 => 500_000,
 			Priority::WhiteWin2 => 100_000,
 			Priority::WhitePossibleWin1 => 10_000,
-			Priority::WhitePossibleWin1 => 5_000,
+			Priority::WhitePossibleWin2 => 5_000,
 			Priority::WhitePossibleWin2Capturable => 2_000,
 			_ => 10,
 		}
 	}
 }
+
 #[derive(Debug, Eq, Clone)]
 pub struct Gameboard {
     pub cells: [u64; SIZE],
