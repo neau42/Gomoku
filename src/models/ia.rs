@@ -8,7 +8,7 @@ pub struct IA {
 }
 
 
-	pub fn filter_boards(possible_boards: Vec<Gameboard>, stone: u8) -> Vec<Gameboard> {
+	pub fn filter_boards(possible_boards: Vec<Gameboard>, stone: u8, actual_depth: u8, orig_depth: u8) -> Vec<Gameboard> {
 		let closure = |board: &Gameboard| {
 			if (stone == BLACK && 
 				(board.priority == Priority::BlackWin
@@ -25,17 +25,26 @@ pub struct IA {
 				}
 		};
 		if possible_boards.iter().filter(|board| closure(board)).count() > 0 {
-			possible_boards.into_iter().filter_map(|board| { 
-				if closure(&board) {
-					Some(board)
-				}
-				else {
-					None
-				}
-			}).collect()
+			let mut final_possible_board: Vec<Gameboard> = possible_boards.into_iter().filter_map(|board| { 
+					if closure(&board) {
+						Some(board)
+					}
+					else {
+						None
+					}
+				}).collect();
+				final_possible_board.sort_by(|board, other| board.value.cmp(&other.value));
+				final_possible_board
 		}
 		else {
-			possible_boards
+			let mut final_possible_board = possible_boards;
+			final_possible_board.sort_by(|board, other| board.value.cmp(&other.value));
+			let t = [80, 60, 50, 45, 40, 35, 30, 25, 20, 20];
+			if orig_depth >= 5 {
+				final_possible_board[0..(final_possible_board.len() * t[(orig_depth - actual_depth) as usize] / 100)].to_vec()
+			} else {
+				final_possible_board
+			}
 		}
 	}
 
@@ -58,16 +67,16 @@ impl IA {
 				None
 			}
 		}).collect();
-		let mut possible_boards = filter_boards(possible_boards, stone);
-		possible_boards.sort_by(|board, other| board.value.cmp(&other.value));
+		filter_boards(possible_boards, stone, depth, self.depth)
+		// possible_boards.sort_by(|board, other| board.value.cmp(&other.value));
 
-		let t = [80, 60, 50, 45, 40, 35, 30, 25, 20, 20];
+		// let t = [80, 60, 50, 45, 40, 35, 30, 25, 20, 20];
 
-		if self.depth >= 5 {
-			possible_boards[0..(possible_boards.len() * t[(self.depth - depth) as usize] / 100)].to_vec()
-		} else {
-			possible_boards
-		}
+		// if self.depth >= 5 {
+		// 	possible_boards[0..(possible_boards.len() * t[(self.depth - depth) as usize] / 100)].to_vec()
+		// } else {
+		// 	possible_boards
+		// }
 	}
 	/// si alpha < current < beta, alors current est la valeur minimax
     /// si current <= alpha, alors la vraie valeur minimax m vérifie : m <= current <= alpha

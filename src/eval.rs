@@ -179,7 +179,7 @@ fn priority_value(arr_priority: &mut[u16; 13], new_priority: &mut Priority, ston
 			arr_priority[Priority::get_index_of(&Priority::WhiteWin2)] += 1;
 		}
 
-		if stone == BLACK {
+		if stone == WHITE {
 			if arr_priority[Priority::get_index_of(&Priority::BlackWin)] > 0 {
 				*new_priority = Priority::BlackWin;
 			}
