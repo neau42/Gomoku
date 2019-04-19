@@ -1,10 +1,7 @@
 //! Gomoku!
 #[macro_use] extern crate conrod_derive;
 #[macro_use] mod macros;
-mod tests;
-/// models
 mod models;
-/// views
 mod views;
 mod controllers;
 mod utils;
@@ -13,7 +10,6 @@ mod traits;
 mod eval;
 
 extern crate rand;
-
 
 use controllers::gameplay::*;
 use conrod::*;

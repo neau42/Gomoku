@@ -57,10 +57,8 @@ pub enum Priority {
 	Other,
 }
 
-impl Priority {
-	// pub fn new(index: usize) -> Priority {
 
-	// }
+impl Priority {
 	pub fn get_index_of(&self) -> usize {
 		match self {
 			Priority::BlackWin => 0,
@@ -227,7 +225,6 @@ impl Gameboard {
 					let tmp_result = self.result.clone();
 					self.result = None;
 					self.update_result(winning_move.0, winning_move.1, opposite_stone!(stone));
-					// println!(" {} {} {:?} | {:?} {} {}", x, y, tmp_result, self.result, winning_move.0, winning_move.1);
 					if self.result == tmp_result {
 						return false;
 					}
@@ -244,7 +241,7 @@ impl Gameboard {
 			let diago_down_right = (y_max - y as usize).min(x_max - x as usize);
 			let diago_down_left = (y_max - y as usize).min(x as usize - x_min);
 			let lines: [u32; 4] = tree_lines!(self.cells, x as usize, x_min, x_max, y as usize, y_min, y_max, diago_up_left, diago_down_right, diago_down_left, diago_up_right);
-			let (win_align, win_result) =  if (stone == WHITE) {
+			let (win_align, win_result) =  if stone == WHITE {
 				(WHITE_5_ALIGN, GameResult::WhiteWin)
 			}
 			else {
