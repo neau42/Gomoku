@@ -10,29 +10,29 @@ pub struct IA {
 
 	pub fn filter_boards(possible_boards: Vec<Gameboard>, stone: u8) -> Vec<Gameboard> {
 		let closure = |board: &Gameboard| {
-				if (stone == BLACK && 
-					(board.priority == Priority::BlackWin
-					|| board.priority == Priority::BlackWin1
-					|| board.priority == Priority::BlackWin2))
-					|| (stone == WHITE && (
-					board.priority == Priority::WhiteWin
-					|| board.priority == Priority::WhiteWin1
-					|| board.priority == Priority::WhiteWin2)) {
-						true
-					}
-					else {
-						false
-					}
-			};
+			if (stone == BLACK && 
+				(board.priority == Priority::BlackWin
+				|| board.priority == Priority::BlackWin1
+				|| board.priority == Priority::BlackWin2))
+				|| (stone == WHITE && (
+				board.priority == Priority::WhiteWin
+				|| board.priority == Priority::WhiteWin1
+				|| board.priority == Priority::WhiteWin2)) {
+					true
+				}
+				else {
+					false
+				}
+		};
 		if possible_boards.iter().filter(|board| closure(board)).count() > 0 {
 			possible_boards.into_iter().filter_map(|board| { 
-					if closure(&board) {
-						Some(board)
-					}
-					else {
-						None
-					}
-				}).collect()
+				if closure(&board) {
+					Some(board)
+				}
+				else {
+					None
+				}
+			}).collect()
 		}
 		else {
 			possible_boards
@@ -72,7 +72,7 @@ impl IA {
 	/// si alpha < current < beta, alors current est la valeur minimax
     /// si current <= alpha, alors la vraie valeur minimax m vérifie : m <= current <= alpha
     /// si beta <= current alors la vraie valeur minimax m vérifie : beta <= current <= m
-pub fn negascout(&mut self, state: &mut Gameboard, stone: u8, depth: u8, mut alpha: isize, beta: isize, map_board_values: &mut HashMap<[u64; SIZE], isize>, all_values: &mut Vec<(usize, usize, isize)>, player_stone: u8) -> isize {
+	pub fn negascout(&mut self, state: &mut Gameboard, stone: u8, depth: u8, mut alpha: isize, beta: isize, map_board_values: &mut HashMap<[u64; SIZE], isize>, all_values: &mut Vec<(usize, usize, isize)>, player_stone: u8) -> isize {
 		if depth == 0 || state.is_finish() {
 			return state.value;
         }

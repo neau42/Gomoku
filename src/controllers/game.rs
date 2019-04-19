@@ -115,12 +115,10 @@ impl GameController {
 			else {
 				model.all_values.clear();
 				ia.negascout(&mut model.state, model.current_stone, ia.depth, (std::i64::MIN + 1) as isize, std::i64::MAX as isize, &mut self.map_board_values, &mut model.all_values, model.current_stone);
-				// ia.alphabeta(&mut model.state, &mut transposition_table, model.current_stone, ia.depth, isize::from(std::i16::MIN), isize::from(std::i16::MAX));
 				model.state.selected_move
 			};
 			match best_move {
 				Some(best_move) => {
-					println!("{} | {}", best_move.0, best_move.1);
 					if model.state.make_move(best_move.0, best_move.1, model.current_stone) {
 						model.all_state.push(model.state.clone());
 						model.current_stone = opposite_stone!(model.current_stone);
