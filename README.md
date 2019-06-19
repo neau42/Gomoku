@@ -5,28 +5,28 @@ Players alternate turns placing a stone of their color on an empty intersection.
 ### victory:
 
 * 5 aligns
-[alt text](readme/AlignWin.png)
+![alt text](readme/AlignWin.png)
 
 or
 
 * 10 enemy stones captured
-[alt text](readme/CaptureWin.png)
+![alt text](readme/CaptureWin.png)
 
 ### specifics rules:
 
 * Captures
-[alt text](readme/capture.png)
+![alt text](readme/capture.png)
 
 * Forbiden Double free-Three (indefendable scenario)
-[alt text](readme/ForbidenDoubleThree.png)
+![alt text](readme/ForbidenDoubleThree.png)
 
 * Depth Research can be modify
-[alt text](readme/IaDepthResearch.png)
+![alt text](readme/IaDepthResearch.png)
 
 ### interface HOME:
 
-[alt text](readme/front1.png)
-[alt text](readme/front2.png)
+![alt text](readme/front1.png)
+![alt text](readme/front2.png)
 
 #### interface GAMEBOARD:
-[alt text](readme/Gameboard.png)
+![alt text](readme/Gameboard.png)
